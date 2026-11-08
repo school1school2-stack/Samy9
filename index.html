@@ -384,11 +384,9 @@
             console.warn("Firebase warning:", e);
         }
 
-        // الاستماع الفوري والكامل من سحابة Firestore (تحديث حي بين جميع الأجهزة)
         function initCloudSync() {
             if (!db) return;
 
-            // استماع لقائمة الطلاب المسموح لهم بالبحث
             db.collection("allowed_students").onSnapshot(snapshot => {
                 allowedStudentsCache = [];
                 snapshot.forEach(doc => {
@@ -402,27 +400,28 @@
                 filterAllowedStudents('');
             });
 
-            // استماع حي لبيانات الجدول المضاف والدرجات والفصول
             db.collection("app_data").doc("main_state").onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
                     if (data.students) students = data.students;
                     if (data.sections) sections = data.sections;
-                    if (data.classes) customClasses = data.classes;
+                    if (data.classes && data.classes.length > 0) customClasses = data.classes;
+                    populateClassOptions();
+                    renderTable();
+                } else {
                     populateClassOptions();
                     renderTable();
                 }
             }, err => {
-                // إذا لم يوجد وثيقة بعد، جلب لمرة واحدة
                 db.collection("app_data").doc("main_state").get().then(d => {
                     if (d.exists) {
                         const data = d.data();
                         if (data.students) students = data.students;
                         if (data.sections) sections = data.sections;
-                        if (data.classes) customClasses = data.classes;
-                        populateClassOptions();
-                        renderTable();
+                        if (data.classes && data.classes.length > 0) customClasses = data.classes;
                     }
+                    populateClassOptions();
+                    renderTable();
                 });
             });
         }
@@ -707,19 +706,22 @@
                 if (!std.scores) std.scores = {};
                 std.scores[slotId] = numericVal;
                 renderTable();
-                await saveAllToCloud(); // حفظ تلقائي فوري
+                await saveAllToCloud();
             }
         }
 
         function populateClassOptions() {
             const classFilter = document.getElementById('classFilter');
             const stdClassSelect = document.getElementById('stdClassSelect');
+            
             let classOptionsHTML = '<option value="all">كل الفصول</option>';
             let modalSelectHTML = '';
+            
             customClasses.forEach(c => {
                 classOptionsHTML += `<option value="${c}">${c}</option>`;
                 modalSelectHTML += `<option value="${c}">${c}</option>`;
             });
+
             if (classFilter) classFilter.innerHTML = classOptionsHTML;
             if (stdClassSelect) stdClassSelect.innerHTML = modalSelectHTML;
         }
@@ -753,6 +755,7 @@
             document.getElementById('stdEmailInput').value = '';
             document.getElementById('stdPhoneInput').value = '';
             document.getElementById('allowedSearchInput').value = '';
+            populateClassOptions(); // تحديث الفصول فور فتح نافذة الإضافة
             const resList = document.getElementById('searchResultsList');
             if (resList) resList.classList.add('hidden');
             document.getElementById('studentModalTitle').innerHTML = '<i class="fas fa-user-plus text-amber-400"></i> إضافة وتصنيف طالب';
@@ -765,6 +768,7 @@
             document.getElementById('editStudentId').value = std.id;
             document.getElementById('stdNameInput').value = std.name;
             document.getElementById('stdEmailInput').value = std.email;
+            populateClassOptions();
             document.getElementById('stdClassSelect').value = std.className || customClasses[0];
             document.getElementById('stdPhoneInput').value = std.phone || '';
             document.getElementById('allowedSearchInput').value = '';
@@ -815,7 +819,7 @@
 
             renderTable();
             closeModal('addStudentModal');
-            await saveAllToCloud(); // رفع فوري للسحابة
+            await saveAllToCloud();
         }
 
         async function deleteStudent(stdId) {
