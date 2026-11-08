@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة القرآن الكريم - د / سامي محمد العمر | ثانوية الأمير عبد المجيد</title>
-    <!-- Tailwind CSS & FontAwesome -->
+    <!-- Tailwind CSS & FontAwesome & Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Firebase SDK 8.10.1 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -30,11 +31,11 @@
         }
     </style>
     
-    <!-- الفحص الفوري لرابط الطالب أو تقرير الفصل المباشر وإظهار زر العودة -->
+    <!-- الفحص الفوري لرابط الطالب أو تقارير الفصل المباشرة -->
     <script>
         (function() {
             const hash = window.location.hash;
-            if (hash.startsWith('#report=') || hash.startsWith('#class-report=') || hash === '#student') {
+            if (hash.startsWith('#report=') || hash.startsWith('#class-report=') || hash.startsWith('#chart-report=') || hash === '#student') {
                 document.addEventListener("DOMContentLoaded", () => {
                     const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'mainFooter'];
                     elementsToHide.forEach(id => {
@@ -42,7 +43,6 @@
                         if (el) el.classList.add('hidden');
                     });
                     
-                    // إظهار زر العودة للمنصة في الصفحات المستقلة
                     const backBtn = document.getElementById('globalBackToPlatformBtn');
                     if (backBtn) backBtn.classList.remove('hidden');
 
@@ -59,7 +59,7 @@
 </head>
 <body class="min-h-screen pb-24" onclick="closeAllDropdowns(event)">
 
-    <!-- زر العودة الثابت للمنصة (يظهر فقط في الروابط المستقلة مثل الطالب أو التقارير) -->
+    <!-- زر العودة الثابت للمنصة -->
     <div id="globalBackToPlatformBtn" class="fixed top-4 right-4 z-50 hidden no-print">
         <a href="./" onclick="backToPlatform(event)" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 rounded-xl text-xs font-black shadow-2xl border border-slate-700 flex items-center gap-2 transition transform hover:scale-105">
             <i class="fas fa-arrow-right"></i> العودة للمنصة الرئيسية
@@ -148,21 +148,37 @@
                         </div>
                     </div>
 
-                    <!-- قائمة منسدلة واحدة للتقارير والطباعة ومشاركة المدير -->
+                    <!-- قائمة التقارير المنسدلة: الكشفي والبياني والطباعة -->
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('reportsDropdown', event)" class="px-3.5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-file-alt"></i> التقرير والطباعة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
                         </button>
-                        <div id="reportsDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
-                            <button onclick="openClassReportModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2">
-                                <i class="fas fa-chalkboard text-amber-600"></i> تقرير الفصل الشامل
-                            </button>
-                            <button onclick="openClassReportModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2">
-                                <i class="fas fa-link text-indigo-600"></i> نسخ رابط تقرير الفصل للمدير
-                            </button>
-                            <button onclick="window.print()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2">
-                                <i class="fas fa-print text-slate-600"></i> طباعة الكشف الحالي
-                            </button>
+                        <div id="reportsDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 divide-y divide-slate-100">
+                            <div class="py-1">
+                                <div class="px-4 py-1 text-[10px] font-extrabold text-slate-400">النوع 1: التقرير الكشفي التقليدي</div>
+                                <button onclick="openClassReportModal('table')" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fas fa-table text-amber-600"></i> كشف الفصل الشامل</span>
+                                </button>
+                                <button onclick="openClassReportModal('table-link')" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fas fa-link text-indigo-600"></i> نسخ رابط الكشف للمدير</span>
+                                </button>
+                            </div>
+
+                            <div class="py-1">
+                                <div class="px-4 py-1 text-[10px] font-extrabold text-purple-500">النوع 2: التقرير البياني والمستويات 📊</div>
+                                <button onclick="openClassReportModal('chart')" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fas fa-chart-pie text-purple-600"></i> التقرير البياني والمستويات</span>
+                                </button>
+                                <button onclick="openClassReportModal('chart-link')" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center justify-between">
+                                    <span class="flex items-center gap-2"><i class="fas fa-share-alt text-purple-600"></i> نسخ رابط البياني للمدير</span>
+                                </button>
+                            </div>
+
+                            <div class="py-1">
+                                <button onclick="window.print()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2">
+                                    <i class="fas fa-print text-slate-600"></i> طباعة الكشف الحالي
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -253,7 +269,7 @@
         </div>
     </div>
 
-    <!-- DIRECT CLASS REPORT VIEW (للمدير عند فتح رابط تقرير الفصل المباشر) -->
+    <!-- DIRECT CLASS REPORT VIEW (الكشفي التقليدي) -->
     <div id="directClassReportView" class="max-w-4xl mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -267,21 +283,35 @@
         </div>
     </div>
 
+    <!-- DIRECT CHART REPORT VIEW (التقرير البياني والمستويات الجديد) -->
+    <div id="directChartReportView" class="max-w-4xl mx-auto px-4 mt-8 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-purple-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-chart-pie text-amber-400"></i> التقرير التحليلي البياني والمستويات</h3>
+                <span id="chartReportBadge" class="text-xs bg-amber-400/20 text-amber-300 px-2.5 py-1 rounded-lg border border-amber-400/30 font-bold">الفصل: 1/1</span>
+            </div>
+            <div id="directChartReportPrintArea" class="p-6 space-y-6 bg-slate-50"></div>
+            <div class="bg-white px-6 py-3 border-t flex items-center justify-end gap-2 no-print">
+                <button onclick="window.print()" class="px-4 py-2 bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"><i class="fas fa-print"></i> طباعة التقرير البياني</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: CLASS REPORT SELECTOR -->
     <div id="classReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-alt text-amber-400"></i> تقرير الفصل الشامل</h3>
+                <h3 id="reportModalTitle" class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-alt text-amber-400"></i> تحديد الفصل للتقرير</h3>
                 <button onclick="closeModal('classReportModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <input type="hidden" id="selectedReportMode">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">اختر الفصل المطلوب:</label>
                     <select id="reportClassSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"></select>
                 </div>
                 <div class="pt-2 flex flex-col gap-2">
-                    <button onclick="viewClassReport()" class="w-full py-2.5 bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm">عرض التقرير</button>
-                    <button onclick="copyClassReportLinkAction()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm">نسخ رابط التقرير للمدير 📋</button>
+                    <button id="btnExecuteReportAction" onclick="executeSelectedReportAction()" class="w-full py-2.5 bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm">تأكيد وعرض</button>
                 </div>
             </div>
         </div>
@@ -429,6 +459,7 @@
         let currentReportStudent = null;
         let db = null;
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
+        let activeChartInstance = null;
 
         let sections = [
             {
@@ -592,6 +623,23 @@
                 } else {
                     renderDirectClassReport(targetClass);
                 }
+            } else if (hash.startsWith('#chart-report=')) {
+                const targetClass = decodeURIComponent(hash.replace('#chart-report=', '')).trim();
+                hasOpenedReportFromUrl = true;
+
+                if (students.length === 0 && db) {
+                    db.collection("app_data").doc("main_state").get().then(doc => {
+                        if (doc.exists && doc.data().students) {
+                            students = doc.data().students;
+                            if (doc.data().sections) sections = doc.data().sections;
+                            renderDirectChartReport(targetClass);
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                    });
+                } else {
+                    renderDirectChartReport(targetClass);
+                }
             }
         }
 
@@ -602,6 +650,7 @@
             document.getElementById('globalBackToPlatformBtn').classList.add('hidden');
             document.getElementById('directStudentReportView').classList.add('hidden');
             document.getElementById('directClassReportView').classList.add('hidden');
+            document.getElementById('directChartReportView').classList.add('hidden');
             document.getElementById('studentView').classList.add('hidden');
             document.getElementById('mainNavbar').classList.remove('hidden');
             document.getElementById('mainHeaderBanner').classList.remove('hidden');
@@ -611,7 +660,7 @@
         }
 
         function renderDirectStudentReport(std) {
-            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
+            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter', 'directClassReportView', 'directChartReportView'];
             elementsToHide.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
@@ -673,7 +722,7 @@
         }
 
         function renderDirectClassReport(className) {
-            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
+            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter', 'directStudentReportView', 'directChartReportView'];
             elementsToHide.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
@@ -688,7 +737,7 @@
             let html = `
                 <div class="text-center border-b pb-4 mb-4">
                     <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
-                    <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات تقييم القرآن الكريم - الفصل (${className})</h2>
+                    <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات تقييم القرآن الكريم الكشفي - الفصل (${className})</h2>
                     <p class="text-xs font-bold text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
                 </div>
             `;
@@ -722,7 +771,7 @@
                 html += `<th class="border"></th></tr></thead><tbody>`;
 
                 classStudents.forEach((st, idx) => {
-                    const { grandTotal, sectionTotals } = calculateStudentTotals(st);
+                    const { grandTotal } = calculateStudentTotals(st);
                     let pct = Math.round((grandTotal / grandMax) * 100) || 0;
                     html += `
                         <tr class="border-b hover:bg-slate-50">
@@ -750,34 +799,211 @@
             document.getElementById('directClassReportView').classList.remove('hidden');
         }
 
-        function openClassReportModal() {
+        // دالة عرض التقرير البياني والمستويات الملونة الجديد
+        function renderDirectChartReport(className) {
+            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter', 'directStudentReportView', 'directClassReportView'];
+            elementsToHide.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById('globalBackToPlatformBtn').classList.remove('hidden');
+            document.getElementById('chartReportBadge').innerText = `الفصل: ${className}`;
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            let grandMax = calculateGrandTotalMax();
+
+            let levels = {
+                excellent: [],   // 90% - 100% ممتاز
+                veryGood: [],    // 80% - 89% جيد جداً
+                good: [],        // 70% - 79% جيد
+                pass: [],        // 60% - 69% مقبول
+                fail: []         // أقل من 60% ضعيف
+            };
+
+            classStudents.forEach(st => {
+                const { grandTotal } = calculateStudentTotals(st);
+                let pct = Math.round((grandTotal / grandMax) * 100) || 0;
+                st._pct = pct;
+                st._score = grandTotal;
+
+                if (pct >= 90) levels.excellent.push(st);
+                else if (pct >= 80) levels.veryGood.push(st);
+                else if (pct >= 70) levels.good.push(st);
+                else if (pct >= 60) levels.pass.push(st);
+                else levels.fail.push(st);
+            });
+
+            let html = `
+                <div class="text-center border-b pb-4">
+                    <span class="text-xs font-bold text-purple-900 bg-purple-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
+                    <h2 class="text-xl font-black text-slate-900 mt-2">التقرير التحليلي لدرجات ومستويات الفصل (${className})</h2>
+                    <p class="text-xs font-bold text-slate-500">إعداد وتصنيف المعلم: د / سامي محمد العمر 🎓</p>
+                </div>
+
+                <!-- الرسم البياني وتوزيع النسب -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="md:col-span-1 flex flex-col items-center justify-center">
+                        <div class="w-48 h-48 relative">
+                            <canvas id="classChartCanvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 space-y-2">
+                        <h4 class="font-extrabold text-xs text-slate-700 mb-3 border-b pb-1">📊 توزيع الطلاب حسب المستويات والألوان:</h4>
+                        
+                        <div class="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+                            <span class="text-xs font-bold text-emerald-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> ممتاز (90% - 100%)</span>
+                            <span class="text-xs font-black text-emerald-800 bg-white px-3 py-0.5 rounded-lg border border-emerald-200">${levels.excellent.length} طالب</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2.5 bg-blue-50 border border-blue-200 rounded-xl">
+                            <span class="text-xs font-bold text-blue-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> جيد جداً (80% - 89%)</span>
+                            <span class="text-xs font-black text-blue-800 bg-white px-3 py-0.5 rounded-lg border border-blue-200">${levels.veryGood.length} طالب</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                            <span class="text-xs font-bold text-amber-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> جيد (70% - 79%)</span>
+                            <span class="text-xs font-black text-amber-800 bg-white px-3 py-0.5 rounded-lg border border-amber-200">${levels.good.length} طالب</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2.5 bg-orange-50 border border-orange-200 rounded-xl">
+                            <span class="text-xs font-bold text-orange-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500"></span> مقبول (60% - 69%)</span>
+                            <span class="text-xs font-black text-orange-800 bg-white px-3 py-0.5 rounded-lg border border-orange-200">${levels.pass.length} طالب</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2.5 bg-rose-50 border border-rose-200 rounded-xl">
+                            <span class="text-xs font-bold text-rose-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> ضعيف / يحتاج متابعة (&lt; 60%)</span>
+                            <span class="text-xs font-black text-rose-800 bg-white px-3 py-0.5 rounded-lg border border-rose-200">${levels.fail.length} طالب</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- قائمة الطلاب الملونة بالمستويات التفصيلية -->
+                <div class="space-y-4">
+                    <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-list-ol text-purple-600"></i> قائمة طلاب الفصل مرتبين حسب المستوى:</h3>
+                    
+                    ${renderLevelGroup('🌟 الطلاب المتميزون (ممتاز)', levels.excellent, 'border-emerald-200 bg-emerald-500/10 text-emerald-900', 'bg-emerald-500 text-white', grandMax)}
+                    ${renderLevelGroup('✨ الطلاب المتفوقون (جيد جداً)', levels.veryGood, 'border-blue-200 bg-blue-500/10 text-blue-900', 'bg-blue-500 text-white', grandMax)}
+                    ${renderLevelGroup('👍 مستوى (جيد)', levels.good, 'border-amber-200 bg-amber-500/10 text-amber-900', 'bg-amber-500 text-white', grandMax)}
+                    ${renderLevelGroup('⚠️ مستوى (مقبول)', levels.pass, 'border-orange-200 bg-orange-500/10 text-orange-900', 'bg-orange-500 text-white', grandMax)}
+                    ${renderLevelGroup('🔴 طلاب يحتاجون متابعة وتكثيف (ضعيف)', levels.fail, 'border-rose-200 bg-rose-500/10 text-rose-900', 'bg-rose-500 text-white', grandMax)}
+                </div>
+            `;
+
+            document.getElementById('directChartReportPrintArea').innerHTML = html;
+            document.getElementById('directChartReportView').classList.remove('hidden');
+
+            // رسم المخطط الدائري Chart.js
+            setTimeout(() => {
+                const ctx = document.getElementById('classChartCanvas');
+                if (ctx) {
+                    if (activeChartInstance) activeChartInstance.destroy();
+                    activeChartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'],
+                            datasets: [{
+                                data: [levels.excellent.length, levels.veryGood.length, levels.good.length, levels.pass.length, levels.fail.length],
+                                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#f43f5e']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function renderLevelGroup(title, list, groupStyle, badgeStyle, grandMax) {
+            if (!list || list.length === 0) return '';
+            let html = `
+                <div class="border rounded-2xl overflow-hidden shadow-sm">
+                    <div class="px-4 py-2.5 font-black text-xs border-b flex justify-between items-center ${groupStyle}">
+                        <span>${title}</span>
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${badgeStyle}">${list.length} طالب</span>
+                    </div>
+                    <div class="p-3 bg-white grid grid-cols-1 sm:grid-cols-2 gap-2">
+            `;
+            list.forEach(st => {
+                html += `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
+                        <div>
+                            <div class="font-extrabold text-slate-800">${st.name}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-black text-slate-900">${st._score} / ${grandMax}</span>
+                            <div class="text-[10px] font-bold text-slate-500">(${st._pct}%)</div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+            return html;
+        }
+
+        function openClassReportModal(mode) {
+            document.getElementById('selectedReportMode').value = mode;
             const select = document.getElementById('reportClassSelect');
+            const btn = document.getElementById('btnExecuteReportAction');
+            const title = document.getElementById('reportModalTitle');
+
             let html = '';
             customClasses.forEach(c => {
                 html += `<option value="${c}">${c}</option>`;
             });
             select.innerHTML = html;
+
             const currentFilter = document.getElementById('classFilter').value;
             if (currentFilter && currentFilter !== 'all') {
                 select.value = currentFilter;
             }
+
+            if (mode === 'table') {
+                title.innerHTML = '<i class="fas fa-table text-amber-400"></i> كشف الفصل الشامل (التقليدي)';
+                btn.className = 'w-full py-2.5 bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm';
+                btn.innerText = 'عرض الكشف الشامل';
+            } else if (mode === 'table-link') {
+                title.innerHTML = '<i class="fas fa-link text-amber-400"></i> نسخ رابط الكشف للمدير';
+                btn.className = 'w-full py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm';
+                btn.innerText = 'نسخ رابط الكشف للمدير 📋';
+            } else if (mode === 'chart') {
+                title.innerHTML = '<i class="fas fa-chart-pie text-amber-400"></i> التقرير البياني والمستويات 📊';
+                btn.className = 'w-full py-2.5 bg-purple-700 text-white rounded-xl text-xs font-bold shadow-sm';
+                btn.innerText = 'عرض التقرير البياني';
+            } else if (mode === 'chart-link') {
+                title.innerHTML = '<i class="fas fa-share-alt text-amber-400"></i> نسخ رابط البياني للمدير 📊';
+                btn.className = 'w-full py-2.5 bg-purple-800 text-white rounded-xl text-xs font-bold shadow-sm';
+                btn.innerText = 'نسخ رابط التقرير البياني للمدير 📋';
+            }
+
             document.getElementById('classReportModal').classList.remove('hidden');
         }
 
-        function viewClassReport() {
+        function executeSelectedReportAction() {
+            const mode = document.getElementById('selectedReportMode').value;
             const className = document.getElementById('reportClassSelect').value;
             closeModal('classReportModal');
-            renderDirectClassReport(className);
-        }
 
-        function copyClassReportLinkAction() {
-            const className = document.getElementById('reportClassSelect').value;
-            closeModal('classReportModal');
             const baseUrl = window.location.href.split('#')[0];
-            const reportUrl = `${baseUrl}#class-report=${encodeURIComponent(className)}`;
-            navigator.clipboard.writeText(reportUrl).then(() => {
-                showToast(`تم نسخ رابط تقرير الفصل (${className}) للمدير بنجاح! 📋`);
-            });
+
+            if (mode === 'table') {
+                renderDirectClassReport(className);
+            } else if (mode === 'table-link') {
+                const reportUrl = `${baseUrl}#class-report=${encodeURIComponent(className)}`;
+                navigator.clipboard.writeText(reportUrl).then(() => {
+                    showToast(`تم نسخ رابط الكشف الشامل للفصل (${className}) للمدير بنجاح! 📋`);
+                });
+            } else if (mode === 'chart') {
+                renderDirectChartReport(className);
+            } else if (mode === 'chart-link') {
+                const chartUrl = `${baseUrl}#chart-report=${encodeURIComponent(className)}`;
+                navigator.clipboard.writeText(chartUrl).then(() => {
+                    showToast(`تم نسخ رابط التقرير البياني للفصل (${className}) للمدير بنجاح! 📊📋`);
+                });
+            }
         }
 
         function toggleDropdown(dropdownId, event) {
