@@ -29,6 +29,22 @@
             .shadow-custom { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
         }
     </style>
+    
+    <!-- الفحص والإخفاء السريع والفوري لوك شاشة التقرير المباشر لمنع ظهور المنصة -->
+    <script>
+        (function() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#report=')) {
+                document.addEventListener("DOMContentLoaded", () => {
+                    const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
+                    elementsToHide.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.add('hidden');
+                    });
+                });
+            }
+        })();
+    </script>
 </head>
 <body class="min-h-screen pb-24" onclick="closeAllDropdowns(event)">
 
@@ -195,7 +211,9 @@
                 <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-invoice text-amber-400"></i> تقرير متابعة درجات الطالب</h3>
                 <span class="text-xs bg-amber-400/20 text-amber-300 px-2.5 py-1 rounded-lg border border-amber-400/30 font-bold">عرض رسمي للقراءة</span>
             </div>
-            <div id="directReportPrintArea" class="p-6 space-y-4 bg-slate-50"></div>
+            <div id="directReportPrintArea" class="p-6 space-y-4 bg-slate-50">
+                <div class="p-8 text-center text-slate-500 text-xs font-bold"><i class="fas fa-spinner fa-spin text-base"></i> جاري تحميل تقرير الطالب...</div>
+            </div>
             <div class="bg-white px-6 py-3 border-t flex items-center justify-end gap-2">
                 <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"><i class="fas fa-print"></i> طباعة التقرير</button>
             </div>
@@ -465,29 +483,37 @@
             const hash = window.location.hash;
             if (hash.startsWith('#report=')) {
                 const targetEmail = decodeURIComponent(hash.replace('#report=', '')).trim().toLowerCase();
-                
-                if (students.length === 0 && db) {
+                hasOpenedReportFromUrl = true;
+
+                // محاولة البحث الفوري إذا كانت البيانات محملة مسبقاً
+                let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
+                if (std) {
+                    renderDirectStudentReport(std);
+                } else if (db) {
+                    // جلب سريع مباشر من قاعدة البيانات في حال عدم التحميل
                     db.collection("app_data").doc("main_state").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
-                            let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
-                            if (std) {
-                                hasOpenedReportFromUrl = true;
-                                renderDirectStudentReport(std);
+                            if (doc.data().sections) sections = doc.data().sections;
+                            let foundStd = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
+                            if (foundStd) {
+                                renderDirectStudentReport(foundStd);
+                            } else {
+                                document.getElementById('directReportPrintArea').innerHTML = `
+                                    <div class="p-6 text-center text-rose-600 text-xs font-bold">
+                                        عذراً، لم يتم العثور على سجل لهذا الطالب في النظام.
+                                    </div>`;
+                                document.getElementById('directStudentReportView').classList.remove('hidden');
                             }
                         }
+                    }).catch(err => {
+                        console.error(err);
                     });
-                } else {
-                    let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
-                    if (std) {
-                        hasOpenedReportFromUrl = true;
-                        renderDirectStudentReport(std);
-                    }
                 }
             }
         }
 
-        // دالة لعرض بطاقة الطالب حصرياً وإخفاء المنصة بالكامل
+        // دالة لعرض بطاقة الطالب حصرياً وإخفاء المنصة بالكامل وبشكل فوري
         function renderDirectStudentReport(std) {
             const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
             elementsToHide.forEach(id => {
