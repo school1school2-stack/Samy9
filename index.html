@@ -32,7 +32,7 @@
 </head>
 <body class="min-h-screen pb-24" onclick="closeAllDropdowns(event)">
 
-    <!-- Top Navigation Tabs (يتم إخفاؤها تلقائياً عند عرض تقرير الطالب المباشر) -->
+    <!-- Top Navigation Tabs -->
     <div id="mainNavbar" class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
             <div class="flex items-center gap-2 font-black text-amber-400 text-sm md:text-base">
@@ -310,7 +310,7 @@
         </div>
     </div>
 
-    <!-- MODAL: REPORT (للمعلم داخل لوحة التحكم) -->
+    <!-- MODAL: REPORT -->
     <div id="reportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -465,7 +465,19 @@
             const hash = window.location.hash;
             if (hash.startsWith('#report=')) {
                 const targetEmail = decodeURIComponent(hash.replace('#report=', '')).trim().toLowerCase();
-                if (students.length > 0) {
+                
+                if (students.length === 0 && db) {
+                    db.collection("app_data").doc("main_state").get().then(doc => {
+                        if (doc.exists && doc.data().students) {
+                            students = doc.data().students;
+                            let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
+                            if (std) {
+                                hasOpenedReportFromUrl = true;
+                                renderDirectStudentReport(std);
+                            }
+                        }
+                    });
+                } else {
                     let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
                     if (std) {
                         hasOpenedReportFromUrl = true;
@@ -477,12 +489,11 @@
 
         // دالة لعرض بطاقة الطالب حصرياً وإخفاء المنصة بالكامل
         function renderDirectStudentReport(std) {
-            // إخفاء لوحة المعلم، الأشرطة العلوية، والتذييل تماماً
-            document.getElementById('mainNavbar').classList.add('hidden');
-            document.getElementById('mainHeaderBanner').classList.add('hidden');
-            document.getElementById('teacherView').classList.add('hidden');
-            document.getElementById('studentView').classList.add('hidden');
-            document.getElementById('mainFooter').classList.add('hidden');
+            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
+            elementsToHide.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
 
             const { grandTotal, sectionTotals } = calculateStudentTotals(std);
             const grandMax = calculateGrandTotalMax();
