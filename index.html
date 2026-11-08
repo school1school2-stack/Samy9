@@ -133,7 +133,7 @@
             <div id="table-empty-state" class="hidden p-12 text-center">
                 <i class="fas fa-folder-open text-4xl text-slate-300 mb-3 block"></i>
                 <p class="text-slate-600 font-bold">لا يوجد طلاب مضافين بحسب شروط البحث.</p>
-                <p class="text-slate-400 text-xs mt-1">استخدم خيار "سحب طلاب السحابة" أو "إضافة طالب" لإضافة الطلاب.</p>
+                <p class="text-slate-400 text-xs mt-1">استخدم خيار "إضافة طالب" أو "سحب طلاب السحابة" لإضافة الطلاب.</p>
             </div>
         </div>
     </div>
@@ -159,7 +159,6 @@
                 </div>
             </div>
 
-            <!-- نتيجة الطالب -->
             <div id="studentQueryResult" class="mt-4">
                 <div class="p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center text-slate-400 text-xs font-bold">
                     النتيجة ستظهر هنا فور إدخال بريدك والاستعلام.
@@ -174,7 +173,7 @@
         </div>
     </div>
 
-    <!-- MODAL: ADD STUDENT -->
+    <!-- MODAL: ADD STUDENT (مع البحث الذكي لجلب الطالب المفرد من السحابة) -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -187,7 +186,7 @@
                 <input type="hidden" id="editStudentId">
                 <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-100 space-y-2">
                     <label class="block text-xs font-bold text-blue-900">🔍 بحث ذكي بجزء من اسم الطالب من السحابة:</label>
-                    <input type="text" id="allowedSearchInput" oninput="filterAllowedStudents(this.value)" placeholder="اكتب جزءاً من الاسم..." class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-600">
+                    <input type="text" id="allowedSearchInput" oninput="filterAllowedStudents(this.value)" placeholder="اكتب جزءاً من الاسم (مثلاً: العتيبي، خالد)..." class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-600">
                     <select id="allowedStudentsSelect" onchange="autofillFromAllowed(this.value)" class="w-full p-2 bg-white border border-blue-200 rounded-lg text-xs font-bold">
                         <option value="">-- نتائج البحث في طلاب السحابة --</option>
                     </select>
@@ -369,7 +368,6 @@
             console.warn("Firebase warning:", e);
         }
 
-        // جلب البيانات من السحابة تلقائياً لكي تظهر للطالب مباشرة
         async function loadCloudDataOnStart() {
             if (!rtdb) return;
             try {
@@ -409,6 +407,7 @@
             }
         }
 
+        // جلب قائمة الطلاب المعتمدين من السحابة في الخلفية للبحث الذكي فقط دون إضافتهم للجدول تلقائياً
         function setupCloudSync() {
             if (!db) return;
             db.collection("allowed_students").onSnapshot(snapshot => {
@@ -423,7 +422,7 @@
                 allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
                 const statusEl = document.getElementById('cloud-status');
                 if (statusEl) {
-                    statusEl.innerHTML = `<i class="fas fa-cloud-check"></i> متصل بالسحابة (${allowedStudentsCache.length} طالب)`;
+                    statusEl.innerHTML = `<i class="fas fa-cloud-check"></i> متصل بالسحابة (${allowedStudentsCache.length} طالب مصرح)`;
                 }
                 filterAllowedStudents('');
             }, err => {
@@ -441,6 +440,7 @@
             });
         }
 
+        // تعبئة بيانات الطالب المختار من قائمة البحث الذكي
         function autofillFromAllowed(email) {
             if (!email) return;
             const item = allowedStudentsCache.find(i => i.email === email);
@@ -450,6 +450,26 @@
             }
         }
 
+        // تصفية نتائج البحث الذكي في نافذة إضافة طالب
+        function filterAllowedStudents(term) {
+            const selectEl = document.getElementById('allowedStudentsSelect');
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">-- نتائج البحث في طلاب السحابة --</option>';
+            const cleanTerm = (term || '').trim().toLowerCase();
+            const filtered = allowedStudentsCache.filter(st => 
+                !cleanTerm || 
+                (st.name && st.name.toLowerCase().includes(cleanTerm)) || 
+                (st.email && st.email.toLowerCase().includes(cleanTerm))
+            );
+            filtered.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.email;
+                opt.textContent = `${item.name} (${item.email})`;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        // زر "سحب طلاب السحابة" (لمن يرغب بسحب الكل دفعة واحدة)
         async function importAllAllowedFromCloud() {
             if (!db) {
                 showToast("جاري الاتصال بالسحابة...", "error");
@@ -461,7 +481,7 @@
                 let addedCount = 0;
 
                 if (snap.empty) {
-                    showToast("قائمة السحابة (`allowed_students`) فارغة حالياً.", "error");
+                    showToast("قائمة السحابة فارغة حالياً.", "error");
                     return;
                 }
 
@@ -496,24 +516,6 @@
                 console.error(e);
                 showToast("تعذر جلب الطلاب من السحابة. تحقق من الاتصال.", "error");
             }
-        }
-
-        function filterAllowedStudents(term) {
-            const selectEl = document.getElementById('allowedStudentsSelect');
-            if (!selectEl) return;
-            selectEl.innerHTML = '<option value="">-- نتائج البحث في طلاب السحابة --</option>';
-            const cleanTerm = (term || '').trim().toLowerCase();
-            const filtered = allowedStudentsCache.filter(st => 
-                !cleanTerm || 
-                (st.name && st.name.toLowerCase().includes(cleanTerm)) || 
-                (st.email && st.email.toLowerCase().includes(cleanTerm))
-            );
-            filtered.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.email;
-                opt.textContent = `${item.name} (${item.email})`;
-                selectEl.appendChild(opt);
-            });
         }
 
         function calculateGrandTotalMax() {
@@ -709,6 +711,8 @@
             document.getElementById('stdNameInput').value = '';
             document.getElementById('stdEmailInput').value = '';
             document.getElementById('stdPhoneInput').value = '';
+            document.getElementById('allowedSearchInput').value = '';
+            filterAllowedStudents('');
             document.getElementById('studentModalTitle').innerHTML = '<i class="fas fa-user-plus text-amber-400"></i> إضافة وتصنيف طالب';
             document.getElementById('addStudentModal').classList.remove('hidden');
         }
@@ -721,6 +725,8 @@
             document.getElementById('stdEmailInput').value = std.email;
             document.getElementById('stdClassSelect').value = std.className || customClasses[0];
             document.getElementById('stdPhoneInput').value = std.phone || '';
+            document.getElementById('allowedSearchInput').value = '';
+            filterAllowedStudents('');
             document.getElementById('studentModalTitle').innerHTML = '<i class="fas fa-user-edit text-amber-400"></i> تعديل بيانات الطالب';
             document.getElementById('addStudentModal').classList.remove('hidden');
         }
@@ -748,6 +754,11 @@
                     showToast("تم تحديث بيانات الطالب بنجاح!");
                 }
             } else {
+                let exists = students.find(s => s.email.toLowerCase() === email.toLowerCase());
+                if (exists) {
+                    showToast("هذا الطالب مضاف بالفعل في الجدول.", "error");
+                    return;
+                }
                 students.push({
                     id: 'std_' + Date.now(),
                     name: name,
@@ -1018,7 +1029,6 @@
             document.getElementById('reportModal').classList.remove('hidden');
         }
 
-        // دالة الاستعلام الخاصة بالطالب (تبحث في السحابة والبيانات المخزنة)
         async function queryStudentGrades() {
             const query = document.getElementById('studentQueryInput').value.trim().toLowerCase();
             const resultDiv = document.getElementById('studentQueryResult');
@@ -1030,7 +1040,6 @@
 
             resultDiv.innerHTML = '<div class="p-4 bg-slate-50 rounded-xl text-center text-slate-500 text-xs font-bold"><i class="fas fa-spinner fa-spin"></i> جاري البحث عن درجاتك في السحابة...</div>';
 
-            // تأكد من جلب أحدث بيانات السحابة قبل البحث
             if (rtdb) {
                 try {
                     const snapshot = await rtdb.ref('quran_app_v2').once('value');
@@ -1166,7 +1175,6 @@
             populateClassOptions();
             renderTable();
 
-            // التحقق مما إذا كان الرابط يحتوي على #student لفتح صفحة الطالب تلقائياً
             if (window.location.hash === '#student') {
                 switchMode('student');
             }
