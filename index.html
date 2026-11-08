@@ -12,7 +12,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
@@ -326,7 +325,7 @@
         let students = [];
         let allowedStudentsCache = [];
         let currentReportStudent = null;
-        let isCloudAvailable = false;
+        let db = null;
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
 
         let sections = [
@@ -370,43 +369,61 @@
             measurementId: "G-M0BB8TTD91"
         };
 
-        let db = null;
-        let rtdb = null;
-
         try {
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
             db = firebase.firestore();
-            rtdb = firebase.database();
 
             firebase.auth().signInAnonymously().then(() => {
-                isCloudAvailable = true;
-                setupCloudSync();
-                // الاستماع للتحديثات الفورية من السحابة في الوقت الحقيقي
-                listenToCloudChanges();
+                initCloudSync();
             }).catch(err => {
-                isCloudAvailable = true;
-                setupCloudSync();
-                listenToCloudChanges();
+                initCloudSync();
             });
         } catch(e) {
             console.warn("Firebase warning:", e);
         }
 
-        // الاستماع الفوري لقاعدة البيانات السحابية (بحيث يظهر أي تغيير في أي جهاز فوراً)
-        function listenToCloudChanges() {
-            if (!rtdb) return;
-            rtdb.ref('quran_app_v2').on('value', (snapshot) => {
-                const val = snapshot.val();
-                if (val) {
-                    if (val.students) students = val.students;
-                    if (val.sections) sections = val.sections;
-                    if (val.classes) customClasses = val.classes;
-                    saveLocalData();
+        // الاستماع الفوري والكامل من سحابة Firestore (تحديث حي بين جميع الأجهزة)
+        function initCloudSync() {
+            if (!db) return;
+
+            // استماع لقائمة الطلاب المسموح لهم بالبحث
+            db.collection("allowed_students").onSnapshot(snapshot => {
+                allowedStudentsCache = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    allowedStudentsCache.push({
+                        email: doc.id,
+                        name: data.name || "طالب"
+                    });
+                });
+                allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+                filterAllowedStudents('');
+            });
+
+            // استماع حي لبيانات الجدول المضاف والدرجات والفصول
+            db.collection("app_data").doc("main_state").onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.students) students = data.students;
+                    if (data.sections) sections = data.sections;
+                    if (data.classes) customClasses = data.classes;
                     populateClassOptions();
                     renderTable();
                 }
+            }, err => {
+                // إذا لم يوجد وثيقة بعد، جلب لمرة واحدة
+                db.collection("app_data").doc("main_state").get().then(d => {
+                    if (d.exists) {
+                        const data = d.data();
+                        if (data.students) students = data.students;
+                        if (data.sections) sections = data.sections;
+                        if (data.classes) customClasses = data.classes;
+                        populateClassOptions();
+                        renderTable();
+                    }
+                });
             });
         }
 
@@ -451,34 +468,6 @@
                 btnT.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
                 history.pushState({}, '', '#student');
             }
-        }
-
-        function setupCloudSync() {
-            if (!db) return;
-            db.collection("allowed_students").onSnapshot(snapshot => {
-                allowedStudentsCache = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    allowedStudentsCache.push({
-                        email: doc.id,
-                        name: data.name || "طالب"
-                    });
-                });
-                allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
-                filterAllowedStudents('');
-            }, err => {
-                db.collection("allowed_students").get().then(snapshot => {
-                    allowedStudentsCache = [];
-                    snapshot.forEach(doc => {
-                        allowedStudentsCache.push({
-                            email: doc.id,
-                            name: doc.data().name || "طالب"
-                        });
-                    });
-                    allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
-                    filterAllowedStudents('');
-                }).catch(e => console.error(e));
-            });
         }
 
         function selectStudentFromSearch(email) {
@@ -566,7 +555,7 @@
                 }
             } catch(e) {
                 console.error(e);
-                showToast("تعذر جلب الطلاب من السحابة. تحقق من الاتصال.", "error");
+                showToast("تعذر جلب الطلاب من السحابة.", "error");
             }
         }
 
@@ -707,7 +696,7 @@
             tableBody.innerHTML = rowsHTML;
         }
 
-        function updateStudentScore(stdId, slotId, val, maxVal) {
+        async function updateStudentScore(stdId, slotId, val, maxVal) {
             let numericVal = parseFloat(val);
             if (isNaN(numericVal)) numericVal = 0;
             if (numericVal < 0) numericVal = 0;
@@ -717,9 +706,8 @@
             if (std) {
                 if (!std.scores) std.scores = {};
                 std.scores[slotId] = numericVal;
-                saveLocalData();
                 renderTable();
-                saveAllToCloud(); // مزامنة تلقائية فورية عند تعديل أي درجة
+                await saveAllToCloud(); // حفظ تلقائي فوري
             }
         }
 
@@ -744,7 +732,6 @@
             }
             if (confirm(`هل أنت متأكد من حذف جميع طلاب الفصل (${classFilterVal}) من الجدول؟`)) {
                 students = students.filter(s => s.className !== classFilterVal);
-                saveLocalData();
                 renderTable();
                 await saveAllToCloud();
                 showToast(`تم حذف طلاب الفصل ${classFilterVal} بنجاح.`);
@@ -754,7 +741,6 @@
         async function deleteAllStudentsConfirm() {
             if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب من الجدول نهائياً؟")) {
                 students = [];
-                saveLocalData();
                 renderTable();
                 await saveAllToCloud();
                 showToast("تم تصفية وحذف كافة الطلاب من الجدول.");
@@ -827,18 +813,16 @@
                 showToast("تمت إضافة الطالب الجديد بنجاح!");
             }
 
-            saveLocalData();
             renderTable();
             closeModal('addStudentModal');
-            await saveAllToCloud(); // رفع وحفظ تلقائي فوري للسحابة عند إضافة طالب
+            await saveAllToCloud(); // رفع فوري للسحابة
         }
 
         async function deleteStudent(stdId) {
             if (confirm("هل أنت متأكد من حذف هذا الطالب من الكشف؟")) {
                 students = students.filter(s => s.id !== stdId);
-                saveLocalData();
                 renderTable();
-                await saveAllToCloud(); // رفع وحفظ تلقائي بعد الحذف
+                await saveAllToCloud();
                 showToast("تم حذف الطالب.");
             }
         }
@@ -869,7 +853,6 @@
                 input.value = '';
                 populateClassOptions();
                 renderClassesList();
-                saveLocalData();
                 await saveAllToCloud();
                 showToast("تمت إضافة الفصل بنجاح!");
             }
@@ -883,7 +866,6 @@
             customClasses.splice(idx, 1);
             populateClassOptions();
             renderClassesList();
-            saveLocalData();
             await saveAllToCloud();
         }
 
@@ -922,26 +904,24 @@
         }
 
         async function updateSectionTitle(secIdx, val) {
-            if (val.trim()) { sections[secIdx].title = val.trim(); saveLocalData(); renderTable(); await saveAllToCloud(); }
+            if (val.trim()) { sections[secIdx].title = val.trim(); renderTable(); await saveAllToCloud(); }
         }
 
         async function deleteSection(secIdx) {
             if (sections.length <= 1) { showToast("يجب الإبقاء على قسم واحد على الأقل.", "error"); return; }
             sections.splice(secIdx, 1);
-            saveLocalData();
             renderSectionsConfig();
             renderTable();
             await saveAllToCloud();
         }
 
         async function updateSlotTitle(secIdx, slotIdx, val) {
-            if (val.trim()) { sections[secIdx].slots[slotIdx].title = val.trim(); saveLocalData(); renderTable(); await saveAllToCloud(); }
+            if (val.trim()) { sections[secIdx].slots[slotIdx].title = val.trim(); renderTable(); await saveAllToCloud(); }
         }
 
         async function updateSlotMax(secIdx, slotIdx, val) {
             let maxVal = parseFloat(val) || 10;
             sections[secIdx].slots[slotIdx].max = maxVal;
-            saveLocalData();
             renderTable();
             await saveAllToCloud();
         }
@@ -950,7 +930,6 @@
             let newId = 'slot_' + Date.now();
             let count = sections[secIdx].slots.length + 1;
             sections[secIdx].slots.push({ id: newId, title: 'المحاولة ' + count, max: 10 });
-            saveLocalData();
             renderSectionsConfig();
             renderTable();
             await saveAllToCloud();
@@ -959,7 +938,6 @@
         async function deleteSlot(secIdx, slotIdx) {
             if (sections[secIdx].slots.length <= 1) { showToast("يجب الإبقاء على محاولة واحدة بالقسم.", "error"); return; }
             sections[secIdx].slots.splice(slotIdx, 1);
-            saveLocalData();
             renderSectionsConfig();
             renderTable();
             await saveAllToCloud();
@@ -979,7 +957,6 @@
                 ]
             });
             input.value = '';
-            saveLocalData();
             renderSectionsConfig();
             renderTable();
             await saveAllToCloud();
@@ -1023,7 +1000,6 @@
                     }
                 }
             }
-            saveLocalData();
             renderTable();
             closeModal('bulkImportModal');
             await saveAllToCloud();
@@ -1099,12 +1075,11 @@
 
             resultDiv.innerHTML = '<div class="p-4 bg-slate-50 rounded-xl text-center text-slate-500 text-xs font-bold"><i class="fas fa-spinner fa-spin"></i> جاري البحث عن درجاتك في السحابة...</div>';
 
-            if (rtdb) {
+            if (db) {
                 try {
-                    const snapshot = await rtdb.ref('quran_app_v2').once('value');
-                    const val = snapshot.val();
-                    if (val && val.students) {
-                        students = val.students;
+                    const doc = await db.collection("app_data").doc("main_state").get();
+                    if (doc.exists && doc.data().students) {
+                        students = doc.data().students;
                     }
                 } catch(e) {}
             }
@@ -1185,30 +1160,19 @@
         }
 
         async function saveAllToCloud() {
-            saveLocalData();
-            if (!rtdb) return;
+            if (!db) return;
             try {
-                await rtdb.ref('quran_app_v2').set({
+                await db.collection("app_data").doc("main_state").set({
                     students: students,
                     sections: sections,
                     classes: customClasses,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
+                showToast("تمت مزامنة البيانات بالسحابة بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
+                showToast("تعذرت المزامنة بالسحابة.", "error");
             }
-        }
-
-        function saveLocalData() {
-            localStorage.setItem('samy_quran_students', JSON.stringify(students));
-            localStorage.setItem('samy_quran_sections', JSON.stringify(sections));
-            localStorage.setItem('samy_quran_classes', JSON.stringify(customClasses));
-        }
-
-        function loadLocalData() {
-            if (localStorage.getItem('samy_quran_students')) students = JSON.parse(localStorage.getItem('samy_quran_students'));
-            if (localStorage.getItem('samy_quran_sections')) sections = JSON.parse(localStorage.getItem('samy_quran_sections'));
-            if (localStorage.getItem('samy_quran_classes')) customClasses = JSON.parse(localStorage.getItem('samy_quran_classes'));
         }
 
         function closeModal(modalId) {
@@ -1226,10 +1190,6 @@
         }
 
         window.onload = function() {
-            loadLocalData();
-            populateClassOptions();
-            renderTable();
-
             if (window.location.hash === '#student') {
                 switchMode('student');
             }
