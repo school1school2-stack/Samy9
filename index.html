@@ -16,7 +16,8 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+        .main-content { flex: 1; }
         .bg-royal-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%); }
         .shadow-custom { box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.1), 0 8px 10px -6px rgba(30, 58, 138, 0.05); }
         input[type=number]::-webkit-inner-spin-button, 
@@ -30,179 +31,180 @@
         }
     </style>
 </head>
-<body class="min-h-screen pb-16" onclick="closeAllDropdowns(event)">
+<body class="pb-16" onclick="closeAllDropdowns(event)">
 
-    <!-- Top Navigation Tabs -->
-    <div class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print">
-        <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
-            <div class="flex items-center gap-2 font-black text-amber-400 text-sm md:text-base">
-                <!-- قبعة التخرج في الأعلى بجانب اسم المدرسة -->
-                <i class="fas fa-graduation-cap text-lg"></i>
-                <span>ثانوية الأمير عبد المجيد</span>
-            </div>
-            <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs font-bold">
-                <button id="btnNavTeacher" onclick="switchMode('teacher')" class="px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2">
-                    <i class="fas fa-chalkboard-teacher"></i> لوحة المعلم
-                </button>
-                <button id="btnNavStudent" onclick="switchMode('student')" class="px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2">
-                    <i class="fas fa-user-graduate"></i> بوابة الطالب المستقلة
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Header Banner -->
-    <header class="bg-royal-header text-white py-8 px-4 shadow-lg no-print">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-4 text-center md:text-right">
-                <!-- أيقونة المصحف الشريف في البنر الأزرق الرئيسي -->
-                <div class="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center text-3xl border border-white/20 shadow-inner">
-                    <i class="fas fa-book-quran text-amber-300"></i>
+    <div class="main-content">
+        <!-- Top Navigation Tabs -->
+        <div class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print">
+            <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+                <div class="flex items-center gap-2 font-black text-amber-400 text-sm md:text-base">
+                    <i class="fas fa-graduation-cap text-lg"></i>
+                    <span>ثانوية الأمير عبد المجيد</span>
                 </div>
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-bold mb-1">
-                        <span>مادة القرآن الكريم والتربية الإسلامية</span>
-                    </div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف متابعة درجات الطلاب وبوابة الاستعلام</h1>
-                    <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">الأستاذ سامي بن محمد العمر</span></p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-slate-900/40 border border-white/15 backdrop-blur px-4 py-2 rounded-xl text-center">
-                    <span class="block text-[11px] text-slate-300 font-bold">حالة سحابة د. سامي</span>
-                    <span id="cloud-status" class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 mt-0.5">
-                        <i class="fas fa-cloud"></i> متصل بالسحابة (samy-28452)
-                    </span>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- TEACHER DASHBOARD -->
-    <div id="teacherView" class="max-w-7xl mx-auto px-4 mt-6">
-        <div class="bg-white rounded-2xl p-4 md:p-5 shadow-custom mb-6 border border-slate-100 no-print">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                    <div class="relative flex-1 sm:w-64">
-                        <i class="fas fa-search absolute right-3 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="ابحث باسم الطالب أو بريده..." class="w-full pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 transition">
-                    </div>
-                    <select id="classFilter" onchange="renderTable()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500">
-                        <option value="all">كل الفصول</option>
-                    </select>
-                </div>
-
-                <!-- أزرار التحكم والقوائم المنسدلة المرتبة -->
-                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
-                    
-                    <!-- القائمة المنسدلة 1: إدارة الطلاب والرفع -->
-                    <div class="relative inline-block text-right">
-                        <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
-                        </button>
-                        <div id="studentsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
-                            <button onclick="openAddStudentModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                                <i class="fas fa-user-plus text-blue-600"></i> إضافة طالب
-                            </button>
-                            <button onclick="importAllAllowedFromCloud()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2">
-                                <i class="fas fa-cloud-download-alt text-indigo-600"></i> سحب طلاب السحابة
-                            </button>
-                            <button onclick="openBulkImportModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2">
-                                <i class="fas fa-file-import text-amber-600"></i> رفع جماعي
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- القائمة المنسدلة 2: الإعدادات والهيكلة -->
-                    <div class="relative inline-block text-right">
-                        <button onclick="toggleDropdown('settingsDropdown', event)" class="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="fas fa-cogs"></i> الإعدادات والهيكلة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
-                        </button>
-                        <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
-                            <button onclick="openManageClassesModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2">
-                                <i class="fas fa-layer-group text-purple-600"></i> إدارة الفصول والشعب
-                            </button>
-                            <button onclick="openManageSectionsModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2">
-                                <i class="fas fa-folder-plus text-purple-600"></i> إدارة الأقسام والمحاولات
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- القائمة المنسدلة 3: خيارات الحذف والتصفية -->
-                    <div class="relative inline-block text-right">
-                        <button onclick="toggleDropdown('deleteDropdown', event)" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="fas fa-trash-alt"></i> خيارات الحذف <i class="fas fa-chevron-down text-[10px] mr-1"></i>
-                        </button>
-                        <div id="deleteDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
-                            <button onclick="deleteCurrentClassStudents()" class="w-full text-right px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2">
-                                <i class="fas fa-eraser"></i> حذف الفصل الحالي
-                            </button>
-                            <button onclick="deleteAllStudentsConfirm()" class="w-full text-right px-4 py-2 text-xs font-bold text-red-700 hover:bg-red-50 flex items-center gap-2">
-                                <i class="fas fa-ban"></i> حذف الجميع
-                            </button>
-                        </div>
-                    </div>
-
-                    <button onclick="saveAllToCloud()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                        <i class="fas fa-cloud-upload-alt"></i> حفظ السحابة
+                <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs font-bold">
+                    <button id="btnNavTeacher" onclick="switchMode('teacher')" class="px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2">
+                        <i class="fas fa-chalkboard-teacher"></i> لوحة المعلم
                     </button>
-                    <button onclick="window.print()" class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-                        <i class="fas fa-print"></i> طباعة
+                    <button id="btnNavStudent" onclick="switchMode('student')" class="px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-user-graduate"></i> بوابة الطالب المستقلة
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Main Table Card -->
-        <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse min-w-[1000px]" id="mainScoreTable">
-                    <thead id="mainTableHead"></thead>
-                    <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
-                </table>
+        <!-- Header Banner -->
+        <header class="bg-royal-header text-white py-8 px-4 shadow-lg no-print">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-4 text-center md:text-right">
+                    <div class="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center text-3xl border border-white/20 shadow-inner">
+                        <i class="fas fa-book-quran text-amber-300"></i>
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-bold mb-1">
+                            <span>مادة القرآن الكريم والتربية الإسلامية</span>
+                        </div>
+                        <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف متابعة درجات الطلاب وبوابة الاستعلام</h1>
+                        <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">الأستاذ سامي بن محمد العمر</span></p>
+                    </div>
+                </div>
+                <!-- تم إخفاء حالة السحابة تماماً من هنا بناءً على طلبك -->
             </div>
-            <div id="table-empty-state" class="hidden p-12 text-center">
-                <i class="fas fa-folder-open text-4xl text-slate-300 mb-3 block"></i>
-                <p class="text-slate-600 font-bold">لا يوجد طلاب مضافين بحسب شروط البحث.</p>
-                <p class="text-slate-400 text-xs mt-1">استخدم خيار "إضافة طالب" أو "سحب طلاب السحابة" لإضافة الطلاب.</p>
+        </header>
+
+        <!-- TEACHER DASHBOARD -->
+        <div id="teacherView" class="max-w-7xl mx-auto px-4 mt-6">
+            <div class="bg-white rounded-2xl p-4 md:p-5 shadow-custom mb-6 border border-slate-100 no-print">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <div class="relative flex-1 sm:w-64">
+                            <i class="fas fa-search absolute right-3 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="searchInput" oninput="renderTable()" placeholder="ابحث باسم الطالب أو بريده..." class="w-full pl-3 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                        <select id="classFilter" onchange="renderTable()" class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500">
+                            <option value="all">كل الفصول</option>
+                        </select>
+                    </div>
+
+                    <!-- أزرار التحكم والقوائم المنسدلة المرتبة -->
+                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
+                        
+                        <!-- القائمة المنسدلة 1: إدارة الطلاب والرفع -->
+                        <div class="relative inline-block text-right">
+                            <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
+                            </button>
+                            <div id="studentsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
+                                <button onclick="openAddStudentModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
+                                    <i class="fas fa-user-plus text-blue-600"></i> إضافة طالب
+                                </button>
+                                <button onclick="importAllAllowedFromCloud()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2">
+                                    <i class="fas fa-cloud-download-alt text-indigo-600"></i> سحب طلاب السحابة
+                                </button>
+                                <button onclick="openBulkImportModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2">
+                                    <i class="fas fa-file-import text-amber-600"></i> رفع جماعي
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- القائمة المنسدلة 2: الإعدادات والهيكلة -->
+                        <div class="relative inline-block text-right">
+                            <button onclick="toggleDropdown('settingsDropdown', event)" class="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fas fa-cogs"></i> الإعدادات والهيكلة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
+                            </button>
+                            <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
+                                <button onclick="openManageClassesModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2">
+                                    <i class="fas fa-layer-group text-purple-600"></i> إدارة الفصول والشعب
+                                </button>
+                                <button onclick="openManageSectionsModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2">
+                                    <i class="fas fa-folder-plus text-purple-600"></i> إدارة الأقسام والمحاولات
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- القائمة المنسدلة 3: خيارات الحذف والتصفية -->
+                        <div class="relative inline-block text-right">
+                            <button onclick="toggleDropdown('deleteDropdown', event)" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fas fa-trash-alt"></i> خيارات الحذف <i class="fas fa-chevron-down text-[10px] mr-1"></i>
+                            </button>
+                            <div id="deleteDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
+                                <button onclick="deleteCurrentClassStudents()" class="w-full text-right px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2">
+                                    <i class="fas fa-eraser"></i> حذف الفصل الحالي
+                                </button>
+                                <button onclick="deleteAllStudentsConfirm()" class="w-full text-right px-4 py-2 text-xs font-bold text-red-700 hover:bg-red-50 flex items-center gap-2">
+                                    <i class="fas fa-ban"></i> حذف الجميع
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="saveAllToCloud()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                            <i class="fas fa-cloud-upload-alt"></i> حفظ السحابة
+                        </button>
+                        <button onclick="window.print()" class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <i class="fas fa-print"></i> طباعة
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Table Card -->
+            <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse min-w-[1000px]" id="mainScoreTable">
+                        <thead id="mainTableHead"></thead>
+                        <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
+                    </table>
+                </div>
+                <div id="table-empty-state" class="hidden p-12 text-center">
+                    <i class="fas fa-folder-open text-4xl text-slate-300 mb-3 block"></i>
+                    <p class="text-slate-600 font-bold">لا يوجد طلاب مضافين بحسب شروط البحث.</p>
+                    <p class="text-slate-400 text-xs mt-1">استخدم خيار "إضافة طالب" أو "سحب طلاب السحابة" لإضافة الطلاب.</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- STUDENT VIEW (بوابة الطالب المستقلة عبر رابط مخصص) -->
-    <div id="studentView" class="max-w-xl mx-auto px-4 mt-12 hidden">
-        <div class="bg-white rounded-2xl shadow-custom p-6 md:p-8 border border-slate-100 space-y-6">
-            <div class="text-center border-b pb-4">
-                <div class="w-14 h-14 bg-blue-50 text-blue-700 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-2 shadow-inner">
-                    <i class="fas fa-user-graduate"></i>
+        <!-- STUDENT VIEW (بوابة الطالب المستقلة عبر رابط مخصص) -->
+        <div id="studentView" class="max-w-xl mx-auto px-4 mt-12 hidden">
+            <div class="bg-white rounded-2xl shadow-custom p-6 md:p-8 border border-slate-100 space-y-6">
+                <div class="text-center border-b pb-4">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-700 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-2 shadow-inner">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h2 class="text-xl font-black text-slate-900">بوابة استعلام درجات الطالب</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">أدخل بريدك الإلكتروني لمنصة مدرستي لعرض تقييمك ودرجاتك الشخصية</p>
                 </div>
-                <h2 class="text-xl font-black text-slate-900">بوابة استعلام درجات الطالب</h2>
-                <p class="text-xs text-slate-500 font-medium mt-1">أدخل بريدك الإلكتروني لمنصة مدرستي لعرض تقييمك ودرجاتك الشخصية</p>
-            </div>
 
-            <div class="space-y-3">
-                <label class="block text-xs font-bold text-slate-700">بريد منصة مدرستي:</label>
-                <div class="flex gap-2">
-                    <input type="text" id="studentQueryInput" placeholder="sxxxxxxx@rb.moe.gov.sa" class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-600 dir-ltr text-right">
-                    <button onclick="queryStudentGrades()" class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                        <i class="fas fa-search"></i> استعلام
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-700">بريد منصة مدرستي:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="studentQueryInput" placeholder="sxxxxxxx@rb.moe.gov.sa" class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-600 dir-ltr text-right">
+                        <button onclick="queryStudentGrades()" class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                            <i class="fas fa-search"></i> استعلام
+                        </button>
+                    </div>
+                </div>
+
+                <div id="studentQueryResult" class="mt-4">
+                    <div class="p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center text-slate-400 text-xs font-bold">
+                        النتيجة ستظهر هنا فور إدخال بريدك والاستعلام.
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 text-center">
+                    <button onclick="copyStudentPortalLink()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-1.5 mx-auto">
+                        <i class="fas fa-share-alt"></i> نسخ رابط بوابة الطلاب لإرساله للطلاب عبر وتساب
                     </button>
                 </div>
             </div>
-
-            <div id="studentQueryResult" class="mt-4">
-                <div class="p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center text-slate-400 text-xs font-bold">
-                    النتيجة ستظهر هنا فور إدخال بريدك والاستعلام.
-                </div>
-            </div>
-
-            <div class="pt-4 border-t border-slate-100 text-center">
-                <button onclick="copyStudentPortalLink()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-1.5 mx-auto">
-                    <i class="fas fa-share-alt"></i> نسخ رابط بوابة الطلاب لإرساله للطلاب عبر وتساب
-                </button>
-            </div>
         </div>
     </div>
+
+    <!-- تذييل الصفحة (Footer) الثابت أسفل الصفحة -->
+    <footer class="bg-slate-900 text-slate-300 py-4 px-4 text-center text-xs font-bold border-t border-slate-800 mt-12 no-print">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>إعداد المعلم: <span class="text-amber-400 font-extrabold">الأستاذ سامي بن محمد العمر</span> | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span></div>
+            <div class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</div>
+        </div>
+    </footer>
 
     <!-- MODAL: ADD STUDENT -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
@@ -471,10 +473,6 @@
                     });
                 });
                 allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
-                const statusEl = document.getElementById('cloud-status');
-                if (statusEl) {
-                    statusEl.innerHTML = `<i class="fas fa-cloud-check"></i> متصل بالسحابة (${allowedStudentsCache.length} طالب مصرح)`;
-                }
                 filterAllowedStudents('');
             }, err => {
                 db.collection("allowed_students").get().then(snapshot => {
