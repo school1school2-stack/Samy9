@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة القرآن الكريم - د / سامي بن محمد العمر | ثانوية الأمير عبد المجيد</title>
+    <title>منصة القرآن الكريم - د / سامي محمد العمر | ثانوية الأمير عبد المجيد</title>
     <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -63,7 +63,7 @@
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
                     <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف متابعة درجات الطلاب وبوابة الاستعلام</h1>
-                    <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">د / سامي بن محمد العمر 🎓</span></p>
+                    <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">د / سامي محمد العمر 🎓</span></p>
                 </div>
             </div>
         </div>
@@ -196,7 +196,7 @@
     <footer class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-bold border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="w-full text-center">
-                إعداد المعلم د / سامي بن محمد العمر | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span> | <span class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</span>
+                إعداد المعلم د / سامي محمد العمر | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span> | <span class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</span>
             </div>
         </div>
     </footer>
@@ -452,10 +452,10 @@
         function checkUrlReportParam() {
             const hash = window.location.hash;
             if (hash.startsWith('#report=')) {
-                const stdId = hash.replace('#report=', '');
+                const targetEmail = decodeURIComponent(hash.replace('#report=', '')).trim().toLowerCase();
                 setTimeout(() => {
                     if (students.length > 0) {
-                        let std = students.find(s => s.id === stdId);
+                        let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
                         if (std) {
                             openReportModal(std.id);
                         }
@@ -1108,11 +1108,11 @@
         }
 
         function copyDirectReportLink() {
-            if (!currentReportStudent) return;
+            if (!currentReportStudent || !currentReportStudent.email) return;
             const baseUrl = window.location.href.split('#')[0];
-            const reportUrl = `${baseUrl}#report=${currentReportStudent.id}`;
+            const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
             navigator.clipboard.writeText(reportUrl).then(() => {
-                showToast("تم نسخ رابط التقرير المباشر بنجاح! 📋");
+                showToast("تم نسخ رابط التقرير المباشر (بايميل الطالب) بنجاح! 📋");
             });
         }
 
@@ -1143,7 +1143,7 @@
                     <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-center text-xs">
                         <i class="fas fa-exclamation-triangle text-amber-600 text-lg"></i>
                         <div class="font-bold text-amber-900">لم يتم العثور على سجل درجات لهذا البريد حالياً.</div>
-                        <p class="text-slate-500 text-[11px]">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع د / سامي بن محمد العمر.</p>
+                        <p class="text-slate-500 text-[11px]">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع د / سامي محمد العمر.</p>
                     </div>`;
                 return;
             }
@@ -1194,13 +1194,13 @@
         }
 
         function shareReportWhatsApp() {
-            if (!currentReportStudent) return;
+            if (!currentReportStudent || !currentReportStudent.email) return;
             const { grandTotal } = calculateStudentTotals(currentReportStudent);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
             const baseUrl = window.location.href.split('#')[0];
-            const reportUrl = `${baseUrl}#report=${currentReportStudent.id}`;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي بن محمد العمر\n----------------------------\nالنتيجة النهائية: *${grandTotal} من ${grandMax}* (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي المباشر عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
+            const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالنتيجة النهائية: *${grandTotal} من ${grandMax}* (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي المباشر عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
@@ -1209,7 +1209,7 @@
             const { grandTotal } = calculateStudentTotals(currentReportStudent);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
-            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nمادة القرآن الكريم - د / سامي بن محمد العمر\nالمجموع الكلي: ${grandTotal} من ${grandMax} (${pct}%)\n`;
+            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nمادة القرآن الكريم - د / سامي محمد العمر\nالمجموع الكلي: ${grandTotal} من ${grandMax} (${pct}%)\n`;
             navigator.clipboard.writeText(msg).then(() => showToast("تم نسخ التقرير للحافظة! 📋"));
         }
 
