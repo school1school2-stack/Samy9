@@ -21,7 +21,6 @@
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-        /* منع انقسام كلمة المحاولة عن رقمها */
         .nowrap-title { white-space: nowrap; }
         @media print {
             .no-print { display: none !important; }
@@ -83,9 +82,7 @@
                     </select>
                 </div>
 
-                <!-- أزرار التحكم والقوائم المنسدلة -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
-                    
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -141,7 +138,6 @@
             </div>
         </div>
 
-        <!-- Main Table Card -->
         <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-right border-collapse min-w-[1000px]" id="mainScoreTable">
@@ -192,7 +188,7 @@
         </div>
     </div>
 
-    <!-- تذييل الصفحة الثابت والموسع -->
+    <!-- Footer -->
     <footer class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-bold border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="w-full text-center">
@@ -423,7 +419,7 @@
                     
                     populateClassOptions();
                     renderTable();
-                    checkUrlReportParam();
+                    checkUrlReportParam(); // تفعيل فتح التقرير تلقائياً فور وصول البيانات
                 } else {
                     saveAllToCloud();
                     populateClassOptions();
@@ -449,18 +445,22 @@
             });
         }
 
+        // دالة موثوقة لفحص وتفعيل عرض التقرير فور توفر الطلاب من السحابة
+        let hasOpenedReportFromUrl = false;
         function checkUrlReportParam() {
+            if (hasOpenedReportFromUrl) return;
             const hash = window.location.hash;
             if (hash.startsWith('#report=')) {
                 const targetEmail = decodeURIComponent(hash.replace('#report=', '')).trim().toLowerCase();
-                setTimeout(() => {
-                    if (students.length > 0) {
-                        let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
-                        if (std) {
+                if (students.length > 0) {
+                    let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
+                    if (std) {
+                        hasOpenedReportFromUrl = true;
+                        setTimeout(() => {
                             openReportModal(std.id);
-                        }
+                        }, 200);
                     }
-                }, 500);
+                }
             }
         }
 
@@ -1248,14 +1248,6 @@
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
-
-        window.onload = function() {
-            if (window.location.hash.startsWith('#report=')) {
-                // سيتم فتحه تلقائياً بعد مزامنة السحابة
-            } else if (window.location.hash === '#student') {
-                switchMode('student');
-            }
-        };
     </script>
 </body>
 </html>
