@@ -44,7 +44,7 @@
                     <i class="fas fa-chalkboard-teacher"></i> لوحة المعلم
                 </button>
                 <button id="btnNavStudent" onclick="switchMode('student')" class="px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2">
-                    <i class="fas fa-user-graduate"></i> استعلام الطالب
+                    <i class="fas fa-user-graduate"></i> بوابة الطالب المستقلة
                 </button>
             </div>
         </div>
@@ -138,24 +138,39 @@
         </div>
     </div>
 
-    <!-- STUDENT VIEW (استعلام الطالب) -->
+    <!-- STUDENT VIEW (بوابة الطالب المستقلة عبر رابط مخصص) -->
     <div id="studentView" class="max-w-xl mx-auto px-4 mt-12 hidden">
-        <div class="bg-white rounded-2xl shadow-custom p-6 border border-slate-100 space-y-4">
+        <div class="bg-white rounded-2xl shadow-custom p-6 md:p-8 border border-slate-100 space-y-6">
             <div class="text-center border-b pb-4">
-                <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-2xl mx-auto flex items-center justify-center text-xl mb-2">
+                <div class="w-14 h-14 bg-blue-50 text-blue-700 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-2 shadow-inner">
                     <i class="fas fa-user-graduate"></i>
                 </div>
-                <h2 class="text-xl font-black text-slate-900">بوابة استعلام الطالب</h2>
-                <p class="text-xs text-slate-500 font-medium mt-1">الاستعلام عن الدرجات والتقييم الشخصي</p>
+                <h2 class="text-xl font-black text-slate-900">بوابة استعلام درجات الطالب</h2>
+                <p class="text-xs text-slate-500 font-medium mt-1">أدخل بريدك الإلكتروني لمنصة مدرستي لعرض تقييمك ودرجاتك الشخصية</p>
             </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">أدخل بريد منصة مدرستي أو اسم الطالب:</label>
+
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-slate-700">بريد منصة مدرستي:</label>
                 <div class="flex gap-2">
-                    <input type="text" id="studentQueryInput" placeholder="sxxxxxxx@rb.moe.gov.sa أو اسم الطالب" class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                    <button onclick="queryStudentGrades()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold">استعلام</button>
+                    <input type="text" id="studentQueryInput" placeholder="sxxxxxxx@rb.moe.gov.sa" class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-600 dir-ltr text-right">
+                    <button onclick="queryStudentGrades()" class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                        <i class="fas fa-search"></i> استعلام
+                    </button>
                 </div>
             </div>
-            <div id="studentQueryResult" class="mt-4"></div>
+
+            <!-- نتيجة الطالب -->
+            <div id="studentQueryResult" class="mt-4">
+                <div class="p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center text-slate-400 text-xs font-bold">
+                    النتيجة ستظهر هنا فور إدخال بريدك والاستعلام.
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 text-center">
+                <button onclick="copyStudentPortalLink()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-1.5 mx-auto">
+                    <i class="fas fa-share-alt"></i> نسخ رابط بوابة الطلاب لإرساله للطلاب عبر وتساب
+                </button>
+            </div>
         </div>
     </div>
 
@@ -344,12 +359,33 @@
             firebase.auth().signInAnonymously().then(() => {
                 isCloudAvailable = true;
                 setupCloudSync();
+                loadCloudDataOnStart();
             }).catch(err => {
                 isCloudAvailable = true;
                 setupCloudSync();
+                loadCloudDataOnStart();
             });
         } catch(e) {
             console.warn("Firebase warning:", e);
+        }
+
+        // جلب البيانات من السحابة تلقائياً لكي تظهر للطالب مباشرة
+        async function loadCloudDataOnStart() {
+            if (!rtdb) return;
+            try {
+                const snapshot = await rtdb.ref('quran_app_v2').once('value');
+                const val = snapshot.val();
+                if (val) {
+                    if (val.students) students = val.students;
+                    if (val.sections) sections = val.sections;
+                    if (val.classes) customClasses = val.classes;
+                    saveLocalData();
+                    populateClassOptions();
+                    renderTable();
+                }
+            } catch(e) {
+                console.error("Cloud load error:", e);
+            }
         }
 
         function switchMode(mode) {
@@ -363,11 +399,13 @@
                 studentView.classList.add('hidden');
                 btnT.className = "px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2";
                 btnS.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
+                history.pushState({}, '', window.location.pathname);
             } else {
                 teacherView.classList.add('hidden');
                 studentView.classList.remove('hidden');
                 btnS.className = "px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2";
                 btnT.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
+                history.pushState({}, '', '#student');
             }
         }
 
@@ -643,7 +681,6 @@
             if (stdClassSelect) stdClassSelect.innerHTML = modalSelectHTML;
         }
 
-        // دالة حذف الفصل الحالي المحدد في الفلتر
         function deleteCurrentClassStudents() {
             const classFilterVal = document.getElementById('classFilter').value;
             if (classFilterVal === 'all') {
@@ -658,7 +695,6 @@
             }
         }
 
-        // دالة حذف جميع الطلاب من الجدول
         function deleteAllStudentsConfirm() {
             if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب من الجدول نهائياً؟")) {
                 students = [];
@@ -982,34 +1018,84 @@
             document.getElementById('reportModal').classList.remove('hidden');
         }
 
-        function queryStudentGrades() {
+        // دالة الاستعلام الخاصة بالطالب (تبحث في السحابة والبيانات المخزنة)
+        async function queryStudentGrades() {
             const query = document.getElementById('studentQueryInput').value.trim().toLowerCase();
             const resultDiv = document.getElementById('studentQueryResult');
+            
             if (!query) {
-                resultDiv.innerHTML = '<p class="text-rose-600 text-xs font-bold text-center">الرجاء إدخال اسم الطالب أو البريد.</p>';
+                resultDiv.innerHTML = '<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-xs font-bold text-center">الرجاء إدخال بريد منصة مدرستي الخاص بك.</div>';
                 return;
+            }
+
+            resultDiv.innerHTML = '<div class="p-4 bg-slate-50 rounded-xl text-center text-slate-500 text-xs font-bold"><i class="fas fa-spinner fa-spin"></i> جاري البحث عن درجاتك في السحابة...</div>';
+
+            // تأكد من جلب أحدث بيانات السحابة قبل البحث
+            if (rtdb) {
+                try {
+                    const snapshot = await rtdb.ref('quran_app_v2').once('value');
+                    const val = snapshot.val();
+                    if (val && val.students) {
+                        students = val.students;
+                    }
+                } catch(e) {}
             }
 
             let std = students.find(s => s.email.toLowerCase() === query || s.name.toLowerCase().includes(query));
+            
             if (!std) {
-                resultDiv.innerHTML = '<p class="text-slate-500 text-xs font-bold text-center">لم يتم العثور على طالب بهذا الاسم أو البريد في الكشف الحالي.</p>';
+                resultDiv.innerHTML = `
+                    <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-center text-xs">
+                        <i class="fas fa-exclamation-triangle text-amber-600 text-lg"></i>
+                        <div class="font-bold text-amber-900">لم يتم العثور على سجل درجات لهذا البريد حالياً.</div>
+                        <p class="text-slate-500 text-[11px]">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع الأستاذ سامي العمر.</p>
+                    </div>`;
                 return;
             }
 
-            const { grandTotal } = calculateStudentTotals(std);
+            const { grandTotal, sectionTotals } = calculateStudentTotals(std);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
 
-            resultDiv.innerHTML = `
-                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-2 text-xs">
-                    <div class="font-black text-blue-900 text-sm">${std.name}</div>
-                    <div class="text-slate-600 font-mono">${std.email}</div>
-                    <div class="text-blue-800 font-bold">الفصل: ${std.className || '1/1'}</div>
-                    <div class="pt-2 border-t border-blue-200 flex justify-between font-black text-amber-800 text-sm">
-                        <span>المجموع الكلي:</span>
-                        <span>${grandTotal} / ${grandMax} (${pct}%)</span>
+            let detailsHTML = `
+                <div class="bg-white border border-blue-200 rounded-2xl p-5 shadow-sm space-y-4 text-right">
+                    <div class="bg-blue-900 text-white p-4 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-black">${std.name}</div>
+                            <div class="text-[11px] text-blue-200 font-mono mt-0.5">${std.email}</div>
+                        </div>
+                        <span class="px-3 py-1 bg-amber-400 text-slate-900 rounded-lg text-xs font-black">الفصل: ${std.className || '1/1'}</span>
+                    </div>
+
+                    <div class="space-y-2">
+            `;
+
+            sections.forEach(sec => {
+                let secSum = sectionTotals[sec.id] || 0;
+                let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
+                detailsHTML += `
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-800">${sec.title}</span>
+                        <span class="font-black text-blue-900">${secSum} من ${secMax} درجات</span>
+                    </div>`;
+            });
+
+            detailsHTML += `
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
+                        <span class="font-extrabold text-sm">المجموع النهائي الكلي:</span>
+                        <span class="font-black text-lg">${grandTotal} / ${grandMax} <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
                 </div>`;
+
+            resultDiv.innerHTML = detailsHTML;
+        }
+
+        function copyStudentPortalLink() {
+            const portalUrl = window.location.href.split('#')[0] + '#student';
+            navigator.clipboard.writeText(portalUrl).then(() => {
+                showToast("تم نسخ رابط بوابة الطلاب المستقلة بنجاح! 📋 يمكنك إرساله للطلاب.");
+            });
         }
 
         function shareReportWhatsApp() {
@@ -1079,6 +1165,11 @@
             loadLocalData();
             populateClassOptions();
             renderTable();
+
+            // التحقق مما إذا كان الرابط يحتوي على #student لفتح صفحة الطالب تلقائياً
+            if (window.location.hash === '#student') {
+                switchMode('student');
+            }
         };
     </script>
 </body>
