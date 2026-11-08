@@ -25,18 +25,16 @@
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; font-size: 10pt; padding-bottom: 0 !important; }
+            body { background: white; font-size: 11pt; padding-bottom: 0 !important; }
             .shadow-custom { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
-            #classReportModal { position: absolute !important; inset: 0 !important; background: white !important; }
-            #classReportModal .bg-white { box-shadow: none !important; max-width: 100% !important; border: none !important; }
         }
     </style>
     
-    <!-- الإخفاء الفوري لعناصر المنصة وزر النسخ في حال فتح رابط الطالب -->
+    <!-- الفحص الفوري لرابط الطالب أو تقرير الفصل المباشر -->
     <script>
         (function() {
             const hash = window.location.hash;
-            if (hash.startsWith('#report=') || hash === '#student') {
+            if (hash.startsWith('#report=') || hash.startsWith('#class-report=') || hash === '#student') {
                 document.addEventListener("DOMContentLoaded", () => {
                     const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'mainFooter'];
                     elementsToHide.forEach(id => {
@@ -107,10 +105,6 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
-                    <button onclick="openClassReportModal()" class="px-3.5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                        <i class="fas fa-file-pdf"></i> تقرير الفصل الشامل
-                    </button>
-
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -142,6 +136,24 @@
                         </div>
                     </div>
 
+                    <!-- قائمة منسدلة واحدة للتقارير والطباعة ومشاركة المدير -->
+                    <div class="relative inline-block text-right">
+                        <button onclick="toggleDropdown('reportsDropdown', event)" class="px-3.5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                            <i class="fas fa-file-alt"></i> التقرير والطباعة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
+                        </button>
+                        <div id="reportsDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
+                            <button onclick="openClassReportModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2">
+                                <i class="fas fa-chalkboard text-amber-600"></i> تقرير الفصل الشامل
+                            </button>
+                            <button onclick="openClassReportModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2">
+                                <i class="fas fa-link text-indigo-600"></i> نسخ رابط تقرير الفصل للمدير
+                            </button>
+                            <button onclick="window.print()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2">
+                                <i class="fas fa-print text-slate-600"></i> طباعة الكشف الحالي
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('deleteDropdown', event)" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-trash-alt"></i> خيارات الحذف <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -158,9 +170,6 @@
 
                     <button onclick="saveAllToCloud()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                         <i class="fas fa-cloud-upload-alt"></i> حفظ السحابة
-                    </button>
-                    <button onclick="window.print()" class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-                        <i class="fas fa-print"></i> طباعة الجدول
                     </button>
                 </div>
             </div>
@@ -232,21 +241,36 @@
         </div>
     </div>
 
-    <!-- MODAL: FULL CLASS REPORT -->
-    <div id="classReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between no-print">
-                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-alt text-amber-400"></i> تقرير الفصل الشامل للطباعة</h3>
-                <div class="flex items-center gap-3">
-                    <select id="classReportFilter" onchange="generateClassReport()" class="px-3 py-1.5 bg-slate-800 border border-slate-700 text-amber-300 rounded-xl text-xs font-bold">
-                    </select>
-                    <button onclick="closeModal('classReportModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
-                </div>
+    <!-- DIRECT CLASS REPORT VIEW (للمدير عند فتح رابط تقرير الفصل المباشر) -->
+    <div id="directClassReportView" class="max-w-4xl mx-auto px-4 mt-8 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-chalkboard-teacher text-amber-400"></i> تقرير متابعة الفصل الدراسي الشامل</h3>
+                <span id="classReportBadge" class="text-xs bg-amber-400/20 text-amber-300 px-2.5 py-1 rounded-lg border border-amber-400/30 font-bold">الفصل: 1/1</span>
             </div>
-            <div id="classReportContent" class="p-6 overflow-y-auto space-y-4 bg-white flex-1"></div>
-            <div class="bg-slate-100 px-6 py-3 border-t flex justify-end gap-2 no-print">
-                <button onclick="window.print()" class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"><i class="fas fa-print"></i> طباعة التقرير الكامل</button>
-                <button onclick="closeModal('classReportModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">إغلاق</button>
+            <div id="directClassReportPrintArea" class="p-6 space-y-4 bg-slate-50 overflow-x-auto"></div>
+            <div class="bg-white px-6 py-3 border-t flex items-center justify-end gap-2 no-print">
+                <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"><i class="fas fa-print"></i> طباعة التقرير</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CLASS REPORT SELECTOR -->
+    <div id="classReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-alt text-amber-400"></i> تقرير الفصل الشامل</h3>
+                <button onclick="closeModal('classReportModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">اختر الفصل المطلوب:</label>
+                    <select id="reportClassSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"></select>
+                </div>
+                <div class="pt-2 flex flex-col gap-2">
+                    <button onclick="viewClassReport()" class="w-full py-2.5 bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm">عرض التقرير</button>
+                    <button onclick="copyClassReportLinkAction()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm">نسخ رابط التقرير للمدير 📋</button>
+                </div>
             </div>
         </div>
     </div>
@@ -539,6 +563,23 @@
                         console.error(err);
                     });
                 }
+            } else if (hash.startsWith('#class-report=')) {
+                const targetClass = decodeURIComponent(hash.replace('#class-report=', '')).trim();
+                hasOpenedReportFromUrl = true;
+
+                if (students.length === 0 && db) {
+                    db.collection("app_data").doc("main_state").get().then(doc => {
+                        if (doc.exists && doc.data().students) {
+                            students = doc.data().students;
+                            if (doc.data().sections) sections = doc.data().sections;
+                            renderDirectClassReport(targetClass);
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                    });
+                } else {
+                    renderDirectClassReport(targetClass);
+                }
             }
         }
 
@@ -603,112 +644,116 @@
             document.getElementById('directStudentReportView').classList.remove('hidden');
         }
 
-        function openClassReportModal() {
-            const select = document.getElementById('classReportFilter');
-            let html = '';
-            customClasses.forEach(c => {
-                html += `<option value="${c}">فصل: ${c}</option>`;
+        function renderDirectClassReport(className) {
+            const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
+            elementsToHide.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
             });
-            select.innerHTML = html;
-            
-            const currentSelected = document.getElementById('classFilter').value;
-            if (currentSelected !== 'all') {
-                select.value = currentSelected;
-            }
-            
-            generateClassReport();
-            document.getElementById('classReportModal').classList.remove('hidden');
-        }
 
-        function generateClassReport() {
-            const selectedClass = document.getElementById('classReportFilter').value;
-            const container = document.getElementById('classReportContent');
-            const classStudents = students.filter(s => s.className === selectedClass);
-            const grandMax = calculateGrandTotalMax();
-
-            if (classStudents.length === 0) {
-                container.innerHTML = `
-                    <div class="p-12 text-center text-slate-400 font-bold">
-                        <i class="fas fa-folder-open text-3xl mb-2 block"></i>
-                        لا يوجد طلاب مضافين لهذا الفصل (${selectedClass}).
-                    </div>`;
-                return;
-            }
+            document.getElementById('classReportBadge').innerText = `الفصل: ${className}`;
+            
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            let grandMax = calculateGrandTotalMax();
 
             let html = `
                 <div class="text-center border-b pb-4 mb-4">
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 mb-2">
-                        <span>المملكة العربية السعودية</span>
-                        <span class="text-sm font-black text-blue-900">ثانوية الأمير عبد المجيد</span>
-                        <span>مادة القرآن الكريم</span>
-                    </div>
-                    <h2 class="text-xl font-black text-slate-900">تقرير المتابعة والتقييم الشامل للفصل: <span class="text-blue-700">${selectedClass}</span></h2>
-                    <p class="text-xs font-bold text-slate-500 mt-1">معلم المادة: د / سامي محمد العمر 🎓 | إجمالي عدد الطلاب: ${classStudents.length}</p>
+                    <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
+                    <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات تقييم القرآن الكريم - الفصل (${className})</h2>
+                    <p class="text-xs font-bold text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
                 </div>
+            `;
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right border-collapse border border-slate-300 text-xs">
+            if (classStudents.length === 0) {
+                html += `<div class="p-8 text-center text-slate-500 text-xs font-bold">لا توجد سجلات طلاب مسجلة لهذا الفصل حالياً.</div>`;
+            } else {
+                html += `
+                    <table class="w-full text-right border-collapse border border-slate-200 text-xs">
                         <thead>
-                            <tr class="bg-slate-800 text-white font-bold text-center">
-                                <th class="border border-slate-300 p-2 w-10">#</th>
-                                <th class="border border-slate-300 p-2 text-right">اسم الطالب</th>
-                                <th class="border border-slate-300 p-2 dir-ltr">البريد الإلكتروني</th>
-            `;
-
-            sections.forEach(sec => {
-                let secMaxSum = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 3), 0);
-                html += `<th class="border border-slate-300 p-2">${sec.title} (${secMaxSum}د)</th>`;
-            });
-
-            html += `
-                                <th class="border border-slate-300 p-2 bg-amber-900 text-amber-200">المجموع النهائي (${grandMax})</th>
-                                <th class="border border-slate-300 p-2 w-16">النسبة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            classStudents.forEach((st, idx) => {
-                const { grandTotal, sectionTotals } = calculateStudentTotals(st);
-                const pct = Math.round((grandTotal / grandMax) * 100) || 0;
-                const bg = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50';
-
-                html += `
-                    <tr class="${bg} font-bold text-slate-800">
-                        <td class="border border-slate-300 p-2 text-center text-slate-500">${idx + 1}</td>
-                        <td class="border border-slate-300 p-2 font-extrabold text-slate-900">${st.name}</td>
-                        <td class="border border-slate-300 p-2 font-mono text-[11px] text-slate-500 dir-ltr text-right">${st.email}</td>
+                            <tr class="bg-slate-900 text-white">
+                                <th class="p-2.5 text-center border w-12">#</th>
+                                <th class="p-2.5 border">اسم الطالب</th>
                 `;
-
                 sections.forEach(sec => {
-                    let secSum = sectionTotals[sec.id] || 0;
-                    let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 3), 0);
-                    html += `<td class="border border-slate-300 p-2 text-center font-bold text-blue-900">${secSum} / ${secMax}</td>`;
+                    let secMaxSum = sec.slots.reduce((acc, s) => acc + (parseFloat(s.max) || 3), 0);
+                    html += `<th class="p-2.5 text-center border bg-blue-950" colspan="${sec.slots.length}">${sec.title} (${secMaxSum})</th>`;
                 });
-
                 html += `
-                        <td class="border border-slate-300 p-2 text-center font-black bg-amber-50 text-amber-900">${grandTotal}</td>
-                        <td class="border border-slate-300 p-2 text-center font-bold text-slate-700">${pct}%</td>
-                    </tr>
+                                <th class="p-2.5 text-center border bg-amber-900">المجموع الكلي (${grandMax})</th>
+                            </tr>
+                            <tr class="bg-slate-800 text-slate-200 text-[10px]">
+                                <th class="border"></th>
+                                <th class="border"></th>
                 `;
+                sections.forEach(sec => {
+                    sec.slots.forEach(slot => {
+                        html += `<th class="p-1.5 text-center border">${slot.title}</th>`;
+                    });
+                });
+                html += `<th class="border"></th></tr></thead><tbody>`;
+
+                classStudents.forEach((st, idx) => {
+                    const { grandTotal, sectionTotals } = calculateStudentTotals(st);
+                    let pct = Math.round((grandTotal / grandMax) * 100) || 0;
+                    html += `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-2 text-center border text-slate-500 font-bold">${idx + 1}</td>
+                            <td class="p-2 border font-extrabold text-slate-900">
+                                <div>${st.name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
+                            </td>
+                    `;
+                    sections.forEach(sec => {
+                        sec.slots.forEach(slot => {
+                            let val = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : 0;
+                            html += `<td class="p-2 text-center border font-bold text-slate-700">${val}</td>`;
+                        });
+                    });
+                    html += `
+                            <td class="p-2 text-center border font-black text-amber-900 bg-amber-50/50">${grandTotal} (${pct}%)</td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+            }
+
+            document.getElementById('directClassReportPrintArea').innerHTML = html;
+            document.getElementById('directClassReportView').classList.remove('hidden');
+        }
+
+        function openClassReportModal() {
+            const select = document.getElementById('reportClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
             });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classReportModal').classList.remove('hidden');
+        }
 
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-6 flex justify-between items-center text-xs font-bold text-slate-600 pt-4 border-t">
-                    <div>تاريخ التقرير: ${new Date().toLocaleDateString('ar-SA')}</div>
-                    <div>توقيع معلم المادة: د / سامي محمد العمر ......................</div>
-                </div>
-            `;
+        function viewClassReport() {
+            const className = document.getElementById('reportClassSelect').value;
+            closeModal('classReportModal');
+            renderDirectClassReport(className);
+        }
 
-            container.innerHTML = html;
+        function copyClassReportLinkAction() {
+            const className = document.getElementById('reportClassSelect').value;
+            closeModal('classReportModal');
+            const baseUrl = window.location.href.split('#')[0];
+            const reportUrl = `${baseUrl}#class-report=${encodeURIComponent(className)}`;
+            navigator.clipboard.writeText(reportUrl).then(() => {
+                showToast(`تم نسخ رابط تقرير الفصل (${className}) للمدير بنجاح! 📋`);
+            });
         }
 
         function toggleDropdown(dropdownId, event) {
             event.stopPropagation();
-            const dropdowns = ['studentsDropdown', 'settingsDropdown', 'deleteDropdown'];
+            const dropdowns = ['studentsDropdown', 'settingsDropdown', 'deleteDropdown', 'reportsDropdown'];
             dropdowns.forEach(id => {
                 const el = document.getElementById(id);
                 if (id === dropdownId) {
@@ -720,7 +765,7 @@
         }
 
         function closeAllDropdowns(event) {
-            const dropdowns = ['studentsDropdown', 'settingsDropdown', 'deleteDropdown'];
+            const dropdowns = ['studentsDropdown', 'settingsDropdown', 'deleteDropdown', 'reportsDropdown'];
             dropdowns.forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
