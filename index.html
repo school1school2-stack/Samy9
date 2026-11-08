@@ -30,7 +30,7 @@
         }
     </style>
     
-    <!-- الإخفاء الفوري لعناصر المنصة في حال فتح رابط الطالب أو التقرير المباشر -->
+    <!-- الإخفاء الفوري لعناصر المنصة وزر النسخ في حال فتح رابط الطالب -->
     <script>
         (function() {
             const hash = window.location.hash;
@@ -44,6 +44,9 @@
                     if (hash === '#student') {
                         const studentView = document.getElementById('studentView');
                         if (studentView) studentView.classList.remove('hidden');
+                        // إخفاء زر نسخ الرابط بالأسفل عندما يفتح الطالب بوابة الاستعلام المستقلة
+                        const copyPortalBtn = document.getElementById('copyPortalLinkContainer');
+                        if (copyPortalBtn) copyPortalBtn.classList.add('hidden');
                     }
                 });
             }
@@ -200,7 +203,7 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 text-center">
+            <div id="copyPortalLinkContainer" class="pt-4 border-t border-slate-100 text-center">
                 <button onclick="copyStudentPortalLink()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-1.5 mx-auto">
                     <i class="fas fa-share-alt"></i> نسخ رابط بوابة الطلاب لإرساله للطلاب عبر وتساب
                 </button>
