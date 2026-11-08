@@ -21,6 +21,8 @@
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
+        /* منع انقسام كلمة المحاولة عن رقمها */
+        .nowrap-title { white-space: nowrap; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -328,33 +330,32 @@
         let db = null;
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
 
-        // تثبيت المحاولات بدون إظهار رقم الدرجة بالاسم
         let sections = [
             {
                 id: 'sec_recitation',
                 title: 'تلاوة القرآن الكريم',
                 slots: [
-                    { id: 't1', title: 'المحـاولة 1', max: 3 },
-                    { id: 't2', title: 'المحـاولة 2', max: 3 },
-                    { id: 't3', title: 'المحـاولة 3', max: 3 }
+                    { id: 't1', title: 'المحاولة 1', max: 3 },
+                    { id: 't2', title: 'المحاولة 2', max: 3 },
+                    { id: 't3', title: 'المحاولة 3', max: 3 }
                 ]
             },
             {
                 id: 'sec_memorization',
                 title: 'حفظ القرآن الكريم',
                 slots: [
-                    { id: 'h1', title: 'المحـاولة 1', max: 3 },
-                    { id: 'h2', title: 'المحـاولة 2', max: 3 },
-                    { id: 'h3', title: 'المحـاولة 3', max: 3 }
+                    { id: 'h1', title: 'المحاولة 1', max: 3 },
+                    { id: 'h2', title: 'المحاولة 2', max: 3 },
+                    { id: 'h3', title: 'المحاولة 3', max: 3 }
                 ]
             },
             {
                 id: 'sec_tajweed',
                 title: 'أحكام التجويد والترتيل',
                 slots: [
-                    { id: 'j1', title: 'المحـاولة 1', max: 3 },
-                    { id: 'j2', title: 'المحـاولة 2', max: 3 },
-                    { id: 'j3', title: 'المحـاولة 3', max: 3 }
+                    { id: 'j1', title: 'المحاولة 1', max: 3 },
+                    { id: 'j2', title: 'المحاولة 2', max: 3 },
+                    { id: 'j3', title: 'المحاولة 3', max: 3 }
                 ]
             }
         ];
@@ -634,14 +635,14 @@
 
             sections.forEach(sec => {
                 sec.slots.forEach(slot => {
-                    // إظهار المحاولة بدون الرقم بين قوسين
-                    headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60">${slot.title}</th>`;
+                    // استخدام class منع الانقسام لضمان بقاء العنوان في سطر واحد متناسق
+                    headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title}</th>`;
                 });
-                headerHTML += `<th class="p-1.5 text-center bg-blue-900/40 text-amber-300 font-extrabold border-r border-slate-700">مجموع الفرع</th>`;
+                headerHTML += `<th class="p-1.5 text-center bg-blue-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع الفرع</th>`;
             });
 
             headerHTML += `
-                    <th class="p-1.5 text-center bg-amber-950/60 text-amber-200 font-extrabold border-r border-slate-700">الدرجة النهائية</th>
+                    <th class="p-1.5 text-center bg-amber-950/60 text-amber-200 font-extrabold border-r border-slate-700 nowrap-title">الدرجة النهائية</th>
                     <th class="p-1.5 no-print"></th>
                 </tr>
             `;
