@@ -30,7 +30,7 @@
         }
     </style>
     
-    <!-- الفحص الفوري لرابط الطالب أو تقرير الفصل المباشر -->
+    <!-- الفحص الفوري لرابط الطالب أو تقرير الفصل المباشر وإظهار زر العودة -->
     <script>
         (function() {
             const hash = window.location.hash;
@@ -41,6 +41,11 @@
                         const el = document.getElementById(id);
                         if (el) el.classList.add('hidden');
                     });
+                    
+                    // إظهار زر العودة للمنصة في الصفحات المستقلة
+                    const backBtn = document.getElementById('globalBackToPlatformBtn');
+                    if (backBtn) backBtn.classList.remove('hidden');
+
                     if (hash === '#student') {
                         const studentView = document.getElementById('studentView');
                         if (studentView) studentView.classList.remove('hidden');
@@ -53,6 +58,13 @@
     </script>
 </head>
 <body class="min-h-screen pb-24" onclick="closeAllDropdowns(event)">
+
+    <!-- زر العودة الثابت للمنصة (يظهر فقط في الروابط المستقلة مثل الطالب أو التقارير) -->
+    <div id="globalBackToPlatformBtn" class="fixed top-4 right-4 z-50 hidden no-print">
+        <a href="./" onclick="backToPlatform(event)" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 rounded-xl text-xs font-black shadow-2xl border border-slate-700 flex items-center gap-2 transition transform hover:scale-105">
+            <i class="fas fa-arrow-right"></i> العودة للمنصة الرئيسية
+        </a>
+    </div>
 
     <!-- Top Navigation Tabs -->
     <div id="mainNavbar" class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print">
@@ -583,12 +595,28 @@
             }
         }
 
+        function backToPlatform(e) {
+            e.preventDefault();
+            history.pushState({}, '', window.location.pathname);
+            window.location.hash = '';
+            document.getElementById('globalBackToPlatformBtn').classList.add('hidden');
+            document.getElementById('directStudentReportView').classList.add('hidden');
+            document.getElementById('directClassReportView').classList.add('hidden');
+            document.getElementById('studentView').classList.add('hidden');
+            document.getElementById('mainNavbar').classList.remove('hidden');
+            document.getElementById('mainHeaderBanner').classList.remove('hidden');
+            document.getElementById('teacherView').classList.remove('hidden');
+            document.getElementById('mainFooter').classList.remove('hidden');
+            renderTable();
+        }
+
         function renderDirectStudentReport(std) {
             const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
             elementsToHide.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
+            document.getElementById('globalBackToPlatformBtn').classList.remove('hidden');
 
             const { grandTotal, sectionTotals } = calculateStudentTotals(std);
             const grandMax = calculateGrandTotalMax();
@@ -650,6 +678,7 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
+            document.getElementById('globalBackToPlatformBtn').classList.remove('hidden');
 
             document.getElementById('classReportBadge').innerText = `الفصل: ${className}`;
             
@@ -785,12 +814,14 @@
                 btnT.className = "px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2";
                 btnS.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
                 history.pushState({}, '', window.location.pathname);
+                document.getElementById('globalBackToPlatformBtn').classList.add('hidden');
             } else {
                 teacherView.classList.add('hidden');
                 studentView.classList.remove('hidden');
                 btnS.className = "px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2";
                 btnT.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
                 history.pushState({}, '', '#student');
+                document.getElementById('globalBackToPlatformBtn').classList.remove('hidden');
             }
         }
 
