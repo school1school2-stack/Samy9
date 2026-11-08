@@ -17,17 +17,11 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
         body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        
-        .bg-royal-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%);
-        }
-        
+        .bg-royal-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%); }
         .shadow-custom { box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.1), 0 8px 10px -6px rgba(30, 58, 138, 0.05); }
-        
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -38,15 +32,13 @@
 </head>
 <body class="min-h-screen pb-16">
 
-    <!-- Top Navigation Tabs (Teacher / Student View Switcher) -->
+    <!-- Top Navigation Tabs -->
     <div class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
             <div class="flex items-center gap-2 font-black text-amber-400 text-sm md:text-base">
                 <i class="fas fa-quran text-lg"></i>
                 <span>ثانوية الأمير عبد المجيد</span>
             </div>
-            
-            <!-- View Switcher Controls -->
             <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs font-bold">
                 <button id="btnNavTeacher" onclick="switchMode('teacher')" class="px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2">
                     <i class="fas fa-chalkboard-teacher"></i> لوحة المعلم
@@ -73,8 +65,6 @@
                     <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">الأستاذ سامي بن محمد العمر</span></p>
                 </div>
             </div>
-
-            <!-- Cloud Connection Status -->
             <div class="flex items-center gap-3">
                 <div class="bg-slate-900/40 border border-white/15 backdrop-blur px-4 py-2 rounded-xl text-center">
                     <span class="block text-[11px] text-slate-300 font-bold">حالة سحابة د. سامي</span>
@@ -86,16 +76,10 @@
         </div>
     </header>
 
-    <!-- ========================================================= -->
-    <!-- MODE 1: TEACHER DASHBOARD                                  -->
-    <!-- ========================================================= -->
+    <!-- TEACHER DASHBOARD -->
     <div id="teacherView" class="max-w-7xl mx-auto px-4 mt-6">
-        
-        <!-- Controls & Action Toolbar -->
         <div class="bg-white rounded-2xl p-4 md:p-5 shadow-custom mb-6 border border-slate-100 no-print">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                
-                <!-- Search & Filters -->
                 <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                     <div class="relative flex-1 sm:w-64">
                         <i class="fas fa-search absolute right-3 top-3 text-slate-400 text-sm"></i>
@@ -106,7 +90,6 @@
                     </select>
                 </div>
 
-                <!-- Section & Student Dynamic Controls -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
                     <button onclick="openManageClassesModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                         <i class="fas fa-layer-group"></i> إدارة الفصول
@@ -115,13 +98,19 @@
                         <i class="fas fa-cloud-download-alt"></i> سحب طلاب السحابة
                     </button>
                     <button onclick="openAddStudentModal()" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                        <i class="fas fa-user-plus"></i> إضافة/بحث طالب
+                        <i class="fas fa-user-plus"></i> إضافة طالب
                     </button>
                     <button onclick="openManageSectionsModal()" class="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                        <i class="fas fa-folder-plus"></i> إدارة الأقسام والتحصيص
+                        <i class="fas fa-folder-plus"></i> إدارة الأقسام
                     </button>
                     <button onclick="openBulkImportModal()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                         <i class="fas fa-file-import"></i> رفع جماعي
+                    </button>
+                    <button onclick="deleteCurrentClassStudents()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm" title="حذف جميع طلاب الفصل المحدد حالياً">
+                        <i class="fas fa-trash-alt"></i> حذف الفصل الحالي
+                    </button>
+                    <button onclick="deleteAllStudentsConfirm()" class="px-3.5 py-2 bg-red-800 hover:bg-red-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm" title="حذف جميع طلاب الجدول">
+                        <i class="fas fa-ban"></i> حذف الجميع
                     </button>
                     <button onclick="saveAllToCloud()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                         <i class="fas fa-cloud-upload-alt"></i> حفظ السحابة
@@ -130,35 +119,47 @@
                         <i class="fas fa-print"></i> طباعة
                     </button>
                 </div>
-
             </div>
         </div>
 
-        <!-- Dynamic Main Table Card -->
+        <!-- Main Table Card -->
         <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-right border-collapse min-w-[1000px]" id="mainScoreTable">
-                    <thead id="mainTableHead">
-                        <!-- Dynamic Header generated in JS -->
-                    </thead>
-                    <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium">
-                        <!-- Dynamic Rows generated in JS -->
-                    </tbody>
+                    <thead id="mainTableHead"></thead>
+                    <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
                 </table>
             </div>
-
-            <!-- Empty State -->
             <div id="table-empty-state" class="hidden p-12 text-center">
                 <i class="fas fa-folder-open text-4xl text-slate-300 mb-3 block"></i>
                 <p class="text-slate-600 font-bold">لا يوجد طلاب مضافين بحسب شروط البحث.</p>
-                <p class="text-slate-400 text-xs mt-1">استخدم خيار "إضافة طالب" أو "رفع جماعي" لإضافة الطلاب.</p>
+                <p class="text-slate-400 text-xs mt-1">استخدم خيار "سحب طلاب السحابة" أو "إضافة طالب" لإضافة الطلاب.</p>
             </div>
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- MODAL 1: ADD/EDIT STUDENT MODAL & SMART SEARCH             -->
-    <!-- ========================================================= -->
+    <!-- STUDENT VIEW (استعلام الطالب) -->
+    <div id="studentView" class="max-w-xl mx-auto px-4 mt-12 hidden">
+        <div class="bg-white rounded-2xl shadow-custom p-6 border border-slate-100 space-y-4">
+            <div class="text-center border-b pb-4">
+                <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-2xl mx-auto flex items-center justify-center text-xl mb-2">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h2 class="text-xl font-black text-slate-900">بوابة استعلام الطالب</h2>
+                <p class="text-xs text-slate-500 font-medium mt-1">الاستعلام عن الدرجات والتقييم الشخصي</p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">أدخل بريد منصة مدرستي أو اسم الطالب:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="studentQueryInput" placeholder="sxxxxxxx@rb.moe.gov.sa أو اسم الطالب" class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                    <button onclick="queryStudentGrades()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold">استعلام</button>
+                </div>
+            </div>
+            <div id="studentQueryResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD STUDENT -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -169,18 +170,13 @@
             </div>
             <form onsubmit="handleSaveStudent(event)" class="p-6 space-y-4">
                 <input type="hidden" id="editStudentId">
-                
-                <!-- Smart Partial Name Search & Quick Auto-Fill -->
                 <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-100 space-y-2">
                     <label class="block text-xs font-bold text-blue-900">🔍 بحث ذكي بجزء من اسم الطالب من السحابة:</label>
-                    <div class="relative">
-                        <input type="text" id="allowedSearchInput" oninput="filterAllowedStudents(this.value)" placeholder="اكتب جزءاً من الاسم (مثلاً: العتيبي، خالد...)" class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-600">
-                    </div>
+                    <input type="text" id="allowedSearchInput" oninput="filterAllowedStudents(this.value)" placeholder="اكتب جزءاً من الاسم..." class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-600">
                     <select id="allowedStudentsSelect" onchange="autofillFromAllowed(this.value)" class="w-full p-2 bg-white border border-blue-200 rounded-lg text-xs font-bold">
                         <option value="">-- نتائج البحث في طلاب السحابة --</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الثلاثي/الرباعي للطالب *</label>
                     <input type="text" id="stdNameInput" required placeholder="مثال: عبد الله بن محمد العتيبي" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
@@ -191,15 +187,12 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">تحديد الفصل / الشعبة *</label>
-                    <select id="stdClassSelect" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
-                        <!-- Populated dynamically -->
-                    </select>
+                    <select id="stdClassSelect" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">رقم الواتساب (للمشاركة المباشرة)</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">رقم الواتساب</label>
                     <input type="text" id="stdPhoneInput" placeholder="9665xxxxxxxx" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
                 </div>
-
                 <div class="pt-2 flex justify-end gap-2">
                     <button type="button" onclick="closeModal('addStudentModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">إلغاء</button>
                     <button type="submit" class="px-5 py-2 bg-blue-700 text-white rounded-xl text-xs font-bold">حفظ وإضافة للفصل</button>
@@ -208,178 +201,77 @@
         </div>
     </div>
 
-
-    <!-- ========================================================= -->
-    <!-- MODAL 5: MANAGE CLASSES MODAL                             -->
-    <!-- ========================================================= -->
+    <!-- MODAL: MANAGE CLASSES -->
     <div id="manageClassesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-layer-group text-amber-400"></i> إدارة الفصول والشعب الدراسية
-                </h3>
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-layer-group text-amber-400"></i> إدارة الفصول والشعب</h3>
                 <button onclick="closeModal('manageClassesModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <div class="flex gap-2">
-                    <input type="text" id="newClassNameInput" placeholder="اسم الفصل الجديد (مثال: 1/3)" class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                    <button onclick="addNewClass()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold">إضافة فصل</button>
+                    <input type="text" id="newClassNameInput" placeholder="اسم الفصل (مثال: 1/3)" class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                    <button onclick="addNewClass()" class="px-4 py-2 bg-blue-700 text-white rounded-xl text-xs font-bold">إضافة</button>
                 </div>
-                
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-600">قائمة الفصول المتاحة:</label>
-                    <div id="classListContainer" class="space-y-1.5 max-h-48 overflow-y-auto">
-                        <!-- Populated dynamically -->
-                    </div>
-                </div>
-                
-                <div class="pt-2 flex justify-end">
-                    <button onclick="closeModal('manageClassesModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">إغلاق</button>
-                </div>
+                <div id="classListContainer" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+                <div class="pt-2 flex justify-end"><button onclick="closeModal('manageClassesModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">إغلاق</button></div>
             </div>
         </div>
     </div>
 
-
-    <!-- ========================================================= -->
-    <!-- MODAL 1: ADD/EDIT STUDENT MODAL                          -->
-    <!-- ========================================================= -->
-    <div id="addStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 id="studentModalTitle" class="font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-user-plus text-amber-400"></i> إضافة طالب جديد
-                </h3>
-                <button onclick="closeModal('addStudentModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <form onsubmit="handleSaveStudent(event)" class="p-6 space-y-4">
-                <input type="hidden" id="editStudentId">
-                
-                <!-- Quick Selection from allowed_students -->
-                <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 mb-3">
-                    <label class="block text-xs font-bold text-blue-900 mb-1">اختر من سحابة الطلاب المعتمدين (اختياري):</label>
-                    <select id="allowedStudentsSelect" onchange="autofillFromAllowed(this.value)" class="w-full p-2 bg-white border border-blue-200 rounded-lg text-xs font-bold">
-                        <option value="">-- اختر طالباً مستورداً من السحابة --</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الثلاثي/الرباعي للطالب *</label>
-                    <input type="text" id="stdNameInput" required placeholder="مثال: عبد الله بن محمد العتيبي" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">بريد منصة مدرستي / الهوية *</label>
-                    <input type="text" id="stdEmailInput" required placeholder="sxxxxxxx@rb.moe.gov.sa" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">الفصل / الشعبة *</label>
-                    <input type="text" id="stdClassInput" required placeholder="مثال: 1/1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">رقم الواتساب (للمشاركة المباشرة)</label>
-                    <input type="text" id="stdPhoneInput" placeholder="9665xxxxxxxx" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                </div>
-
-                <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('addStudentModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">إلغاء</button>
-                    <button type="submit" class="px-5 py-2 bg-blue-700 text-white rounded-xl text-xs font-bold">حفظ الطالب</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- ========================================================= -->
-    <!-- MODAL 2: DYNAMIC SECTIONS & SLOTS MANAGEMENT             -->
-    <!-- ========================================================= -->
+    <!-- MODAL: MANAGE SECTIONS -->
     <div id="manageSectionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-sliders-h text-amber-400"></i> إعداد وإضافة الأقسام والخانة والمحاولات
-                </h3>
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-sliders-h text-amber-400"></i> إعداد الأقسام والمحاولات</h3>
                 <button onclick="closeModal('manageSectionsModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
-            
             <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                <!-- Add New Section Form -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-end gap-3">
                     <div class="flex-1 min-w-[200px]">
                         <label class="block text-xs font-bold text-slate-700 mb-1">اسم القسم الجديد</label>
-                        <input type="text" id="newSecTitleInput" placeholder="مثال: قسم التفسير والتدبر" class="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                        <input type="text" id="newSecTitleInput" placeholder="مثال: قسم التفسير" class="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
                     </div>
-                    <button onclick="addNewSection()" class="px-4 py-2 bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-                        <i class="fas fa-plus"></i> إضافة قسم
-                    </button>
+                    <button onclick="addNewSection()" class="px-4 py-2 bg-purple-700 text-white rounded-xl text-xs font-bold"><i class="fas fa-plus"></i> إضافة قسم</button>
                 </div>
-
-                <!-- Existing Sections Config list -->
-                <div id="sectionsConfigList" class="space-y-4">
-                    <!-- Rendered dynamically -->
-                </div>
+                <div id="sectionsConfigList" class="space-y-4"></div>
             </div>
-
-            <div class="bg-slate-100 px-6 py-3 border-t border-slate-200 flex justify-end">
-                <button onclick="closeModal('manageSectionsModal')" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold">تم والعودة للجدول</button>
+            <div class="bg-slate-100 px-6 py-3 border-t flex justify-end">
+                <button onclick="closeModal('manageSectionsModal')" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold">تم</button>
             </div>
         </div>
     </div>
 
-
-    <!-- ========================================================= -->
-    <!-- MODAL 3: BULK IMPORT (لصق القائمة)                        -->
-    <!-- ========================================================= -->
+    <!-- MODAL: BULK IMPORT -->
     <div id="bulkImportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-file-import text-amber-400"></i> الرفع والاستيراد الجماعي للطلاب
-                </h3>
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-import text-amber-400"></i> الرفع الجماعي للطلاب</h3>
                 <button onclick="closeModal('bulkImportModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-500 font-semibold leading-relaxed">
-                    الصق النص المعالج هنا (مثال: الاسم في سطر والإيميل في السطر الذي يليه مباشرة). سيتم رفعهم وحفظهم تلقائياً إلى قائمة الطلاب المعتمدين وسحابة د. سامي.
-                </p>
-                <textarea id="bulkInputText" rows="6" placeholder="عبد الله بن محمد العتيبي&#10;s4412345@rb.moe.gov.sa&#10;خالد بن سلطان الدوسري&#10;s4412346@rb.moe.gov.sa" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-left dir-ltr focus:outline-none focus:border-blue-500"></textarea>
-                
+                <p class="text-xs text-slate-500 font-semibold leading-relaxed">الصق القائمة هنا (اسم في سطر وإيميل في السطر التالي مباشرة أو كلاهما):</p>
+                <textarea id="bulkInputText" rows="6" placeholder="عبد الله بن محمد العتيبي&#10;s4412345@rb.moe.gov.sa" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-left dir-ltr"></textarea>
                 <div class="flex justify-between items-center pt-2">
-                    <button onclick="processBulkStudents()" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-2">
-                        <i class="fas fa-rocket"></i> معالجة والرفع للسحابة
-                    </button>
+                    <button onclick="processBulkStudents()" class="px-5 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold"><i class="fas fa-rocket"></i> معالجة والرفع للسحابة</button>
                     <button onclick="closeModal('bulkImportModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">إلغاء</button>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- ========================================================= -->
-    <!-- MODAL 4: INDIVIDUAL STUDENT REPORT MODAL                  -->
-    <!-- ========================================================= -->
+    <!-- MODAL: REPORT -->
     <div id="reportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
-                <h3 class="font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-file-invoice text-amber-400"></i> تقرير متابعة درجات الطالب
-                </h3>
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-file-invoice text-amber-400"></i> تقرير متابعة درجات الطالب</h3>
                 <button onclick="closeModal('reportModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
-
-            <div id="reportPrintArea" class="p-6 overflow-y-auto space-y-4 bg-slate-50">
-                <!-- Generated Report Card -->
-            </div>
-
-            <div class="bg-white px-6 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                <button onclick="shareReportWhatsApp()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fab fa-whatsapp"></i> واتساب
-                </button>
-                <button onclick="copyReportText()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fas fa-copy"></i> نسخ التقرير
-                </button>
-                <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fas fa-print"></i> طباعة
-                </button>
+            <div id="reportPrintArea" class="p-6 overflow-y-auto space-y-4 bg-slate-50 flex-1"></div>
+            <div class="bg-white px-6 py-3 border-t flex flex-wrap items-center justify-between gap-2">
+                <button onclick="shareReportWhatsApp()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"><i class="fab fa-whatsapp"></i> واتساب</button>
+                <button onclick="copyReportText()" class="px-3.5 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold"><i class="fas fa-copy"></i> نسخ التقرير</button>
+                <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold"><i class="fas fa-print"></i> طباعة</button>
             </div>
         </div>
     </div>
@@ -390,11 +282,8 @@
         <span id="toastMessage">تمت العملية بنجاح</span>
     </div>
 
-    <!-- MAIN JAVASCRIPT LOGIC -->
+    <!-- SCRIPT LOGIC -->
     <script>
-        // ----------------------------------------------------
-        // Global State & Firebase Global References
-        // ----------------------------------------------------
         let students = [];
         let allowedStudentsCache = [];
         let currentReportStudent = null;
@@ -431,7 +320,6 @@
             }
         ];
 
-        // Initialize Firebase SDK
         const firebaseConfig = {
             apiKey: "AIzaSyAJKKo_NfmOMA095ulSRDnwQvfHLeIz_s",
             authDomain: "samy-28452.firebaseapp.com",
@@ -453,23 +341,17 @@
             db = firebase.firestore();
             rtdb = firebase.database();
 
-            // Anonymous auth to guarantee Firestore access
-            firebase.auth().signInAnonymously()
-                .then(() => {
-                    console.log("Firebase Anonymous Auth successful");
-                    isCloudAvailable = true;
-                    setupCloudSync();
-                })
-                .catch(err => {
-                    console.warn("Anon auth notice:", err);
-                    isCloudAvailable = true;
-                    setupCloudSync();
-                });
+            firebase.auth().signInAnonymously().then(() => {
+                isCloudAvailable = true;
+                setupCloudSync();
+            }).catch(err => {
+                isCloudAvailable = true;
+                setupCloudSync();
+            });
         } catch(e) {
-            console.warn("Firebase initialization warning:", e);
+            console.warn("Firebase warning:", e);
         }
 
-        // Mode Switching (Teacher / Student)
         function switchMode(mode) {
             const teacherView = document.getElementById('teacherView');
             const studentView = document.getElementById('studentView');
@@ -478,22 +360,19 @@
 
             if (mode === 'teacher') {
                 teacherView.classList.remove('hidden');
-                if (studentView) studentView.classList.add('hidden');
+                studentView.classList.add('hidden');
                 btnT.className = "px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2";
                 btnS.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
             } else {
                 teacherView.classList.add('hidden');
-                if (studentView) studentView.classList.remove('hidden');
+                studentView.classList.remove('hidden');
                 btnS.className = "px-4 py-1.5 rounded-lg bg-blue-700 text-white transition flex items-center gap-2";
                 btnT.className = "px-4 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2";
             }
         }
 
-        // Listen for Allowed Students Cloud Data without complex orderBy queries
         function setupCloudSync() {
             if (!db) return;
-
-            // Direct fetch from allowed_students collection without orderBy to avoid index permission blocks
             db.collection("allowed_students").onSnapshot(snapshot => {
                 allowedStudentsCache = [];
                 snapshot.forEach(doc => {
@@ -503,19 +382,13 @@
                         name: data.name || "طالب"
                     });
                 });
-
-                // Sort in JavaScript memory safely
                 allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
-
                 const statusEl = document.getElementById('cloud-status');
                 if (statusEl) {
                     statusEl.innerHTML = `<i class="fas fa-cloud-check"></i> متصل بالسحابة (${allowedStudentsCache.length} طالب)`;
                 }
-
                 filterAllowedStudents('');
             }, err => {
-                console.warn("Firestore snapshot direct query error, falling back to fetch:", err);
-                // Fallback attempt: getDocs manually
                 db.collection("allowed_students").get().then(snapshot => {
                     allowedStudentsCache = [];
                     snapshot.forEach(doc => {
@@ -526,7 +399,7 @@
                     });
                     allowedStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
                     filterAllowedStudents('');
-                }).catch(e => console.error("Cloud fallback failed:", e));
+                }).catch(e => console.error(e));
             });
         }
 
@@ -546,9 +419,13 @@
             }
 
             try {
-                // Fetch latest data directly from allowed_students
                 const snap = await db.collection("allowed_students").get();
                 let addedCount = 0;
+
+                if (snap.empty) {
+                    showToast("قائمة السحابة (`allowed_students`) فارغة حالياً.", "error");
+                    return;
+                }
 
                 snap.forEach(doc => {
                     const data = doc.data();
@@ -575,7 +452,7 @@
                 if (addedCount > 0) {
                     showToast(`تم سحب واستيراد ${addedCount} طالب من سحابة د. سامي بنجاح! 🎉`);
                 } else {
-                    showToast(`تم تحديث القائمة! جميع طلاب السحابة (${snap.size}) مضافون بالفعل بالجدول.`);
+                    showToast(`جميع طلاب السحابة (${snap.size}) مضافون بالفعل في الجدول.`);
                 }
             } catch(e) {
                 console.error(e);
@@ -586,16 +463,13 @@
         function filterAllowedStudents(term) {
             const selectEl = document.getElementById('allowedStudentsSelect');
             if (!selectEl) return;
-            
             selectEl.innerHTML = '<option value="">-- نتائج البحث في طلاب السحابة --</option>';
             const cleanTerm = (term || '').trim().toLowerCase();
-
             const filtered = allowedStudentsCache.filter(st => 
                 !cleanTerm || 
                 (st.name && st.name.toLowerCase().includes(cleanTerm)) || 
                 (st.email && st.email.toLowerCase().includes(cleanTerm))
             );
-
             filtered.forEach(item => {
                 const opt = document.createElement('option');
                 opt.value = item.email;
@@ -617,7 +491,6 @@
         function calculateStudentTotals(student) {
             let grandTotal = 0;
             let sectionTotals = {};
-
             sections.forEach(sec => {
                 let secSum = 0;
                 sec.slots.forEach(slot => {
@@ -627,7 +500,6 @@
                 sectionTotals[sec.id] = secSum;
                 grandTotal += secSum;
             });
-
             return { grandTotal, sectionTotals };
         }
 
@@ -638,7 +510,6 @@
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
 
-            // 1. Render Table Headers Dynamically
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-20">#</th>
@@ -680,7 +551,6 @@
             `;
             tableHead.innerHTML = headerHTML;
 
-            // 2. Filter & Render Rows
             const filteredStudents = students.filter(st => {
                 const matchSearch = !searchVal || st.name.toLowerCase().includes(searchVal) || st.email.toLowerCase().includes(searchVal);
                 const matchClass = (classVal === 'all') || (st.className === classVal);
@@ -724,13 +594,8 @@
                             </td>
                         `;
                     });
-
                     let secSum = sectionTotals[sec.id] || 0;
-                    rowsHTML += `
-                        <td class="p-2 text-center bg-blue-50/60 font-extrabold text-blue-900 border-r border-slate-200">
-                            ${secSum}
-                        </td>
-                    `;
+                    rowsHTML += `<td class="p-2 text-center bg-blue-50/60 font-extrabold text-blue-900 border-r border-slate-200">${secSum}</td>`;
                 });
 
                 let pct = Math.round((grandTotal / grandMax) * 100) || 0;
@@ -740,21 +605,13 @@
                     </td>
                     <td class="p-2 text-center no-print">
                         <div class="flex items-center justify-center gap-1">
-                            <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition">
-                                <i class="fas fa-file-invoice"></i>
-                            </button>
-                            <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                            <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
+                            <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
+                            <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
-                </tr>
-                `;
+                </tr>`;
             });
-
             tableBody.innerHTML = rowsHTML;
         }
 
@@ -776,17 +633,39 @@
         function populateClassOptions() {
             const classFilter = document.getElementById('classFilter');
             const stdClassSelect = document.getElementById('stdClassSelect');
-            
             let classOptionsHTML = '<option value="all">كل الفصول</option>';
             let modalSelectHTML = '';
-
             customClasses.forEach(c => {
                 classOptionsHTML += `<option value="${c}">${c}</option>`;
                 modalSelectHTML += `<option value="${c}">${c}</option>`;
             });
-
             if (classFilter) classFilter.innerHTML = classOptionsHTML;
             if (stdClassSelect) stdClassSelect.innerHTML = modalSelectHTML;
+        }
+
+        // دالة حذف الفصل الحالي المحدد في الفلتر
+        function deleteCurrentClassStudents() {
+            const classFilterVal = document.getElementById('classFilter').value;
+            if (classFilterVal === 'all') {
+                alert("يرجى اختيار فصل محدد من قائمة (كل الفصول) أولاً لحذف طلابه.");
+                return;
+            }
+            if (confirm(`هل أنت متأكد من حذف جميع طلاب الفصل (${classFilterVal}) من الجدول؟`)) {
+                students = students.filter(s => s.className !== classFilterVal);
+                saveLocalData();
+                renderTable();
+                showToast(`تم حذف طلاب الفصل ${classFilterVal} بنجاح.`);
+            }
+        }
+
+        // دالة حذف جميع الطلاب من الجدول
+        function deleteAllStudentsConfirm() {
+            if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب من الجدول نهائياً؟")) {
+                students = [];
+                saveLocalData();
+                renderTable();
+                showToast("تم تصفية وحذف كافة الطلاب من الجدول.");
+            }
         }
 
         function openAddStudentModal() {
@@ -801,7 +680,6 @@
         function openEditStudentModal(stdId) {
             let std = students.find(s => s.id === stdId);
             if (!std) return;
-
             document.getElementById('editStudentId').value = std.id;
             document.getElementById('stdNameInput').value = std.name;
             document.getElementById('stdEmailInput').value = std.email;
@@ -872,8 +750,7 @@
                     <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                         <span class="text-xs font-bold text-slate-800">${c}</span>
                         <button onclick="removeClass('${idx}')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded-lg">حذف</button>
-                    </div>
-                `;
+                    </div>`;
             });
             container.innerHTML = html;
         }
@@ -910,7 +787,6 @@
         function renderSectionsConfig() {
             const container = document.getElementById('sectionsConfigList');
             let html = '';
-
             sections.forEach((sec, secIdx) => {
                 html += `
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
@@ -918,28 +794,22 @@
                             <input type="text" value="${sec.title}" onchange="updateSectionTitle(${secIdx}, this.value)" class="font-extrabold text-xs text-purple-900 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200 focus:outline-none">
                             <button onclick="deleteSection(${secIdx})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2.5 py-1 bg-rose-50 rounded-lg"><i class="fas fa-trash"></i> حذف القسم</button>
                         </div>
-                        
                         <div class="space-y-2">
-                            <label class="block text-[11px] font-bold text-slate-500">المحاولات والخانة الفرعية:</label>
+                            <label class="block text-[11px] font-bold text-slate-500">المحاولات:</label>
                 `;
-
                 sec.slots.forEach((slot, slotIdx) => {
                     html += `
                         <div class="flex items-center gap-2">
                             <input type="text" value="${slot.title}" onchange="updateSlotTitle(${secIdx}, ${slotIdx}, this.value)" class="flex-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold">
-                            <input type="number" value="${slot.max}" onchange="updateSlotMax(${secIdx}, ${slotIdx}, this.value)" title="الدرجة القصوى" class="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-center">
+                            <input type="number" value="${slot.max}" onchange="updateSlotMax(${secIdx}, ${slotIdx}, this.value)" class="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-center">
                             <button onclick="deleteSlot(${secIdx}, ${slotIdx})" class="text-slate-400 hover:text-rose-600 text-xs px-2"><i class="fas fa-times"></i></button>
-                        </div>
-                    `;
+                        </div>`;
                 });
-
                 html += `
                         </div>
-                        <button onclick="addSlotToSection(${secIdx})" class="mt-2 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 flex items-center gap-1"><i class="fas fa-plus-circle"></i> إضافة محاولة جديدة</button>
-                    </div>
-                `;
+                        <button onclick="addSlotToSection(${secIdx})" class="mt-2 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 flex items-center gap-1"><i class="fas fa-plus-circle"></i> إضافة محاولة</button>
+                    </div>`;
             });
-
             container.innerHTML = html;
         }
 
@@ -987,7 +857,6 @@
             const input = document.getElementById('newSecTitleInput');
             const title = input.value.trim();
             if (!title) return;
-
             let secId = 'sec_' + Date.now();
             sections.push({
                 id: secId,
@@ -997,12 +866,11 @@
                     { id: secId + '_2', title: 'المحاولة 2', max: 10 }
                 ]
             });
-
             input.value = '';
             saveLocalData();
             renderSectionsConfig();
             renderTable();
-            showToast("تمت إضافة القسم الجديد بنجاح!");
+            showToast("تمت إضافة القسم بنجاح!");
         }
 
         function openBulkImportModal() {
@@ -1013,7 +881,6 @@
         async function processBulkStudents() {
             const rawText = document.getElementById('bulkInputText').value.trim();
             if (!rawText) return;
-
             const lines = rawText.split('\n').map(l => l.trim()).filter(l => l);
             let count = 0;
 
@@ -1041,7 +908,6 @@
                         });
                         count++;
                     }
-
                     if (db) {
                         try {
                             await db.collection("allowed_students").doc(email).set({
@@ -1052,7 +918,6 @@
                     }
                 }
             }
-
             saveLocalData();
             renderTable();
             closeModal('bulkImportModal');
@@ -1063,7 +928,6 @@
             let std = students.find(s => s.id === stdId);
             if (!std) return;
             currentReportStudent = std;
-
             const printArea = document.getElementById('reportPrintArea');
             const { grandTotal, sectionTotals } = calculateStudentTotals(std);
             const grandMax = calculateGrandTotalMax();
@@ -1072,62 +936,80 @@
             let reportHTML = `
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div class="text-center border-b pb-4">
-                        <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">ثانوية الأمير عبد المجيد</span>
+                        <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
                         <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات تقييم القرآن الكريم</h2>
                         <p class="text-xs font-bold text-slate-500">المعلم: الأستاذ سامي بن محمد العمر</p>
                     </div>
-
-                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs font-bold">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border flex justify-between items-center text-xs font-bold">
                         <div>
                             <div class="text-slate-900 text-sm font-extrabold">${std.name}</div>
                             <div class="text-slate-400 font-mono">${std.email}</div>
                         </div>
-                        <div class="text-right">
-                            <span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span>
-                        </div>
+                        <div class="text-right"><span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span></div>
                     </div>
-
                     <div class="space-y-3">
             `;
 
             sections.forEach(sec => {
                 let secSum = sectionTotals[sec.id] || 0;
                 let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
-
                 reportHTML += `
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <div class="border rounded-xl overflow-hidden">
                         <div class="bg-slate-100 px-3 py-2 flex justify-between items-center text-xs font-bold text-slate-800 border-b">
-                            <span>${sec.title}</span>
-                            <span class="text-amber-800">${secSum} / ${secMax}</span>
+                            <span>${sec.title}</span><span class="text-amber-800">${secSum} / ${secMax}</span>
                         </div>
                         <div class="p-3 grid grid-cols-3 gap-2 bg-white text-center">
                 `;
-
                 sec.slots.forEach(slot => {
                     let val = std.scores && (std.scores[slot.id] !== undefined) ? std.scores[slot.id] : 0;
                     reportHTML += `
-                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div class="bg-slate-50 p-2 rounded-lg border">
                             <div class="text-[10px] text-slate-400 font-bold">${slot.title}</div>
                             <div class="text-xs font-extrabold text-slate-800 mt-0.5">${val} / ${slot.max}</div>
-                        </div>
-                    `;
+                        </div>`;
                 });
-
                 reportHTML += `</div></div>`;
             });
 
             reportHTML += `
                     </div>
-
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
                         <span class="font-extrabold text-sm">المجموع النهائي الكلي:</span>
                         <span class="font-black text-xl">${grandTotal} / ${grandMax} <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
-                </div>
-            `;
-
+                </div>`;
             printArea.innerHTML = reportHTML;
             document.getElementById('reportModal').classList.remove('hidden');
+        }
+
+        function queryStudentGrades() {
+            const query = document.getElementById('studentQueryInput').value.trim().toLowerCase();
+            const resultDiv = document.getElementById('studentQueryResult');
+            if (!query) {
+                resultDiv.innerHTML = '<p class="text-rose-600 text-xs font-bold text-center">الرجاء إدخال اسم الطالب أو البريد.</p>';
+                return;
+            }
+
+            let std = students.find(s => s.email.toLowerCase() === query || s.name.toLowerCase().includes(query));
+            if (!std) {
+                resultDiv.innerHTML = '<p class="text-slate-500 text-xs font-bold text-center">لم يتم العثور على طالب بهذا الاسم أو البريد في الكشف الحالي.</p>';
+                return;
+            }
+
+            const { grandTotal } = calculateStudentTotals(std);
+            const grandMax = calculateGrandTotalMax();
+            const pct = Math.round((grandTotal / grandMax) * 100) || 0;
+
+            resultDiv.innerHTML = `
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-2 text-xs">
+                    <div class="font-black text-blue-900 text-sm">${std.name}</div>
+                    <div class="text-slate-600 font-mono">${std.email}</div>
+                    <div class="text-blue-800 font-bold">الفصل: ${std.className || '1/1'}</div>
+                    <div class="pt-2 border-t border-blue-200 flex justify-between font-black text-amber-800 text-sm">
+                        <span>المجموع الكلي:</span>
+                        <span>${grandTotal} / ${grandMax} (${pct}%)</span>
+                    </div>
+                </div>`;
         }
 
         function shareReportWhatsApp() {
@@ -1135,17 +1017,8 @@
             const { grandTotal } = calculateStudentTotals(currentReportStudent);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
-
-            let msg = `السلام عليكم ورحمة الله وبركاته،\n`;
-            msg += `تقرير درجات الطالب: *${currentReportStudent.name}*\n`;
-            msg += `مادة القرآن الكريم - ثانوية الأمير عبد المجيد\n`;
-            msg += `معلم المادة: الأستاذ سامي بن محمد العمر\n`;
-            msg += `----------------------------\n`;
-            msg += `النتيجة النهائية: *${grandTotal} من ${grandMax}* (النسبة: ${pct}%)\n`;
-            msg += `نتمنى لك التوفيق والنجاح الدائم 🌟`;
-
-            let url = `https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg);
-            window.open(url, '_blank');
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم - ثانوية الأمير عبد المجيد\nمعلم المادة: الأستاذ سامي بن محمد العمر\n----------------------------\nالنتيجة النهائية: *${grandTotal} من ${grandMax}* (النسبة: ${pct}%)\nنتمنى لك التوفيق 🌟`;
+            window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
         function copyReportText() {
@@ -1153,37 +1026,26 @@
             const { grandTotal } = calculateStudentTotals(currentReportStudent);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
-
-            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\n`;
-            msg += `مادة القرآن الكريم - الأستاذ سامي العمر\n`;
-            msg += `المجموع الكلي: ${grandTotal} من ${grandMax} (${pct}%)\n`;
-
-            navigator.clipboard.writeText(msg).then(() => {
-                showToast("تم نسخ ملخص التقرير للحافظة! 📋");
-            });
+            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nمادة القرآن الكريم - الأستاذ سامي العمر\nالمجموع الكلي: ${grandTotal} من ${grandMax} (${pct}%)\n`;
+            navigator.clipboard.writeText(msg).then(() => showToast("تم نسخ التقرير للحافظة! 📋"));
         }
 
         async function saveAllToCloud() {
             saveLocalData();
-
-            if (!rtdb && !db) {
-                showToast("تم الحفظ في جهازك (تعذر الاتصال بالسحابة).", "error");
+            if (!rtdb) {
+                showToast("تم الحفظ محلياً.", "error");
                 return;
             }
-
             try {
-                if (rtdb) {
-                    await rtdb.ref('quran_app_v2').set({
-                        students: students,
-                        sections: sections,
-                        classes: customClasses,
-                        updatedAt: new Date().toLocaleString('ar-SA')
-                    });
-                }
-                showToast("تمت مزامنة وحفظ كافة البيانات بالسحابة بنجاح! 💾");
+                await rtdb.ref('quran_app_v2').set({
+                    students: students,
+                    sections: sections,
+                    classes: customClasses,
+                    updatedAt: new Date().toLocaleString('ar-SA')
+                });
+                showToast("تمت مزامنة وحفظ البيانات بالسحابة بنجاح! 💾");
             } catch(e) {
-                console.error(e);
-                showToast("تم الحفظ محلياً. لم تكتمل المزامنة للسحابة.", "error");
+                showToast("تعذرت المزامنة بالسحابة.", "error");
             }
         }
 
@@ -1194,13 +1056,9 @@
         }
 
         function loadLocalData() {
-            const localStd = localStorage.getItem('samy_quran_students');
-            const localSec = localStorage.getItem('samy_quran_sections');
-            const localClass = localStorage.getItem('samy_quran_classes');
-
-            if (localStd) students = JSON.parse(localStd);
-            if (localSec) sections = JSON.parse(localSec);
-            if (localClass) customClasses = JSON.parse(localClass);
+            if (localStorage.getItem('samy_quran_students')) students = JSON.parse(localStorage.getItem('samy_quran_students'));
+            if (localStorage.getItem('samy_quran_sections')) sections = JSON.parse(localStorage.getItem('samy_quran_sections'));
+            if (localStorage.getItem('samy_quran_classes')) customClasses = JSON.parse(localStorage.getItem('samy_quran_classes'));
         }
 
         function closeModal(modalId) {
@@ -1211,21 +1069,12 @@
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toastIcon');
             const text = document.getElementById('toastMessage');
-
             text.innerText = msg;
-            if (type === 'error') {
-                icon.className = "fas fa-exclamation-circle text-rose-400 text-base";
-            } else {
-                icon.className = "fas fa-check-circle text-emerald-400 text-base";
-            }
-
+            icon.className = type === 'error' ? "fas fa-exclamation-circle text-rose-400 text-base" : "fas fa-check-circle text-emerald-400 text-base";
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        // Initialize App
         window.onload = function() {
             loadLocalData();
             populateClassOptions();
