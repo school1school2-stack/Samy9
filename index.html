@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة القرآن الكريم - د/ سامي بن محمد العمر | ثانوية الأمير عبد المجيد</title>
+    <title>منصة القرآن الكريم - الدكتور سامي بن محمد العمر | ثانوية الأمير عبد المجيد</title>
     <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -62,7 +62,7 @@
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
                     <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف متابعة درجات الطلاب وبوابة الاستعلام</h1>
-                    <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">د/ سامي بن محمد العمر</span></p>
+                    <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">الدكتور سامي بن محمد العمر 🎓</span></p>
                 </div>
             </div>
         </div>
@@ -82,10 +82,9 @@
                     </select>
                 </div>
 
-                <!-- أزرار التحكم والقوائم المنسدلة المرتبة -->
+                <!-- أزرار التحكم والقوائم المنسدلة -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
                     
-                    <!-- القائمة المنسدلة 1: إدارة الطلاب والرفع -->
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -103,7 +102,6 @@
                         </div>
                     </div>
 
-                    <!-- القائمة المنسدلة 2: الإعدادات والهيكلة -->
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('settingsDropdown', event)" class="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-cogs"></i> الإعدادات والهيكلة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -118,7 +116,6 @@
                         </div>
                     </div>
 
-                    <!-- القائمة المنسدلة 3: خيارات الحذف والتصفية -->
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('deleteDropdown', event)" class="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-trash-alt"></i> خيارات الحذف <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -159,7 +156,7 @@
         </div>
     </div>
 
-    <!-- STUDENT VIEW (بوابة الطالب المستقلة عبر رابط مخصص) -->
+    <!-- STUDENT VIEW -->
     <div id="studentView" class="max-w-xl mx-auto px-4 mt-12 hidden">
         <div class="bg-white rounded-2xl shadow-custom p-6 md:p-8 border border-slate-100 space-y-6">
             <div class="text-center border-b pb-4">
@@ -198,12 +195,12 @@
     <footer class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-bold border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="w-full text-center">
-                إعداد المعلم: <span class="text-amber-400 font-extrabold">د/ سامي بن محمد العمر</span> | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span> | <span class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</span>
+                إعداد المعلم الدكتور سامي بن محمد العمر | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span> | <span class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</span>
             </div>
         </div>
     </footer>
 
-    <!-- MODAL: ADD STUDENT (مع إضافة القائمة المنسدلة الحية للنتائج) -->
+    <!-- MODAL: ADD STUDENT -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -217,8 +214,6 @@
                 <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-100 space-y-2 relative">
                     <label class="block text-xs font-bold text-blue-900">🔍 بحث فوري باسم الطالب من السحابة:</label>
                     <input type="text" id="allowedSearchInput" oninput="filterAllowedStudents(this.value)" placeholder="اكتب جزءاً من الاسم للتعرف الفوري..." class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-600" autocomplete="off">
-                    
-                    <!-- قائمة النتائج الفورية الضمنية -->
                     <div id="searchResultsList" class="hidden absolute right-3 left-3 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-40 overflow-y-auto divide-y divide-slate-100"></div>
                 </div>
                 <div>
@@ -388,14 +383,31 @@
             firebase.auth().signInAnonymously().then(() => {
                 isCloudAvailable = true;
                 setupCloudSync();
-                loadCloudDataOnStart();
+                // الاستماع للتحديثات الفورية من السحابة في الوقت الحقيقي
+                listenToCloudChanges();
             }).catch(err => {
                 isCloudAvailable = true;
                 setupCloudSync();
-                loadCloudDataOnStart();
+                listenToCloudChanges();
             });
         } catch(e) {
             console.warn("Firebase warning:", e);
+        }
+
+        // الاستماع الفوري لقاعدة البيانات السحابية (بحيث يظهر أي تغيير في أي جهاز فوراً)
+        function listenToCloudChanges() {
+            if (!rtdb) return;
+            rtdb.ref('quran_app_v2').on('value', (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    if (val.students) students = val.students;
+                    if (val.sections) sections = val.sections;
+                    if (val.classes) customClasses = val.classes;
+                    saveLocalData();
+                    populateClassOptions();
+                    renderTable();
+                }
+            });
         }
 
         function toggleDropdown(dropdownId, event) {
@@ -418,24 +430,6 @@
             });
             const resList = document.getElementById('searchResultsList');
             if (resList) resList.classList.add('hidden');
-        }
-
-        async function loadCloudDataOnStart() {
-            if (!rtdb) return;
-            try {
-                const snapshot = await rtdb.ref('quran_app_v2').once('value');
-                const val = snapshot.val();
-                if (val) {
-                    if (val.students) students = val.students;
-                    if (val.sections) sections = val.sections;
-                    if (val.classes) customClasses = val.classes;
-                    saveLocalData();
-                    populateClassOptions();
-                    renderTable();
-                }
-            } catch(e) {
-                console.error("Cloud load error:", e);
-            }
         }
 
         function switchMode(mode) {
@@ -561,7 +555,7 @@
                     }
                 });
 
-                saveLocalData();
+                await saveAllToCloud();
                 populateClassOptions();
                 renderTable();
 
@@ -725,6 +719,7 @@
                 std.scores[slotId] = numericVal;
                 saveLocalData();
                 renderTable();
+                saveAllToCloud(); // مزامنة تلقائية فورية عند تعديل أي درجة
             }
         }
 
@@ -741,7 +736,7 @@
             if (stdClassSelect) stdClassSelect.innerHTML = modalSelectHTML;
         }
 
-        function deleteCurrentClassStudents() {
+        async function deleteCurrentClassStudents() {
             const classFilterVal = document.getElementById('classFilter').value;
             if (classFilterVal === 'all') {
                 alert("يرجى اختيار فصل محدد من قائمة (كل الفصول) أولاً لحذف طلابه.");
@@ -751,15 +746,17 @@
                 students = students.filter(s => s.className !== classFilterVal);
                 saveLocalData();
                 renderTable();
+                await saveAllToCloud();
                 showToast(`تم حذف طلاب الفصل ${classFilterVal} بنجاح.`);
             }
         }
 
-        function deleteAllStudentsConfirm() {
+        async function deleteAllStudentsConfirm() {
             if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب من الجدول نهائياً؟")) {
                 students = [];
                 saveLocalData();
                 renderTable();
+                await saveAllToCloud();
                 showToast("تم تصفية وحذف كافة الطلاب من الجدول.");
             }
         }
@@ -791,7 +788,7 @@
             document.getElementById('addStudentModal').classList.remove('hidden');
         }
 
-        function handleSaveStudent(e) {
+        async function handleSaveStudent(e) {
             e.preventDefault();
             const editId = document.getElementById('editStudentId').value;
             const name = document.getElementById('stdNameInput').value.trim();
@@ -833,13 +830,15 @@
             saveLocalData();
             renderTable();
             closeModal('addStudentModal');
+            await saveAllToCloud(); // رفع وحفظ تلقائي فوري للسحابة عند إضافة طالب
         }
 
-        function deleteStudent(stdId) {
+        async function deleteStudent(stdId) {
             if (confirm("هل أنت متأكد من حذف هذا الطالب من الكشف؟")) {
                 students = students.filter(s => s.id !== stdId);
                 saveLocalData();
                 renderTable();
+                await saveAllToCloud(); // رفع وحفظ تلقائي بعد الحذف
                 showToast("تم حذف الطالب.");
             }
         }
@@ -862,7 +861,7 @@
             container.innerHTML = html;
         }
 
-        function addNewClass() {
+        async function addNewClass() {
             const input = document.getElementById('newClassNameInput');
             const val = input.value.trim();
             if (val && !customClasses.includes(val)) {
@@ -871,11 +870,12 @@
                 populateClassOptions();
                 renderClassesList();
                 saveLocalData();
+                await saveAllToCloud();
                 showToast("تمت إضافة الفصل بنجاح!");
             }
         }
 
-        function removeClass(idx) {
+        async function removeClass(idx) {
             if (customClasses.length <= 1) {
                 showToast("يجب الإبقاء على فصل واحد على الأقل.", "error");
                 return;
@@ -884,6 +884,7 @@
             populateClassOptions();
             renderClassesList();
             saveLocalData();
+            await saveAllToCloud();
         }
 
         function openManageSectionsModal() {
@@ -920,47 +921,51 @@
             container.innerHTML = html;
         }
 
-        function updateSectionTitle(secIdx, val) {
-            if (val.trim()) { sections[secIdx].title = val.trim(); saveLocalData(); renderTable(); }
+        async function updateSectionTitle(secIdx, val) {
+            if (val.trim()) { sections[secIdx].title = val.trim(); saveLocalData(); renderTable(); await saveAllToCloud(); }
         }
 
-        function deleteSection(secIdx) {
+        async function deleteSection(secIdx) {
             if (sections.length <= 1) { showToast("يجب الإبقاء على قسم واحد على الأقل.", "error"); return; }
             sections.splice(secIdx, 1);
             saveLocalData();
             renderSectionsConfig();
             renderTable();
+            await saveAllToCloud();
         }
 
-        function updateSlotTitle(secIdx, slotIdx, val) {
-            if (val.trim()) { sections[secIdx].slots[slotIdx].title = val.trim(); saveLocalData(); renderTable(); }
+        async function updateSlotTitle(secIdx, slotIdx, val) {
+            if (val.trim()) { sections[secIdx].slots[slotIdx].title = val.trim(); saveLocalData(); renderTable(); await saveAllToCloud(); }
         }
 
-        function updateSlotMax(secIdx, slotIdx, val) {
+        async function updateSlotMax(secIdx, slotIdx, val) {
             let maxVal = parseFloat(val) || 10;
             sections[secIdx].slots[slotIdx].max = maxVal;
             saveLocalData();
             renderTable();
+            await saveAllToCloud();
         }
 
-        function addSlotToSection(secIdx) {
+        async function addSlotToSection(secIdx) {
             let newId = 'slot_' + Date.now();
             let count = sections[secIdx].slots.length + 1;
             sections[secIdx].slots.push({ id: newId, title: 'المحاولة ' + count, max: 10 });
             saveLocalData();
             renderSectionsConfig();
             renderTable();
+            await saveAllToCloud();
         }
 
-        function deleteSlot(secIdx, slotIdx) {
+        async function deleteSlot(secIdx, slotIdx) {
             if (sections[secIdx].slots.length <= 1) { showToast("يجب الإبقاء على محاولة واحدة بالقسم.", "error"); return; }
             sections[secIdx].slots.splice(slotIdx, 1);
             saveLocalData();
             renderSectionsConfig();
             renderTable();
+            await saveAllToCloud();
         }
 
-        function addNewSection() {
+        async function addNewSection() {
             const input = document.getElementById('newSecTitleInput');
             const title = input.value.trim();
             if (!title) return;
@@ -977,6 +982,7 @@
             saveLocalData();
             renderSectionsConfig();
             renderTable();
+            await saveAllToCloud();
             showToast("تمت إضافة القسم بنجاح!");
         }
 
@@ -1015,19 +1021,12 @@
                         });
                         count++;
                     }
-                    if (db) {
-                        try {
-                            await db.collection("allowed_students").doc(email).set({
-                                name: name,
-                                added_at: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                        } catch(e) {}
-                    }
                 }
             }
             saveLocalData();
             renderTable();
             closeModal('bulkImportModal');
+            await saveAllToCloud();
             showToast(`تمت معالجة وإضافة ${count} طالب للسحابة بنجاح!`);
         }
 
@@ -1045,7 +1044,7 @@
                     <div class="text-center border-b pb-4">
                         <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
                         <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات تقييم القرآن الكريم</h2>
-                        <p class="text-xs font-bold text-slate-500">المعلم: د/ سامي بن محمد العمر</p>
+                        <p class="text-xs font-bold text-slate-500">المعلم: الدكتور سامي بن محمد العمر 🎓</p>
                     </div>
                     <div class="bg-slate-50 p-3.5 rounded-xl border flex justify-between items-center text-xs font-bold">
                         <div>
@@ -1117,7 +1116,7 @@
                     <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-center text-xs">
                         <i class="fas fa-exclamation-triangle text-amber-600 text-lg"></i>
                         <div class="font-bold text-amber-900">لم يتم العثور على سجل درجات لهذا البريد حالياً.</div>
-                        <p class="text-slate-500 text-[11px]">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع د/ سامي العمر.</p>
+                        <p class="text-slate-500 text-[11px]">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع الدكتور سامي بن محمد العمر.</p>
                     </div>`;
                 return;
             }
@@ -1172,7 +1171,7 @@
             const { grandTotal } = calculateStudentTotals(currentReportStudent);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم - ثانوية الأمير عبد المجيد\nمعلم المادة: د/ سامي بن محمد العمر\n----------------------------\nالنتيجة النهائية: *${grandTotal} من ${grandMax}* (النسبة: ${pct}%)\nنتمنى لك التوفيق 🌟`;
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم - ثانوية الأمير عبد المجيد\nمعلم المادة: الدكتور سامي بن محمد العمر\n----------------------------\nالنتيجة النهائية: *${grandTotal} من ${grandMax}* (النسبة: ${pct}%)\nنتمنى لك التوفيق 🌟`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
@@ -1181,16 +1180,13 @@
             const { grandTotal } = calculateStudentTotals(currentReportStudent);
             const grandMax = calculateGrandTotalMax();
             const pct = Math.round((grandTotal / grandMax) * 100) || 0;
-            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nمادة القرآن الكريم - د/ سامي العمر\nالمجموع الكلي: ${grandTotal} من ${grandMax} (${pct}%)\n`;
+            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nمادة القرآن الكريم - الدكتور سامي بن محمد العمر\nالمجموع الكلي: ${grandTotal} من ${grandMax} (${pct}%)\n`;
             navigator.clipboard.writeText(msg).then(() => showToast("تم نسخ التقرير للحافظة! 📋"));
         }
 
         async function saveAllToCloud() {
             saveLocalData();
-            if (!rtdb) {
-                showToast("تم الحفظ محلياً.", "error");
-                return;
-            }
+            if (!rtdb) return;
             try {
                 await rtdb.ref('quran_app_v2').set({
                     students: students,
@@ -1198,9 +1194,8 @@
                     classes: customClasses,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تمت مزامنة وحفظ البيانات بالسحابة بنجاح! 💾");
             } catch(e) {
-                showToast("تعذرت المزامنة بالسحابة.", "error");
+                console.error("Cloud save error:", e);
             }
         }
 
