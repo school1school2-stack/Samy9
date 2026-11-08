@@ -30,17 +30,21 @@
         }
     </style>
     
-    <!-- الفحص والإخفاء السريع والفوري لوك شاشة التقرير المباشر لمنع ظهور المنصة -->
+    <!-- الإخفاء الفوري لعناصر المنصة في حال فتح رابط الطالب أو التقرير المباشر -->
     <script>
         (function() {
             const hash = window.location.hash;
-            if (hash.startsWith('#report=')) {
+            if (hash.startsWith('#report=') || hash === '#student') {
                 document.addEventListener("DOMContentLoaded", () => {
-                    const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
+                    const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'mainFooter'];
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.classList.add('hidden');
                     });
+                    if (hash === '#student') {
+                        const studentView = document.getElementById('studentView');
+                        if (studentView) studentView.classList.remove('hidden');
+                    }
                 });
             }
         })();
@@ -204,7 +208,7 @@
         </div>
     </div>
 
-    <!-- DIRECT STUDENT REPORT VIEW (يظهر للطالب حصرياً عند فتح رابط التقرير المباشر) -->
+    <!-- DIRECT STUDENT REPORT VIEW -->
     <div id="directStudentReportView" class="max-w-lg mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -485,12 +489,10 @@
                 const targetEmail = decodeURIComponent(hash.replace('#report=', '')).trim().toLowerCase();
                 hasOpenedReportFromUrl = true;
 
-                // محاولة البحث الفوري إذا كانت البيانات محملة مسبقاً
                 let std = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
                 if (std) {
                     renderDirectStudentReport(std);
                 } else if (db) {
-                    // جلب سريع مباشر من قاعدة البيانات في حال عدم التحميل
                     db.collection("app_data").doc("main_state").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
@@ -513,7 +515,6 @@
             }
         }
 
-        // دالة لعرض بطاقة الطالب حصرياً وإخفاء المنصة بالكامل وبشكل فوري
         function renderDirectStudentReport(std) {
             const elementsToHide = ['mainNavbar', 'mainHeaderBanner', 'teacherView', 'studentView', 'mainFooter'];
             elementsToHide.forEach(id => {
