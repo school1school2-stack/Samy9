@@ -95,7 +95,7 @@
                     <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-bold mb-1">
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي 40 + تحريري 60 = النهائي 100)</h1>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي وتحريري)</h1>
                     <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">د / سامي محمد العمر 🎓</span></p>
                 </div>
             </div>
@@ -136,11 +136,14 @@
 
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('settingsDropdown', event)" class="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="fas fa-cogs"></i> الإعدادات والفصول <i class="fas fa-chevron-down text-[10px] mr-1"></i>
+                            <i class="fas fa-cogs"></i> الإعدادات والأقسام <i class="fas fa-chevron-down text-[10px] mr-1"></i>
                         </button>
                         <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
                             <button onclick="openManageClassesModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2">
                                 <i class="fas fa-layer-group text-purple-600"></i> إدارة الفصول والشعب
+                            </button>
+                            <button onclick="openManageSectionsModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2">
+                                <i class="fas fa-folder-tree text-indigo-600"></i> إدارة الأقسام والمسميات والدرجات
                             </button>
                         </div>
                     </div>
@@ -314,6 +317,26 @@
         </div>
     </div>
 
+    <!-- MODAL: MANAGE SECTIONS & GRADES -->
+    <div id="manageSectionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-folder-tree text-amber-400"></i> إدارة الأقسام، المسميات، والدرجات العظمى</h3>
+                <button onclick="closeModal('manageSectionsModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50">
+                <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-bold">
+                    💡 يمكنك هنا تعديل أسماء الأقسام، الأقسام الفرعية، ومحاولاتها، وتعديل الدرجات العظمى لكل محاولة. الجدول سيتحدث تلقائياً.
+                </div>
+                <div id="sectionsConfigEditorContainer" class="space-y-6"></div>
+            </div>
+            <div class="bg-white px-6 py-4 border-t flex justify-between items-center">
+                <button onclick="addNewMainSection()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"><i class="fas fa-plus"></i> إضافة قسم رئيسي جديد</button>
+                <button onclick="saveSectionsConfigFromModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm">حفظ التطبيق والتحديث</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer id="mainFooter" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-bold border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -435,55 +458,53 @@
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
         let activeChartInstance = null;
 
-        // الهيكل المطلوب: صفين فقط لكل طالب (الصف الأول للقسم الشفوي بكل أقسامه، والصف الثاني للقسم التحريري بكل أقسامه)
+        // الهيكل الافتراضي بصفين رئيسيين (الشفوي والتحريري) وأقسامهما الفرعية مع المحاولات
         let twoRowsSectionsConfig = [
             {
                 id: 'oral',
                 title: 'القسم الشفوي',
-                enabled: true,
                 maxTotal: 40,
                 icon: 'fa-microphone',
                 badgeClass: 'bg-blue-50/80 text-blue-900 border-blue-200',
                 columns: [
-                    { subTitle: 'التلاوة (15)', slots: [
-                        { id: 'tilawah_1', title: 'محاولة 1 (5)', max: 5 },
-                        { id: 'tilawah_2', title: 'محاولة 2 (5)', max: 5 },
-                        { id: 'tilawah_3', title: 'محاولة 3 (5)', max: 5 }
+                    { subTitle: 'التلاوة', maxCol: 15, slots: [
+                        { id: 'tilawah_1', title: 'محاولة 1', max: 5 },
+                        { id: 'tilawah_2', title: 'محاولة 2', max: 5 },
+                        { id: 'tilawah_3', title: 'محاولة 3', max: 5 }
                     ]},
-                    { subTitle: 'الحفظ (15)', slots: [
-                        { id: 'hifz_1', title: 'محاولة 1 (5)', max: 5 },
-                        { id: 'hifz_2', title: 'محاولة 2 (5)', max: 5 },
-                        { id: 'hifz_3', title: 'محاولة 3 (5)', max: 5 }
+                    { subTitle: 'الحفظ', maxCol: 15, slots: [
+                        { id: 'hifz_1', title: 'محاولة 1', max: 5 },
+                        { id: 'hifz_2', title: 'محاولة 2', max: 5 },
+                        { id: 'hifz_3', title: 'محاولة 3', max: 5 }
                     ]},
-                    { subTitle: 'التجويد (10)', slots: [
-                        { id: 'tajweed_1', title: 'محاولة 1 (3)', max: 3 },
-                        { id: 'tajweed_2', title: 'محاولة 2 (3)', max: 3 },
-                        { id: 'tajweed_3', title: 'محاولة 3 (4)', max: 4 }
+                    { subTitle: 'التجويد', maxCol: 10, slots: [
+                        { id: 'tajweed_1', title: 'محاولة 1', max: 3 },
+                        { id: 'tajweed_2', title: 'محاولة 2', max: 3 },
+                        { id: 'tajweed_3', title: 'محاولة 3', max: 4 }
                     ]}
                 ]
             },
             {
                 id: 'written',
                 title: 'القسم التحريري',
-                enabled: true,
                 maxTotal: 60,
                 icon: 'fa-pen-nib',
                 badgeClass: 'bg-purple-50/80 text-purple-900 border-purple-200',
                 columns: [
-                    { subTitle: 'الاختبار 1 (20)', slots: [
-                        { id: 'test1_1', title: 'محاولة 1 (7)', max: 7 },
-                        { id: 'test1_2', title: 'محاولة 2 (7)', max: 7 },
-                        { id: 'test1_3', title: 'محاولة 3 (6)', max: 6 }
+                    { subTitle: 'الاختبار الأول', maxCol: 20, slots: [
+                        { id: 'test1_1', title: 'محاولة 1', max: 7 },
+                        { id: 'test1_2', title: 'محاولة 2', max: 7 },
+                        { id: 'test1_3', title: 'محاولة 3', max: 6 }
                     ]},
-                    { subTitle: 'الاختبار 2 (20)', slots: [
-                        { id: 'test2_1', title: 'محاولة 1 (7)', max: 7 },
-                        { id: 'test2_2', title: 'محاولة 2 (7)', max: 7 },
-                        { id: 'test2_3', title: 'محاولة 3 (6)', max: 6 }
+                    { subTitle: 'الاختبار الثاني', maxCol: 20, slots: [
+                        { id: 'test2_1', title: 'محاولة 1', max: 7 },
+                        { id: 'test2_2', title: 'محاولة 2', max: 7 },
+                        { id: 'test2_3', title: 'محاولة 3', max: 6 }
                     ]},
-                    { subTitle: 'الاختبار 3 (20)', slots: [
-                        { id: 'test3_1', title: 'محاولة 1 (7)', max: 7 },
-                        { id: 'test3_2', title: 'محاولة 2 (7)', max: 7 },
-                        { id: 'test3_3', title: 'محاولة 3 (6)', max: 6 }
+                    { subTitle: 'الاختبار الثالث', maxCol: 20, slots: [
+                        { id: 'test3_1', title: 'محاولة 1', max: 7 },
+                        { id: 'test3_2', title: 'محاولة 2', max: 7 },
+                        { id: 'test3_3', title: 'محاولة 3', max: 6 }
                     ]}
                 ]
             }
@@ -536,6 +557,7 @@
                     const data = doc.data();
                     if (data.students) students = data.students;
                     if (data.classes && data.classes.length > 0) customClasses = data.classes;
+                    if (data.sectionsConfig && data.sectionsConfig.length > 0) twoRowsSectionsConfig = data.sectionsConfig;
                     
                     populateClassOptions();
                     renderTable();
@@ -551,6 +573,7 @@
                         const data = d.data();
                         if (data.students) students = data.students;
                         if (data.classes && data.classes.length > 0) customClasses = data.classes;
+                        if (data.sectionsConfig && data.sectionsConfig.length > 0) twoRowsSectionsConfig = data.sectionsConfig;
                     }
                     populateClassOptions();
                     renderTable();
@@ -641,25 +664,15 @@
         }
 
         function calculateCategoryTotals(student) {
-            let oralTotal = 0;
-            let writtenTotal = 0;
-
+            let totalSum = 0;
             twoRowsSectionsConfig.forEach(mainSec => {
-                let secSum = 0;
                 mainSec.columns.forEach(col => {
                     col.slots.forEach(slot => {
-                        secSum += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
+                        totalSum += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
                     });
                 });
-                if (mainSec.id === 'written') {
-                    writtenTotal = secSum;
-                } else {
-                    oralTotal = secSum;
-                }
             });
-
-            let grandTotal = oralTotal + writtenTotal;
-            return { oralTotal, writtenTotal, grandTotal };
+            return { grandTotal: totalSum };
         }
 
         function renderDirectStudentReport(std) {
@@ -677,7 +690,7 @@
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-right">
                     <div class="text-center border-b pb-4">
                         <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
-                        <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات التقييم (شفوي وتحريري)</h2>
+                        <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات التقييم الشامل</h2>
                         <p class="text-xs font-bold text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
                     </div>
                     <div class="bg-slate-50 p-3.5 rounded-xl border flex justify-between items-center text-xs font-bold">
@@ -687,18 +700,8 @@
                         </div>
                         <div class="text-right"><span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span></div>
                     </div>
-                    <div class="space-y-3">
-                        <div class="bg-blue-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
-                            <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
-                        </div>
-                        <div class="bg-purple-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم التحريري (الاختبارات 1، 2، 3 - من 60)</span>
-                            <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
-                        </div>
-                    </div>
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-extrabold text-sm">المجموع النهائي (من 100):</span>
+                        <span class="font-extrabold text-sm">المجموع الكلي النهائي:</span>
                         <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
                 </div>`;
@@ -714,7 +717,6 @@
                 if (el) el.classList.add('hidden');
             });
             document.getElementById('globalBackToPlatformBtn').classList.remove('hidden');
-
             document.getElementById('classReportBadge').innerText = `الفصل: ${className}`;
             
             const classStudents = students.filter(s => (s.className || '1/1') === className);
@@ -736,14 +738,11 @@
                             <tr class="bg-slate-900 text-white">
                                 <th class="p-2.5 text-center border w-12">#</th>
                                 <th class="p-2.5 border">اسم الطالب والصف</th>
-                                <th class="p-2.5 text-center border bg-blue-950">مجموع الشفوي (40)</th>
-                                <th class="p-2.5 text-center border bg-purple-950">مجموع التحريري (60)</th>
-                                <th class="p-2.5 text-center border bg-amber-900">المجموع الكلي النهائي (100)</th>
+                                <th class="p-2.5 text-center border bg-amber-900">المجموع الكلي النهائي</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
-
                 classStudents.forEach((st, idx) => {
                     const totals = calculateCategoryTotals(st);
                     let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
@@ -754,8 +753,6 @@
                                 <div>${st.name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                             </td>
-                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20">${totals.oralTotal} / 40</td>
-                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20">${totals.writtenTotal} / 60</td>
                             <td class="p-3 text-center border font-black text-amber-900 bg-amber-50/50">${totals.grandTotal} (${pct}%)</td>
                         </tr>
                     `;
@@ -777,7 +774,6 @@
             document.getElementById('chartReportBadge').innerText = `الفصل: ${className}`;
 
             const classStudents = students.filter(s => (s.className || '1/1') === className);
-
             let levels = { excellent: [], veryGood: [], good: [], pass: [], fail: [] };
 
             classStudents.forEach(st => {
@@ -799,54 +795,35 @@
                     <h2 class="text-xl font-black text-slate-900 mt-2">التقرير التحليلي البياني والمستويات للفصل (${className})</h2>
                     <p class="text-xs font-bold text-slate-500">إعداد وتصنيف المعلم: د / سامي محمد العمر 🎓</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div class="md:col-span-1 flex flex-col items-center justify-center">
-                        <div class="w-48 h-48 relative">
-                            <canvas id="classChartCanvas"></canvas>
-                        </div>
+                        <div class="w-48 h-48 relative"><canvas id="classChartCanvas"></canvas></div>
                     </div>
                     <div class="md:col-span-2 space-y-2">
-                        <h4 class="font-extrabold text-xs text-slate-700 mb-3 border-b pb-1">📊 توزيع الطلاب حسب المستويات والألوان (من 100 درجة):</h4>
-                        
+                        <h4 class="font-extrabold text-xs text-slate-700 mb-3 border-b pb-1">📊 توزيع الطلاب حسب المستويات:</h4>
                         <div class="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
-                            <span class="text-xs font-bold text-emerald-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> ممتاز (90% - 100%)</span>
-                            <span class="text-xs font-black text-emerald-800 bg-white px-3 py-0.5 rounded-lg border border-emerald-200">${levels.excellent.length} طالب</span>
+                            <span class="text-xs font-bold text-emerald-900">ممتاز (90% - 100%)</span>
+                            <span class="text-xs font-black text-emerald-800 bg-white px-3 py-0.5 rounded-lg border">${levels.excellent.length} طالب</span>
                         </div>
-
                         <div class="flex items-center justify-between p-2.5 bg-blue-50 border border-blue-200 rounded-xl">
-                            <span class="text-xs font-bold text-blue-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> جيد جداً (80% - 89%)</span>
-                            <span class="text-xs font-black text-blue-800 bg-white px-3 py-0.5 rounded-lg border border-blue-200">${levels.veryGood.length} طالب</span>
+                            <span class="text-xs font-bold text-blue-900">جيد جداً (80% - 89%)</span>
+                            <span class="text-xs font-black text-blue-800 bg-white px-3 py-0.5 rounded-lg border">${levels.veryGood.length} طالب</span>
                         </div>
-
                         <div class="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-                            <span class="text-xs font-bold text-amber-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> جيد (70% - 79%)</span>
-                            <span class="text-xs font-black text-amber-800 bg-white px-3 py-0.5 rounded-lg border border-amber-200">${levels.good.length} طالب</span>
+                            <span class="text-xs font-bold text-amber-900">جيد (70% - 79%)</span>
+                            <span class="text-xs font-black text-amber-800 bg-white px-3 py-0.5 rounded-lg border">${levels.good.length} طالب</span>
                         </div>
-
                         <div class="flex items-center justify-between p-2.5 bg-orange-50 border border-orange-200 rounded-xl">
-                            <span class="text-xs font-bold text-orange-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500"></span> مقبول (60% - 69%)</span>
-                            <span class="text-xs font-black text-orange-800 bg-white px-3 py-0.5 rounded-lg border border-orange-200">${levels.pass.length} طالب</span>
+                            <span class="text-xs font-bold text-orange-900">مقبول (60% - 69%)</span>
+                            <span class="text-xs font-black text-orange-800 bg-white px-3 py-0.5 rounded-lg border">${levels.pass.length} طالب</span>
                         </div>
-
                         <div class="flex items-center justify-between p-2.5 bg-rose-50 border border-rose-200 rounded-xl">
-                            <span class="text-xs font-bold text-rose-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> ضعيف / يحتاج متابعة (&lt; 60%)</span>
-                            <span class="text-xs font-black text-rose-800 bg-white px-3 py-0.5 rounded-lg border border-rose-200">${levels.fail.length} طالب</span>
+                            <span class="text-xs font-bold text-rose-900">ضعيف (&lt; 60%)</span>
+                            <span class="text-xs font-black text-rose-800 bg-white px-3 py-0.5 rounded-lg border">${levels.fail.length} طالب</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="space-y-4">
-                    <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-list-ol text-purple-600"></i> قائمة طلاب الفصل مرتبين حسب المستوى:</h3>
-                    
-                    ${renderLevelGroup('🌟 الطلاب المتميزون (ممتاز)', levels.excellent, 'border-emerald-200 bg-emerald-500/10 text-emerald-900', 'bg-emerald-500 text-white')}
-                    ${renderLevelGroup('✨ الطلاب المتفوقون (جيد جداً)', levels.veryGood, 'border-blue-200 bg-blue-500/10 text-blue-900', 'bg-blue-500 text-white')}
-                    ${renderLevelGroup('👍 مستوى (جيد)', levels.good, 'border-amber-200 bg-amber-500/10 text-amber-900', 'bg-amber-500 text-white')}
-                    ${renderLevelGroup('⚠️ مستوى (مقبول)', levels.pass, 'border-orange-200 bg-orange-500/10 text-orange-900', 'bg-orange-500 text-white')}
-                    ${renderLevelGroup('🔴 طلاب يحتاجون متابعة وتكثيف (ضعيف)', levels.fail, 'border-rose-200 bg-rose-500/10 text-rose-900', 'bg-rose-500 text-white')}
-                </div>
             `;
-
             document.getElementById('directChartReportPrintArea').innerHTML = html;
             document.getElementById('directChartReportView').classList.remove('hidden');
 
@@ -863,79 +840,18 @@
                                 backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#f43f5e']
                             }]
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } }
-                        }
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                     });
                 }
             }, 100);
         }
 
-        function renderLevelGroup(title, list, groupStyle, badgeStyle) {
-            if (!list || list.length === 0) return '';
-            let html = `
-                <div class="border rounded-2xl overflow-hidden shadow-sm">
-                    <div class="px-4 py-2.5 font-black text-xs border-b flex justify-between items-center ${groupStyle}">
-                        <span>${title}</span>
-                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${badgeStyle}">${list.length} طالب</span>
-                    </div>
-                    <div class="p-3 bg-white grid grid-cols-1 sm:grid-cols-2 gap-2">
-            `;
-            list.forEach(st => {
-                html += `
-                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
-                        <div>
-                            <div class="font-extrabold text-slate-800">${st.name}</div>
-                            <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
-                        </div>
-                        <div class="text-right">
-                            <span class="font-black text-slate-900">${st._score} / 100</span>
-                            <div class="text-[10px] font-bold text-slate-500">(${st._pct}%)</div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-            return html;
-        }
-
         function openClassReportModal(mode) {
             document.getElementById('selectedReportMode').value = mode;
             const select = document.getElementById('reportClassSelect');
-            const btn = document.getElementById('btnExecuteReportAction');
-            const title = document.getElementById('reportModalTitle');
-
             let html = '';
-            customClasses.forEach(c => {
-                html += `<option value="${c}">${c}</option>`;
-            });
+            customClasses.forEach(c => { html += `<option value="${c}">${c}</option>`; });
             select.innerHTML = html;
-
-            const currentFilter = document.getElementById('classFilter').value;
-            if (currentFilter && currentFilter !== 'all') {
-                select.value = currentFilter;
-            }
-
-            if (mode === 'table') {
-                title.innerHTML = '<i class="fas fa-table text-amber-400"></i> كشف الفصل الشامل';
-                btn.className = 'w-full py-2.5 bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm';
-                btn.innerText = 'عرض الكشف الشامل';
-            } else if (mode === 'table-link') {
-                title.innerHTML = '<i class="fas fa-link text-amber-400"></i> نسخ رابط الكشف للمدير';
-                btn.className = 'w-full py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm';
-                btn.innerText = 'نسخ رابط الكشف للمدير 📋';
-            } else if (mode === 'chart') {
-                title.innerHTML = '<i class="fas fa-chart-pie text-amber-400"></i> التقرير البياني والمستويات 📊';
-                btn.className = 'w-full py-2.5 bg-purple-700 text-white rounded-xl text-xs font-bold shadow-sm';
-                btn.innerText = 'عرض التقرير البياني';
-            } else if (mode === 'chart-link') {
-                title.innerHTML = '<i class="fas fa-share-alt text-amber-400"></i> نسخ رابط البياني للمدير 📊';
-                btn.className = 'w-full py-2.5 bg-purple-800 text-white rounded-xl text-xs font-bold shadow-sm';
-                btn.innerText = 'نسخ رابط التقرير البياني للمدير 📋';
-            }
-
             document.getElementById('classReportModal').classList.remove('hidden');
         }
 
@@ -943,42 +859,30 @@
             const mode = document.getElementById('selectedReportMode').value;
             const className = document.getElementById('reportClassSelect').value;
             closeModal('classReportModal');
-
             const baseUrl = window.location.href.split('#')[0];
 
             if (mode === 'table') {
                 renderDirectClassReport(className);
             } else if (mode === 'table-link') {
-                const reportUrl = `${baseUrl}#class-report=${encodeURIComponent(className)}`;
-                navigator.clipboard.writeText(reportUrl).then(() => {
-                    showToast(`تم نسخ رابط الكشف الشامل للفصل (${className}) للمدير بنجاح! 📋`);
-                });
+                navigator.clipboard.writeText(`${baseUrl}#class-report=${encodeURIComponent(className)}`).then(() => showToast("تم نسخ رابط الكشف للمدير! 📋"));
             } else if (mode === 'chart') {
                 renderDirectChartReport(className);
             } else if (mode === 'chart-link') {
-                const chartUrl = `${baseUrl}#chart-report=${encodeURIComponent(className)}`;
-                navigator.clipboard.writeText(chartUrl).then(() => {
-                    showToast(`تم نسخ رابط التقرير البياني للفصل (${className}) للمدير بنجاح! 📊📋`);
-                });
+                navigator.clipboard.writeText(`${baseUrl}#chart-report=${encodeURIComponent(className)}`).then(() => showToast("تم نسخ رابط التقرير البياني للمدير! 📊📋"));
             }
         }
 
         function toggleDropdown(dropdownId, event) {
             event.stopPropagation();
-            const dropdowns = ['studentsDropdown', 'settingsDropdown', 'deleteDropdown', 'reportsDropdown'];
-            dropdowns.forEach(id => {
+            ['studentsDropdown', 'settingsDropdown', 'deleteDropdown', 'reportsDropdown'].forEach(id => {
                 const el = document.getElementById(id);
-                if (id === dropdownId) {
-                    el.classList.toggle('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
+                if (id === dropdownId) el.classList.toggle('hidden');
+                else el.classList.add('hidden');
             });
         }
 
         function closeAllDropdowns(event) {
-            const dropdowns = ['studentsDropdown', 'settingsDropdown', 'deleteDropdown', 'reportsDropdown'];
-            dropdowns.forEach(id => {
+            ['studentsDropdown', 'settingsDropdown', 'deleteDropdown', 'reportsDropdown'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             const resList = document.getElementById('searchResultsList');
@@ -1021,80 +925,36 @@
         function filterAllowedStudents(term) {
             const resList = document.getElementById('searchResultsList');
             if (!resList) return;
-            
             const cleanTerm = (term || '').trim().toLowerCase();
-            if (!cleanTerm) {
-                resList.classList.add('hidden');
-                return;
-            }
+            if (!cleanTerm) { resList.classList.add('hidden'); return; }
 
-            const filtered = allowedStudentsCache.filter(st => 
-                (st.name && st.name.toLowerCase().includes(cleanTerm)) || 
-                (st.email && st.email.toLowerCase().includes(cleanTerm))
-            );
-
-            if (filtered.length === 0) {
-                resList.innerHTML = '<div class="p-3 text-center text-xs text-slate-400 font-bold">لا توجد نتائج مطابقة في السحابة</div>';
-            } else {
-                let html = '';
-                filtered.forEach(item => {
-                    html += `
-                        <div onclick="selectStudentFromSearch('${item.email}')" class="p-2.5 hover:bg-blue-50 cursor-pointer text-xs font-bold text-slate-800 flex justify-between items-center transition">
-                            <span>${item.name}</span>
-                            <span class="text-[10px] text-slate-400 font-mono">${item.email}</span>
-                        </div>`;
-                });
-                resList.innerHTML = html;
-            }
+            const filtered = allowedStudentsCache.filter(st => (st.name && st.name.toLowerCase().includes(cleanTerm)) || (st.email && st.email.toLowerCase().includes(cleanTerm)));
+            let html = filtered.length === 0 ? '<div class="p-3 text-center text-xs text-slate-400 font-bold">لا توجد نتائج مطابقة</div>' : '';
+            filtered.forEach(item => {
+                html += `<div onclick="selectStudentFromSearch('${item.email}')" class="p-2.5 hover:bg-blue-50 cursor-pointer text-xs font-bold text-slate-800 flex justify-between items-center"><span>${item.name}</span><span class="text-[10px] text-slate-400 font-mono">${item.email}</span></div>`;
+            });
+            resList.innerHTML = html;
             resList.classList.remove('hidden');
         }
 
         async function importAllAllowedFromCloud() {
-            if (!db) {
-                showToast("جاري الاتصال بالسحابة...", "error");
-                return;
-            }
-
+            if (!db) return;
             try {
                 const snap = await db.collection("allowed_students").get();
                 let addedCount = 0;
-
-                if (snap.empty) {
-                    showToast("قائمة السحابة فارغة حالياً.", "error");
-                    return;
-                }
-
                 snap.forEach(doc => {
-                    const data = doc.data();
                     const email = doc.id;
-                    const name = data.name || "طالب";
-
-                    let exists = students.find(s => s.email === email);
-                    if (!exists) {
-                        students.push({
-                            id: 'std_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                            name: name,
-                            email: email,
-                            className: customClasses[0] || '1/1',
-                            scores: {}
-                        });
+                    const name = doc.data().name || "طالب";
+                    if (!students.find(s => s.email === email)) {
+                        students.push({ id: 'std_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), name: name, email: email, className: customClasses[0] || '1/1', scores: {} });
                         addedCount++;
                     }
                 });
-
                 await saveAllToCloud();
                 populateClassOptions();
                 renderTable();
-
-                if (addedCount > 0) {
-                    showToast(`تم سحب واستيراد ${addedCount} طالب من السحابة بنجاح! 🎉`);
-                } else {
-                    showToast(`جميع طلاب السحابة (${snap.size}) مضافون بالفعل في الجدول.`);
-                }
-            } catch(e) {
-                console.error(e);
-                showToast("تعذر جلب الطلاب من السحابة.", "error");
-            }
+                showToast(`تم سحب واستيراد ${addedCount} طالب من السحابة بنجاح! 🎉`);
+            } catch(e) { showToast("تعذر جلب الطلاب.", "error"); }
         }
 
         function renderTable() {
@@ -1104,16 +964,21 @@
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
 
-            // تصميم رأس الجدول ليعرض صفين رئيسيين لكل طالب بجانب الأعمدة
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25">#</th>
                     <th class="p-3 w-44 sticky right-12 bg-slate-900 z-25">اسم الطالب</th>
                     <th class="p-3 w-20 text-center">الفصل</th>
                     <th class="p-3 text-center bg-slate-800 w-36">القسم الرئيسي</th>
-                    <th class="p-3 text-center bg-slate-800 w-32 border-r border-slate-700">التلاوة / اختبار 1</th>
-                    <th class="p-3 text-center bg-slate-800 w-32 border-r border-slate-700">الحفظ / اختبار 2</th>
-                    <th class="p-3 text-center bg-slate-800 w-32 border-r border-slate-700">التجويد / اختبار 3</th>
+            `;
+
+            // أخذ أعمدة القسم الأول كمرجع للأعمدة الأفقية
+            let refColumns = twoRowsSectionsConfig[0] ? twoRowsSectionsConfig[0].columns : [];
+            refColumns.forEach(col => {
+                headerHTML += `<th class="p-3 text-center bg-slate-800 border-r border-slate-700">${col.subTitle}</th>`;
+            });
+
+            headerHTML += `
                     <th class="p-3 text-center bg-slate-800 w-24 border-r border-slate-700">مجموع القسم</th>
                     <th class="p-3 text-center bg-amber-900/60 text-amber-300 border-r border-slate-800 w-28">المجموع النهائي</th>
                     <th class="p-3 text-center bg-slate-900 no-print w-16">خيارات</th>
@@ -1141,9 +1006,7 @@
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
                 twoRowsSectionsConfig.forEach((mainSec, secIdx) => {
-                    let isWritten = mainSec.id === 'written';
                     let secSum = 0;
-                    
                     mainSec.columns.forEach(col => {
                         col.slots.forEach(slot => {
                             secSum += parseFloat(st.scores && st.scores[slot.id] !== undefined ? st.scores[slot.id] : 0) || 0;
@@ -1151,7 +1014,6 @@
                     });
 
                     let rowClass = (secIdx === 1) ? 'student-divider bg-purple-50/10' : 'border-b border-slate-100 bg-white';
-
                     rowsHTML += `<tr class="${rowClass} hover:bg-slate-50/50 transition text-slate-800 font-bold">`;
 
                     if (secIdx === 0) {
@@ -1162,42 +1024,39 @@
                                 <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                             </td>
                             <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20" rowspan="2">
-                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200/60">${st.className || '1/1'}</span>
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border">${st.className || '1/1'}</span>
                             </td>
                         `;
                     }
 
-                    // اسم القسم الرئيسي (الشفوي أو التحريري)
                     rowsHTML += `
-                        <td class="p-2.5 text-right border-l ${mainSec.badgeClass} text-xs font-black flex items-center justify-between gap-1">
-                            <span class="flex items-center gap-1.5"><i class="fas ${mainSec.icon}"></i> ${mainSec.title}</span>
+                        <td class="p-2.5 text-right border-l ${mainSec.badgeClass || 'bg-slate-50'} text-xs font-black flex items-center justify-between gap-1">
+                            <span class="flex items-center gap-1.5"><i class="fas ${mainSec.icon || 'fa-folder'}"></i> ${mainSec.title}</span>
                             <span class="text-[9px] px-1.5 py-0.5 bg-white/90 rounded border">من ${mainSec.maxTotal}</span>
                         </td>
                     `;
 
-                    // الأعمدة الثلاثة الأفقية لكل قسم رئيسي (تحتوي على المحاولات مدمجة بوضوح)
                     mainSec.columns.forEach(col => {
                         rowsHTML += `
                             <td class="p-1 text-center border-r border-slate-100 bg-slate-50/40">
-                                <div class="text-[9px] font-extrabold text-slate-700 mb-1 border-b pb-0.5">${col.subTitle}</div>
+                                <div class="text-[9px] font-extrabold text-slate-700 mb-1 border-b pb-0.5">${col.subTitle} (من ${col.maxCol || 0})</div>
                                 <div class="flex items-center justify-center gap-1">
                         `;
                         col.slots.forEach(slot => {
                             let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
                             rowsHTML += `
                                 <div class="text-center">
-                                    <div class="text-[8px] text-slate-400">${slot.title.split(' ')[1]}</div>
+                                    <div class="text-[8px] text-slate-400">${slot.title}</div>
                                     <input type="number" step="0.5" min="0" max="${slot.max}" 
                                         value="${scoreVal}" 
                                         onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                        class="w-10 text-center py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 transition" title="الدرجة العظمى: ${slot.max}">
+                                        class="w-11 text-center py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 transition" title="الدرجة العظمى: ${slot.max}">
                                 </div>
                             `;
                         });
                         rowsHTML += `</div></td>`;
                     });
 
-                    // مجموع القسم (الشفوي أو التحريري)
                     rowsHTML += `
                         <td class="p-2 text-center font-extrabold text-slate-900 bg-slate-100/60 border-r">
                             ${secSum} <span class="text-[9px] text-slate-400 font-normal">/${mainSec.maxTotal}</span>
@@ -1243,39 +1102,147 @@
         function populateClassOptions() {
             const classFilter = document.getElementById('classFilter');
             const stdClassSelect = document.getElementById('stdClassSelect');
-            
             let classOptionsHTML = '<option value="all">كل الفصول</option>';
             let modalSelectHTML = '';
-            
             customClasses.forEach(c => {
                 classOptionsHTML += `<option value="${c}">${c}</option>`;
                 modalSelectHTML += `<option value="${c}">${c}</option>`;
             });
-
             if (classFilter) classFilter.innerHTML = classOptionsHTML;
             if (stdClassSelect) stdClassSelect.innerHTML = modalSelectHTML;
         }
 
-        async function deleteCurrentClassStudents() {
-            const classFilterVal = document.getElementById('classFilter').value;
-            if (classFilterVal === 'all') {
-                alert("يرجى اختيار فصل محدد من قائمة (كل الفصول) أولاً لحذف طلابه.");
+        // إدارة الأقسام والمسميات والدرجات
+        function openManageSectionsModal() {
+            renderSectionsEditor();
+            document.getElementById('manageSectionsModal').classList.remove('hidden');
+        }
+
+        function renderSectionsEditor() {
+            const container = document.getElementById('sectionsConfigEditorContainer');
+            let html = '';
+            twoRowsSectionsConfig.forEach((mainSec, mIdx) => {
+                html += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between gap-2 border-b pb-2">
+                            <div class="flex items-center gap-2 flex-1">
+                                <span class="text-xs font-extrabold text-slate-500">اسم القسم الرئيسى:</span>
+                                <input type="text" id="mainTitle_${mIdx}" value="${mainSec.title}" class="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold flex-1">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-extrabold text-slate-500">المجموع الكلي للقسم:</span>
+                                <input type="number" id="mainMax_${mIdx}" value="${mainSec.maxTotal}" class="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-center">
+                            </div>
+                            <button onclick="removeMainSection(${mIdx})" class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold hover:bg-rose-100"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="space-y-3 pr-2">
+                `;
+
+                mainSec.columns.forEach((col, cIdx) => {
+                    html += `
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 flex-1">
+                                    <span class="text-[11px] font-bold text-indigo-900">القسم الفرعي ${cIdx+1}:</span>
+                                    <input type="text" id="subTitle_${mIdx}_${cIdx}" value="${col.subTitle}" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold flex-1">
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[10px] font-bold text-slate-500">مجموع الفرعي:</span>
+                                    <input type="number" id="subMax_${mIdx}_${cIdx}" value="${col.maxCol}" class="w-14 px-1.5 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-center">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-200/60">
+                    `;
+
+                    col.slots.forEach((slot, sIdx) => {
+                        html += `
+                            <div class="bg-white p-2 rounded border border-slate-100 space-y-1">
+                                <div class="text-[9px] font-bold text-slate-500">المحاولة ${sIdx+1}:</div>
+                                <div class="flex gap-1">
+                                    <input type="text" id="slotTitle_${mIdx}_${cIdx}_${sIdx}" value="${slot.title}" class="w-1/2 px-1 py-0.5 bg-slate-50 border rounded text-[10px] font-bold text-center" placeholder="المسمى">
+                                    <input type="number" id="slotMax_${mIdx}_${cIdx}_${sIdx}" value="${slot.max}" class="w-1/2 px-1 py-0.5 bg-slate-50 border rounded text-[10px] font-bold text-center" placeholder="الدرجة">
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div></div>`;
+                });
+
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function addNewMainSection() {
+            twoRowsSectionsConfig.push({
+                id: 'sec_' + Date.now(),
+                title: 'قسم جديد',
+                maxTotal: 50,
+                icon: 'fa-folder',
+                badgeClass: 'bg-indigo-50/80 text-indigo-900 border-indigo-200',
+                columns: [
+                    { subTitle: 'فرعي 1', maxCol: 25, slots: [{ id: 's1_1', title: 'محاولة 1', max: 12 }, { id: 's1_2', title: 'محاولة 2', max: 13 }, { id: 's1_3', title: 'محاولة 3', max: 0 }] },
+                    { subTitle: 'فرعي 2', maxCol: 25, slots: [{ id: 's2_1', title: 'محاولة 1', max: 12 }, { id: 's2_2', title: 'محاولة 2', max: 13 }, { id: 's2_3', title: 'محاولة 3', max: 0 }] }
+                ]
+            });
+            renderSectionsEditor();
+        }
+
+        function removeMainSection(mIdx) {
+            if (twoRowsSectionsConfig.length <= 1) {
+                alert("يجب الإبقاء على قسم رئيسي واحد على الأقل.");
                 return;
             }
-            if (confirm(`هل أنت متأكد من حذف جميع طلاب الفصل (${classFilterVal}) من الجدول؟`)) {
+            twoRowsSectionsConfig.splice(mIdx, 1);
+            renderSectionsEditor();
+        }
+
+        async function saveSectionsConfigFromModal() {
+            twoRowsSectionsConfig.forEach((mainSec, mIdx) => {
+                let mTitleEl = document.getElementById(`mainTitle_${mIdx}`);
+                let mMaxEl = document.getElementById(`mainMax_${mIdx}`);
+                if (mTitleEl) mainSec.title = mTitleEl.value.trim();
+                if (mMaxEl) mainSec.maxTotal = parseFloat(mMaxEl.value) || 0;
+
+                mainSec.columns.forEach((col, cIdx) => {
+                    let sTitleEl = document.getElementById(`subTitle_${mIdx}_${cIdx}`);
+                    let sMaxEl = document.getElementById(`subMax_${mIdx}_${cIdx}`);
+                    if (sTitleEl) col.subTitle = sTitleEl.value.trim();
+                    if (sMaxEl) col.maxCol = parseFloat(sMaxEl.value) || 0;
+
+                    col.slots.forEach((slot, sIdx) => {
+                        let stTitleEl = document.getElementById(`slotTitle_${mIdx}_${cIdx}_${sIdx}`);
+                        let stMaxEl = document.getElementById(`slotMax_${mIdx}_${cIdx}_${sIdx}`);
+                        if (stTitleEl) slot.title = stTitleEl.value.trim();
+                        if (stMaxEl) slot.max = parseFloat(stMaxEl.value) || 0;
+                    });
+                });
+            });
+
+            closeModal('manageSectionsModal');
+            renderTable();
+            await saveAllToCloud();
+            showToast("تم تحديث وحفظ الأقسام والمسميات والدرجات بنجاح! 🚀");
+        }
+
+        async function deleteCurrentClassStudents() {
+            const classFilterVal = document.getElementById('classFilter').value;
+            if (classFilterVal === 'all') { alert("يرجى اختيار فصل محدد أولاً."); return; }
+            if (confirm(`هل أنت متأكد من حذف طلاب الفصل (${classFilterVal})؟`)) {
                 students = students.filter(s => s.className !== classFilterVal);
                 renderTable();
                 await saveAllToCloud();
-                showToast(`تم حذف طلاب الفصل ${classFilterVal} بنجاح.`);
+                showToast("تم حذف طلاب الفصل.");
             }
         }
 
         async function deleteAllStudentsConfirm() {
-            if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب من الجدول نهائياً؟")) {
+            if (confirm("تحذير: هل أنت متأكد من حذف جميع الطلاب نهائياً؟")) {
                 students = [];
                 renderTable();
                 await saveAllToCloud();
-                showToast("تم تصفية وحذف كافة الطلاب من الجدول.");
+                showToast("تم حذف كافة الطلاب.");
             }
         }
 
@@ -1286,9 +1253,6 @@
             document.getElementById('stdPhoneInput').value = '';
             document.getElementById('allowedSearchInput').value = '';
             populateClassOptions();
-            const resList = document.getElementById('searchResultsList');
-            if (resList) resList.classList.add('hidden');
-            document.getElementById('studentModalTitle').innerHTML = '<i class="fas fa-user-plus text-amber-400"></i> إضافة وتصنيف طالب';
             document.getElementById('addStudentModal').classList.remove('hidden');
         }
 
@@ -1301,10 +1265,6 @@
             populateClassOptions();
             document.getElementById('stdClassSelect').value = std.className || customClasses[0];
             document.getElementById('stdPhoneInput').value = std.phone || '';
-            document.getElementById('allowedSearchInput').value = '';
-            const resList = document.getElementById('searchResultsList');
-            if (resList) resList.classList.add('hidden');
-            document.getElementById('studentModalTitle').innerHTML = '<i class="fas fa-user-edit text-amber-400"></i> تعديل بيانات الطالب';
             document.getElementById('addStudentModal').classList.remove('hidden');
         }
 
@@ -1316,273 +1276,142 @@
             const className = document.getElementById('stdClassSelect').value;
             const phone = document.getElementById('stdPhoneInput').value.trim();
 
-            if (!name || !email) {
-                showToast("يرجى ملء كافة الحقول الإلزامية.", "error");
-                return;
-            }
+            if (!name || !email) return;
 
             if (editId) {
                 let std = students.find(s => s.id === editId);
-                if (std) {
-                    std.name = name;
-                    std.email = email;
-                    std.className = className;
-                    std.phone = phone;
-                    showToast("تم تحديث بيانات الطالب بنجاح!");
-                }
+                if (std) { std.name = name; std.email = email; std.className = className; std.phone = phone; }
             } else {
-                let exists = students.find(s => s.email.toLowerCase() === email.toLowerCase());
-                if (exists) {
-                    showToast("هذا الطالب مضاف بالفعل في الجدول.", "error");
-                    return;
-                }
-                students.push({
-                    id: 'std_' + Date.now(),
-                    name: name,
-                    email: email,
-                    className: className,
-                    phone: phone,
-                    scores: {}
-                });
-                showToast("تمت إضافة الطالب الجديد بنجاح!");
+                students.push({ id: 'std_' + Date.now(), name: name, email: email, className: className, phone: phone, scores: {} });
             }
-
             renderTable();
             closeModal('addStudentModal');
             await saveAllToCloud();
+            showToast("تم حفظ الطالب بنجاح!");
         }
 
         async function deleteStudent(stdId) {
-            if (confirm("هل أنت متأكد من حذف هذا الطالب من الكشف؟")) {
+            if (confirm("حذف الطالب؟")) {
                 students = students.filter(s => s.id !== stdId);
                 renderTable();
                 await saveAllToCloud();
-                showToast("تم حذف الطالب.");
+                showToast("تم الحذف.");
             }
         }
 
         function openManageClassesModal() {
-            renderClassesList();
+            let html = '';
+            customClasses.forEach((c, idx) => {
+                html += `<div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border"><span class="text-xs font-bold">${c}</span><button onclick="removeClass(${idx})" class="text-rose-600 text-xs font-bold px-2 py-1 bg-rose-50 rounded">حذف</button></div>`;
+            });
+            document.getElementById('classListContainer').innerHTML = html;
             document.getElementById('manageClassesModal').classList.remove('hidden');
         }
 
-        function renderClassesList() {
-            const container = document.getElementById('classListContainer');
-            let html = '';
-            customClasses.forEach((c, idx) => {
-                html += `
-                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span class="text-xs font-bold text-slate-800">${c}</span>
-                        <button onclick="removeClass('${idx}')" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-50 rounded-lg">حذف</button>
-                    </div>`;
-            });
-            container.innerHTML = html;
-        }
-
         async function addNewClass() {
-            const input = document.getElementById('newClassNameInput');
-            const val = input.value.trim();
+            const val = document.getElementById('newClassNameInput').value.trim();
             if (val && !customClasses.includes(val)) {
                 customClasses.push(val);
-                input.value = '';
+                document.getElementById('newClassNameInput').value = '';
                 populateClassOptions();
-                renderClassesList();
+                openManageClassesModal();
                 await saveAllToCloud();
-                showToast("تمت إضافة الفصل بنجاح!");
             }
         }
 
         async function removeClass(idx) {
-            if (customClasses.length <= 1) {
-                showToast("يجب الإبقاء على فصل واحد على الأقل.", "error");
-                return;
-            }
+            if (customClasses.length <= 1) return;
             customClasses.splice(idx, 1);
             populateClassOptions();
-            renderClassesList();
+            openManageClassesModal();
             await saveAllToCloud();
         }
 
-        function openBulkImportModal() {
-            document.getElementById('bulkInputText').value = '';
-            document.getElementById('bulkImportModal').classList.remove('hidden');
-        }
+        function openBulkImportModal() { document.getElementById('bulkImportModal').classList.remove('hidden'); }
 
         async function processBulkStudents() {
             const rawText = document.getElementById('bulkInputText').value.trim();
             if (!rawText) return;
             const lines = rawText.split('\n').map(l => l.trim()).filter(l => l);
             let count = 0;
-
             for (let i = 0; i < lines.length; i++) {
-                let l1 = lines[i];
-                let l2 = lines[i + 1];
+                let l1 = lines[i], l2 = lines[i + 1];
                 if (!l2) break;
-
                 let name = "", email = "";
-                if (!l1.includes('@') && l2.includes('@')) {
-                    name = l1; email = l2.toLowerCase(); i++;
-                } else if (l1.includes('@') && !l2.includes('@')) {
-                    email = l1.toLowerCase(); name = l2; i++;
-                }
-
-                if (name && email) {
-                    let exists = students.find(s => s.email === email);
-                    if (!exists) {
-                        students.push({
-                            id: 'std_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                            name: name,
-                            email: email,
-                            className: customClasses[0] || '1/1',
-                            scores: {}
-                        });
-                        count++;
-                    }
+                if (!l1.includes('@') && l2.includes('@')) { name = l1; email = l2.toLowerCase(); i++; }
+                else if (l1.includes('@') && !l2.includes('@')) { email = l1.toLowerCase(); name = l2; i++; }
+                if (name && email && !students.find(s => s.email === email)) {
+                    students.push({ id: 'std_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4), name: name, email: email, className: customClasses[0] || '1/1', scores: {} });
+                    count++;
                 }
             }
             renderTable();
             closeModal('bulkImportModal');
             await saveAllToCloud();
-            showToast(`تمت معالجة وإضافة ${count} طالب للسحابة بنجاح!`);
+            showToast(`تمت إضافة ${count} طالب.`);
         }
 
         function openReportModal(stdId) {
             let std = students.find(s => s.id === stdId);
             if (!std) return;
             currentReportStudent = std;
-            const printArea = document.getElementById('reportPrintArea');
             const totals = calculateCategoryTotals(std);
-            const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-
             let reportHTML = `
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="bg-white p-6 rounded-2xl border space-y-4">
                     <div class="text-center border-b pb-4">
                         <span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
-                        <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات التقييم (شفوي وتحريري)</h2>
-                        <p class="text-xs font-bold text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
+                        <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات الطالب</h2>
                     </div>
                     <div class="bg-slate-50 p-3.5 rounded-xl border flex justify-between items-center text-xs font-bold">
-                        <div>
-                            <div class="text-slate-900 text-sm font-extrabold">${std.name}</div>
-                            <div class="text-slate-400 font-mono">${std.email}</div>
-                        </div>
-                        <div class="text-right"><span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span></div>
+                        <div><div class="text-slate-900 text-sm font-extrabold">${std.name}</div><div class="text-slate-400 font-mono">${std.email}</div></div>
+                        <div><span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span></div>
                     </div>
-                    <div class="space-y-3">
-                        <div class="bg-blue-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
-                            <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
-                        </div>
-                        <div class="bg-purple-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم التحريري (الاختبارات 1، 2، 3 - من 60)</span>
-                            <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
-                        </div>
-                    </div>
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
+                    <div class="bg-amber-50 border p-4 rounded-xl flex items-center justify-between text-amber-900">
                         <span class="font-extrabold text-sm">المجموع الكلي النهائي:</span>
-                        <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
+                        <span class="font-black text-xl">${totals.grandTotal} / 100</span>
                     </div>
-                `;
-            printArea.innerHTML = reportHTML;
+                </div>`;
+            document.getElementById('reportPrintArea').innerHTML = reportHTML;
             document.getElementById('reportModal').classList.remove('hidden');
         }
 
         function copyDirectReportLink() {
             if (!currentReportStudent || !currentReportStudent.email) return;
-            const baseUrl = window.location.href.split('#')[0];
-            const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
-            navigator.clipboard.writeText(reportUrl).then(() => {
-                showToast("تم نسخ رابط التقرير المباشر (بايميل الطالب) بنجاح! 📋");
-            });
+            navigator.clipboard.writeText(window.location.href.split('#')[0] + '#report=' + currentReportStudent.email.trim()).then(() => showToast("تم نسخ رابط التقرير! 📋"));
         }
 
         async function queryStudentGrades() {
             const query = document.getElementById('studentQueryInput').value.trim().toLowerCase();
             const resultDiv = document.getElementById('studentQueryResult');
-            
-            if (!query) {
-                resultDiv.innerHTML = '<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-xs font-bold text-center">الرجاء إدخال بريد منصة مدرستي الخاص بك.</div>';
-                return;
-            }
-
-            resultDiv.innerHTML = '<div class="p-4 bg-slate-50 rounded-xl text-center text-slate-500 text-xs font-bold"><i class="fas fa-spinner fa-spin"></i> جاري البحث عن درجاتك في السحابة...</div>';
-
-            if (db) {
-                try {
-                    const doc = await db.collection("app_data").doc("main_state").get();
-                    if (doc.exists && doc.data().students) {
-                        students = doc.data().students;
-                    }
-                } catch(e) {}
-            }
-
+            if (!query) { resultDiv.innerHTML = '<div class="p-4 bg-rose-50 text-rose-600 text-xs font-bold text-center">أدخل بريدك.</div>'; return; }
             let std = students.find(s => s.email.toLowerCase() === query || s.name.toLowerCase().includes(query));
-            
-            if (!std) {
-                resultDiv.innerHTML = `
-                    <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-center text-xs">
-                        <i class="fas fa-exclamation-triangle text-amber-600 text-lg"></i>
-                        <div class="font-bold text-amber-900">لم يتم العثور على سجل درجات لهذا البريد حالياً.</div>
-                        <p class="text-slate-500 text-[11px]">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع د / سامي محمد العمر.</p>
-                    </div>`;
-                return;
-            }
-
+            if (!std) { resultDiv.innerHTML = '<div class="p-5 bg-amber-50 text-amber-900 text-xs text-center font-bold">لم يتم العثور على سجل.</div>'; return; }
             const totals = calculateCategoryTotals(std);
-            const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-
-            let detailsHTML = `
-                <div class="bg-white border border-blue-200 rounded-2xl p-5 shadow-sm space-y-4 text-right">
-                    <div class="bg-blue-900 text-white p-4 rounded-xl flex justify-between items-center">
-                        <div>
-                            <div class="text-sm font-black">${std.name}</div>
-                            <div class="text-[11px] text-blue-200 font-mono mt-0.5">${std.email}</div>
-                        </div>
-                        <span class="px-3 py-1 bg-amber-400 text-slate-900 rounded-lg text-xs font-black">الفصل: ${std.className || '1/1'}</span>
+            resultDiv.innerHTML = `
+                <div class="bg-white border p-5 rounded-2xl space-y-3 text-right">
+                    <div class="bg-blue-900 text-white p-3 rounded-xl flex justify-between items-center text-xs">
+                        <div><div class="font-black text-sm">${std.name}</div><div class="font-mono">${std.email}</div></div>
+                        <span>الفصل: ${std.className || '1/1'}</span>
                     </div>
-
-                    <div class="space-y-3">
-                        <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
-                            <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم التحريري (الاختبارات 1، 2، 3 - من 60)</span>
-                            <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
-                        </div>
-                    </div>
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-extrabold text-sm">المجموع الكلي النهائي:</span>
-                        <span class="font-black text-lg">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
-                    </div>
-                `;
-
-            resultDiv.innerHTML = detailsHTML;
+                    <div class="bg-amber-50 p-3 rounded-xl font-black text-amber-900 text-center">المجموع النهائي: ${totals.grandTotal} / 100</div>
+                </div>`;
         }
 
         function copyStudentPortalLink() {
-            const portalUrl = window.location.href.split('#')[0] + '#student';
-            navigator.clipboard.writeText(portalUrl).then(() => {
-                showToast("تم نسخ رابط بوابة الطلاب المستقلة بنجاح! 📋 يمكنك إرساله للطلاب.");
-            });
+            navigator.clipboard.writeText(window.location.href.split('#')[0] + '#student').then(() => showToast("تم نسخ رابط البوابة المستقلة! 📋"));
         }
 
         function shareReportWhatsApp() {
-            if (!currentReportStudent || !currentReportStudent.email) return;
+            if (!currentReportStudent) return;
             const totals = calculateCategoryTotals(currentReportStudent);
-            const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-            const baseUrl = window.location.href.split('#')[0];
-            const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\nالشفوي: ${totals.oralTotal} | التحريري: ${totals.writtenTotal}\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
+            let msg = `تقرير الطالب: ${currentReportStudent.name}\nالمجموع النهائي: ${totals.grandTotal} من 100`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
         function copyReportText() {
             if (!currentReportStudent) return;
             const totals = calculateCategoryTotals(currentReportStudent);
-            const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nشفوي: ${totals.oralTotal} | تحريري: ${totals.writtenTotal}\nالمجموع الكلي النهائي: ${totals.grandTotal} من 100 (${pct}%)\n`;
-            navigator.clipboard.writeText(msg).then(() => showToast("تم نسخ التقرير للحافظة! 📋"));
+            navigator.clipboard.writeText(`الطالب: ${currentReportStudent.name} - المجموع: ${totals.grandTotal}/100`).then(() => showToast("تم النسخ!"));
         }
 
         async function saveAllToCloud() {
@@ -1591,25 +1420,19 @@
                 await db.collection("app_data").doc("main_state").set({
                     students: students,
                     classes: customClasses,
+                    sectionsConfig: twoRowsSectionsConfig,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ صفوف الأقسام والدرجات بالسحابة بنجاح! 💾");
-            } catch(e) {
-                console.error("Cloud save error:", e);
-                showToast("تعذرت المزامنة بالسحابة.", "error");
-            }
+                showToast("تم الحفظ في السحابة بنجاح! 💾");
+            } catch(e) { showToast("تعذرت المزامنة.", "error"); }
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
-            const icon = document.getElementById('toastIcon');
-            const text = document.getElementById('toastMessage');
-            text.innerText = msg;
-            icon.className = type === 'error' ? "fas fa-exclamation-circle text-rose-400 text-base" : "fas fa-check-circle text-emerald-400 text-base";
+            document.getElementById('toastMessage').innerText = msg;
+            document.getElementById('toastIcon').className = type === 'error' ? "fas fa-exclamation-circle text-rose-400 text-base" : "fas fa-check-circle text-emerald-400 text-base";
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
