@@ -1047,7 +1047,7 @@
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-extrabold text-slate-500">المجموع:</span>
                                 <input type="number" id="mainMax_${mIdx}" value="${mainSec.maxTotal}" class="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-center">
-                                <button onclick="removeMainSection(${mIdx})" class="px-2.5 py-1 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold" title="حذف القسم الرئيسى"><i class="fas fa-trash"></i></button>
+                                <button onclick="removeMainSection(${mIdx})" class="px-2.5 py-1 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold" title="حذف القسم الرئيسي"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="space-y-3 pr-2" id="subSectionsContainer_${mIdx}">
@@ -1481,10 +1481,10 @@
             if (isNaN(numericVal)) numericVal = 0;
             if (numericVal < 0) numericVal = 0;
             
-            // التحقق من تجاوز الدرجة العظمى المحددة في الإعدادات ومنعها
+            // منع تجاوز الدرجة العظمى المحددة في الإعدادات مع إظهار تنبيه بصري
             if (numericVal > maxVal) {
                 showToast(`عذراً، الدرجة المدخلة أكبر من المسموح (الحد الأقصى لهذه المحاولة: ${maxVal})! ⚠️`, "error");
-                numericVal = maxVal; // إعادة ضبطها للحد الأقصى أو يمكنك تركها فارغة بحسب رغبتك
+                numericVal = maxVal;
             }
 
             let std = students.find(s => s.id === stdId);
