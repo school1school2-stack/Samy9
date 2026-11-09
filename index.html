@@ -115,7 +115,7 @@
                         <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
                         </button>
-                        <div id="studentsDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 font-black">
+                        <div id="studentsDropdown" class="hidden absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 font-black">
                             <button onclick="openAddStudentModal()" class="w-full text-right px-4 py-2 text-xs font-black text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
                                 <i class="fas fa-user-plus text-blue-600"></i> إضافة طالب
                             </button>
@@ -125,8 +125,11 @@
                             <button onclick="openBulkImportModal()" class="w-full text-right px-4 py-2 text-xs font-black text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2">
                                 <i class="fas fa-file-import text-amber-600"></i> رفع جماعي
                             </button>
-                            <button onclick="copyClassStudentsReportsLinks()" class="w-full text-right px-4 py-2 text-xs font-black text-teal-800 hover:bg-teal-50 flex items-center gap-2 border-t border-slate-100">
-                                <i class="fas fa-copy text-teal-600"></i> نسخ روابط تقارير طلاب الفصل 📋
+                            <button onclick="copyClassStudentsNamesAndEmails()" class="w-full text-right px-4 py-2 text-xs font-black text-emerald-800 hover:bg-emerald-50 flex items-center gap-2 border-t border-slate-100">
+                                <i class="fas fa-copy text-emerald-600"></i> نسخ أسماء وإيميلات طلاب الفصل 📋
+                            </button>
+                            <button onclick="copyClassStudentsReportsLinks()" class="w-full text-right px-4 py-2 text-xs font-black text-teal-800 hover:bg-teal-50 flex items-center gap-2">
+                                <i class="fas fa-link text-teal-600"></i> نسخ روابط تقارير طلاب الفصل 🔗
                             </button>
                         </div>
                     </div>
@@ -423,10 +426,31 @@
         </div>
     </div>
 
+    <!-- نافذة اختيار الفصل لنسخ الأسماء والإيميلات -->
+    <div id="classNamesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden font-black">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-copy text-amber-400"></i> نسخ أسماء وإيميلات الفصل</h3>
+                <button onclick="closeModal('classNamesModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">اختر الفصل المراد نسخ بيانات طلابه:</label>
+                    <select id="copyNamesClassSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800"></select>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('classNamesModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">إلغاء</button>
+                    <button onclick="executeCopyClassNamesAndEmails()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-sm">نسخ القائمة 📋</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة اختيار الفصل لنسخ روابط التقارير -->
     <div id="classLinksModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden font-black">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-copy text-amber-400"></i> نسخ روابط طلاب الفصل</h3>
+                <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-link text-amber-400"></i> نسخ روابط تقارير طلاب الفصل</h3>
                 <button onclick="closeModal('classLinksModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
@@ -436,7 +460,7 @@
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
                     <button type="button" onclick="closeModal('classLinksModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">إلغاء</button>
-                    <button onclick="executeCopyClassLinks()" class="px-5 py-2.5 bg-teal-600 text-white rounded-xl text-xs font-black shadow-sm">نسخ الروابط 📋</button>
+                    <button onclick="executeCopyClassLinks()" class="px-5 py-2.5 bg-teal-600 text-white rounded-xl text-xs font-black shadow-sm">نسخ الروابط 🔗</button>
                 </div>
             </div>
         </div>
@@ -819,7 +843,6 @@
                 mainSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let best = getBestSlotScore(std, col.slots);
-                    let colMax = col.slots.reduce((sum, s) => sum + s.max, 0); // مجموع الحد الأعلى للفرع إذا لزم، أو أقصى محاولة
                     reportHTML += `
                         <div class="p-3 rounded-xl border ${colColor} space-y-2">
                             <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between">
@@ -1100,6 +1123,40 @@
             });
             html += `</div></div>`;
             return html;
+        }
+
+        function copyClassStudentsNamesAndEmails() {
+            const select = document.getElementById('copyNamesClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classNamesModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassNamesAndEmails() {
+            const className = document.getElementById('copyNamesClassSelect').value;
+            closeModal('classNamesModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            let textOutput = "";
+            classStudents.forEach(st => {
+                textOutput += `${st.name}\n${st.email}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ أسماء وإيميلات طلاب الفصل (${className}) بنجاح جاهزة للصق في الرفع الجماعي! 📋`);
+            });
         }
 
         function copyClassStudentsReportsLinks() {
