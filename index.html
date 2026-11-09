@@ -95,7 +95,7 @@
                     <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-bold mb-1">
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي 40 + تحريري 60 = النهائي 100)</h1>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي وتحريري)</h1>
                     <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">د / سامي محمد العمر 🎓</span></p>
                 </div>
             </div>
@@ -136,11 +136,14 @@
 
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('settingsDropdown', event)" class="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="fas fa-cogs"></i> الإعدادات والفصول <i class="fas fa-chevron-down text-[10px] mr-1"></i>
+                            <i class="fas fa-cogs"></i> الإعدادات والأقسام <i class="fas fa-chevron-down text-[10px] mr-1"></i>
                         </button>
                         <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5">
                             <button onclick="openManageClassesModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2">
                                 <i class="fas fa-layer-group text-purple-600"></i> إدارة الفصول والشعب
+                            </button>
+                            <button onclick="openManageMainSectionsModal()" class="w-full text-right px-4 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2">
+                                <i class="fas fa-folder-tree text-indigo-600"></i> إدارة الأقسام الكبرى والفرعية
                             </button>
                         </div>
                     </div>
@@ -314,6 +317,25 @@
         </div>
     </div>
 
+    <!-- MODAL: MANAGE MAIN SECTIONS -->
+    <div id="manageMainSectionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-folder-tree text-amber-400"></i> إدارة الأقسام الكبرى والفرعية</h3>
+                <button onclick="closeModal('manageMainSectionsModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-bold">
+                    💡 يمكنك هنا التحكم بحالة الأقسام الكبرى (شفوي / تحريري) وتفعيلها أو إضافتها أو تعديل أقسامها الفرعية.
+                </div>
+                <div id="mainSectionsListContainer" class="space-y-4"></div>
+                <div class="pt-3 border-t flex justify-end">
+                    <button onclick="closeModal('manageMainSectionsModal')" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold">حفظ وإغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer id="mainFooter" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-bold border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -435,71 +457,88 @@
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
         let activeChartInstance = null;
 
-        // الهيكل الجديد حسب طلبك الدقيق:
-        // القسم الشفوي (يحتوي على: التلاوة، الحفظ، التجويد - لكل منها 3 محاولات) مجموعه 40
-        // القسم التحريري (يحتوي على: الاختبار الأول، الاختبار الثاني، الاختبار الثالث - لكل منها 3 محاولات) مجموعه 60
-        let oralSubSections = [
+        // الأقسام الكبرى القابلة للإدارة والتفعيل (كل قسم له حالته وأقسامه الفرعية)
+        let mainSectionsConfig = [
             {
-                id: 'tilawah',
-                title: 'التلاوة',
-                maxTotal: 15,
-                slots: [
-                    { id: 'tilawah_1', title: 'المحاولة 1', max: 5 },
-                    { id: 'tilawah_2', title: 'المحاولة 2', max: 5 },
-                    { id: 'tilawah_3', title: 'المحاولة 3', max: 5 }
+                id: 'oral',
+                title: 'القسم الشفوي',
+                enabled: true,
+                maxTotal: 40,
+                subSections: [
+                    {
+                        id: 'tilawah',
+                        title: 'التلاوة',
+                        enabled: true,
+                        maxTotal: 15,
+                        slots: [
+                            { id: 'tilawah_1', title: 'المحاولة 1', max: 5 },
+                            { id: 'tilawah_2', title: 'المحاولة 2', max: 5 },
+                            { id: 'tilawah_3', title: 'المحاولة 3', max: 5 }
+                        ]
+                    },
+                    {
+                        id: 'hifz',
+                        title: 'الحفظ',
+                        enabled: true,
+                        maxTotal: 15,
+                        slots: [
+                            { id: 'hifz_1', title: 'المحاولة 1', max: 5 },
+                            { id: 'hifz_2', title: 'المحاولة 2', max: 5 },
+                            { id: 'hifz_3', title: 'المحاولة 3', max: 5 }
+                        ]
+                    },
+                    {
+                        id: 'tajweed',
+                        title: 'التجويد',
+                        enabled: true,
+                        maxTotal: 10,
+                        slots: [
+                            { id: 'tajweed_1', title: 'المحاولة 1', max: 3 },
+                            { id: 'tajweed_2', title: 'المحاولة 2', max: 3 },
+                            { id: 'tajweed_3', title: 'المحاولة 3', max: 4 }
+                        ]
+                    }
                 ]
             },
             {
-                id: 'hifz',
-                title: 'الحفظ',
-                maxTotal: 15,
-                slots: [
-                    { id: 'hifz_1', title: 'المحاولة 1', max: 5 },
-                    { id: 'hifz_2', title: 'المحاولة 2', max: 5 },
-                    { id: 'hifz_3', title: 'المحاولة 3', max: 5 }
-                ]
-            },
-            {
-                id: 'tajweed',
-                title: 'التجويد',
-                maxTotal: 10,
-                slots: [
-                    { id: 'tajweed_1', title: 'المحاولة 1', max: 3 },
-                    { id: 'tajweed_2', title: 'المحاولة 2', max: 3 },
-                    { id: 'tajweed_3', title: 'المحاولة 3', max: 4 }
-                ]
-            }
-        ];
-
-        let writtenSubSections = [
-            {
-                id: 'test1',
-                title: 'الاختبار الأول',
-                maxTotal: 20,
-                slots: [
-                    { id: 'test1_1', title: 'المحاولة 1', max: 7 },
-                    { id: 'test1_2', title: 'المحاولة 2', max: 7 },
-                    { id: 'test1_3', title: 'المحاولة 3', max: 6 }
-                ]
-            },
-            {
-                id: 'test2',
-                title: 'الاختبار الثاني',
-                maxTotal: 20,
-                slots: [
-                    { id: 'test2_1', title: 'المحاولة 1', max: 7 },
-                    { id: 'test2_2', title: 'المحاولة 2', max: 7 },
-                    { id: 'test2_3', title: 'المحاولة 3', max: 6 }
-                ]
-            },
-            {
-                id: 'test3',
-                title: 'الاختبار الثالث',
-                maxTotal: 20,
-                slots: [
-                    { id: 'test3_1', title: 'المحاولة 1', max: 7 },
-                    { id: 'test3_2', title: 'المحاولة 2', max: 7 },
-                    { id: 'test3_3', title: 'المحاولة 3', max: 6 }
+                id: 'written',
+                title: 'القسم التحريري',
+                enabled: true,
+                maxTotal: 60,
+                subSections: [
+                    {
+                        id: 'test1',
+                        title: 'الاختبار الأول',
+                        enabled: true,
+                        maxTotal: 20,
+                        slots: [
+                            { id: 'test1_1', title: 'المحاولة 1', max: 7 },
+                            { id: 'test1_2', title: 'المحاولة 2', max: 7 },
+                            { id: 'test1_3', title: 'المحاولة 3', max: 6 }
+                        ]
+                    },
+                    {
+                        id: 'test2',
+                        title: 'الاختبار الثاني',
+                        enabled: true,
+                        maxTotal: 20,
+                        slots: [
+                            { id: 'test2_1', title: 'المحاولة 1', max: 7 },
+                            { id: 'test2_2', title: 'المحاولة 2', max: 7 },
+                            { id: 'test2_3', title: 'المحاولة 3', max: 6 }
+                        ]
+                    },
+                    {
+                        id: 'test3',
+                        title: 'الاختبار الثالث',
+                        enabled: true,
+                        maxTotal: 20,
+                        slots: [
+                            { id: 'test3_1', title: 'المحاولة 1', max: 7 },
+                            { id: 'test3_2', title: 'المحاولة 2', max: 7 },
+                            { id: 'test3_3', title: 'المحاولة 3', max: 6 }
+                        ]
+                    }
                 ]
             }
         ];
@@ -551,6 +590,7 @@
                     const data = doc.data();
                     if (data.students) students = data.students;
                     if (data.classes && data.classes.length > 0) customClasses = data.classes;
+                    if (data.sectionsConfig) mainSectionsConfig = data.sectionsConfig;
                     
                     populateClassOptions();
                     renderTable();
@@ -566,6 +606,7 @@
                         const data = d.data();
                         if (data.students) students = data.students;
                         if (data.classes && data.classes.length > 0) customClasses = data.classes;
+                        if (data.sectionsConfig) mainSectionsConfig = data.sectionsConfig;
                     }
                     populateClassOptions();
                     renderTable();
@@ -659,16 +700,21 @@
             let oralTotal = 0;
             let writtenTotal = 0;
 
-            oralSubSections.forEach(sub => {
-                sub.slots.forEach(slot => {
-                    oralTotal += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
+            mainSectionsConfig.forEach(mainSec => {
+                if (!mainSec.enabled) return;
+                let secSum = 0;
+                mainSec.subSections.forEach(sub => {
+                    if (sub.enabled !== false) {
+                        sub.slots.forEach(slot => {
+                            secSum += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
+                        });
+                    }
                 });
-            });
-
-            writtenSubSections.forEach(sub => {
-                sub.slots.forEach(slot => {
-                    writtenTotal += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
-                });
+                if (mainSec.id === 'written') {
+                    writtenTotal = secSum;
+                } else {
+                    oralTotal += secSum;
+                }
             });
 
             let grandTotal = oralTotal + writtenTotal;
@@ -702,16 +748,16 @@
                     </div>
                     <div class="space-y-3">
                         <div class="bg-blue-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
-                            <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
+                            <span>القسم الشفوي (تلاوة، حفظ، تجويد)</span>
+                            <span class="font-black text-blue-900">${totals.oralTotal} درجة</span>
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم التحريري (الاختبار 1، 2، 3 - من 60)</span>
-                            <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
+                            <span>القسم التحريري (الاختبارات)</span>
+                            <span class="font-black text-purple-900">${totals.writtenTotal} درجة</span>
                         </div>
                     </div>
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-extrabold text-sm">المجموع النهائي (من 100):</span>
+                        <span class="font-extrabold text-sm">المجموع النهائي:</span>
                         <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
                 </div>`;
@@ -749,9 +795,9 @@
                             <tr class="bg-slate-900 text-white">
                                 <th class="p-2.5 text-center border w-12">#</th>
                                 <th class="p-2.5 border">اسم الطالب والصف</th>
-                                <th class="p-2.5 text-center border bg-blue-950">مجموع الشفوي (40)</th>
-                                <th class="p-2.5 text-center border bg-purple-950">مجموع التحريري (60)</th>
-                                <th class="p-2.5 text-center border bg-amber-900">المجموع الكلي النهائي (100)</th>
+                                <th class="p-2.5 text-center border bg-blue-950">مجموع الشفوي</th>
+                                <th class="p-2.5 text-center border bg-purple-950">مجموع التحريري</th>
+                                <th class="p-2.5 text-center border bg-amber-900">المجموع الكلي النهائي</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -767,8 +813,8 @@
                                 <div>${st.name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                             </td>
-                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20">${totals.oralTotal} / 40</td>
-                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20">${totals.writtenTotal} / 60</td>
+                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20">${totals.oralTotal}</td>
+                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20">${totals.writtenTotal}</td>
                             <td class="p-3 text-center border font-black text-amber-900 bg-amber-50/50">${totals.grandTotal} (${pct}%)</td>
                         </tr>
                     `;
@@ -820,7 +866,7 @@
                         </div>
                     </div>
                     <div class="md:col-span-2 space-y-2">
-                        <h4 class="font-extrabold text-xs text-slate-700 mb-3 border-b pb-1">📊 توزيع الطلاب حسب المستويات والألوان (من 100 درجة):</h4>
+                        <h4 class="font-extrabold text-xs text-slate-700 mb-3 border-b pb-1">📊 توزيع الطلاب حسب المستويات والألوان:</h4>
                         
                         <div class="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
                             <span class="text-xs font-bold text-emerald-900 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> ممتاز (90% - 100%)</span>
@@ -1117,7 +1163,6 @@
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
 
-            // الجدول يتكون من 6 صفوف لكل طالب (3 صفوف للشفوي: تلاوة، حفظ، تجويد | 3 صفوف للتحريري: الاختبار 1، الاختبار 2، الاختبار 3)
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25">#</th>
@@ -1148,19 +1193,31 @@
                 emptyState.classList.add('hidden');
             }
 
-            let allRowsList = [];
-            // دمج الأقسام الفرعية الشفوي والتحريري (6 أقسام فرعية إجمالاً)
-            let combinedSections = [
-                ...oralSubSections.map(s => ({ ...s, mainCat: 'oral', mainTitle: 'القسم الشفوي' })),
-                ...writtenSubSections.map(s => ({ ...s, mainCat: 'written', mainTitle: 'القسم التحريري' }))
-            ];
+            // تجميع الأقسام الفرعية المفعلة فقط
+            let activeSubSections = [];
+            mainSectionsConfig.forEach(mainSec => {
+                if (mainSec.enabled) {
+                    mainSec.subSections.forEach(sub => {
+                        if (sub.enabled !== false) {
+                            activeSubSections.push({ ...sub, mainCat: mainSec.id, mainTitle: mainSec.title });
+                        }
+                    });
+                }
+            });
+
+            let totalRowsCount = activeSubSections.length;
+            if (totalRowsCount === 0) {
+                tableBody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500 font-bold">لا توجد أقسام مفعلة حالياً. يرجى تفعيل الأقسام من قائمة الإعدادات.</td></tr>`;
+                emptyState.classList.add('hidden');
+                return;
+            }
 
             let rowsHTML = '';
             filteredStudents.forEach((st, idx) => {
                 const totals = calculateCategoryTotals(st);
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
-                combinedSections.forEach((sec, secIdx) => {
+                activeSubSections.forEach((sec, secIdx) => {
                     let isWritten = sec.mainCat === 'written';
                     let secSum = 0;
                     sec.slots.forEach(slot => {
@@ -1170,25 +1227,24 @@
                     let badgeClass = isWritten ? 'bg-purple-50/80 text-purple-900 border-purple-200' : 'bg-blue-50/80 text-blue-900 border-blue-200';
                     let iconClass = isWritten ? 'fa-pen-nib text-purple-600' : 'fa-microphone text-blue-600';
 
-                    // خط فاصل عريض بعد القسم الشفوي (الصف الثالث) لتمييز بداية القسم التحريري
-                    let rowClass = (secIdx === 5) ? 'student-divider bg-purple-50/10' : ((secIdx === 2) ? 'border-b-4 border-slate-800 bg-blue-50/10' : 'border-b border-slate-100 bg-white');
+                    let isLastRowOfStudent = (secIdx === totalRowsCount - 1);
+                    let rowClass = isLastRowOfStudent ? 'student-divider bg-slate-50/20' : 'border-b border-slate-100 bg-white';
 
                     rowsHTML += `<tr class="${rowClass} hover:bg-slate-50/50 transition text-slate-800 font-bold">`;
 
                     if (secIdx === 0) {
                         rowsHTML += `
-                            <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10" rowspan="6">${idx + 1}</td>
-                            <td class="p-3 sticky right-12 bg-white z-10 border-l border-slate-100" rowspan="6">
+                            <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10" rowspan="${totalRowsCount}">${idx + 1}</td>
+                            <td class="p-3 sticky right-12 bg-white z-10 border-l border-slate-100" rowspan="${totalRowsCount}">
                                 <div class="font-bold text-slate-900 text-xs">${st.name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                             </td>
-                            <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20" rowspan="6">
+                            <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20" rowspan="${totalRowsCount}">
                                 <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200/60">${st.className || '1/1'}</span>
                             </td>
                         `;
                     }
 
-                    // اسم القسم الفرعي (تلاوة، حفظ، تجويد، اختبار 1، اختبار 2، اختبار 3) مع تصنيفه الرئيسي
                     rowsHTML += `
                         <td class="p-2 text-right border-l ${badgeClass} text-xs font-black flex items-center justify-between gap-1">
                             <span class="flex items-center gap-1.5"><i class="fas ${iconClass}"></i> ${sec.title}</span>
@@ -1196,7 +1252,6 @@
                         </td>
                     `;
 
-                    // خلايا المحاولات الثلاث مع مسمياتها والدرجة العظمى
                     sec.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
                         rowsHTML += `
@@ -1210,7 +1265,6 @@
                         `;
                     });
 
-                    // مجموع القسم الفرعي
                     rowsHTML += `
                         <td class="p-2 text-center font-extrabold text-slate-900 bg-slate-100/60 border-r">
                             ${secSum} <span class="text-[9px] text-slate-400 font-normal">/${sec.maxTotal}</span>
@@ -1219,10 +1273,10 @@
 
                     if (secIdx === 0) {
                         rowsHTML += `
-                            <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-slate-200 text-sm" rowspan="6">
+                            <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-slate-200 text-sm" rowspan="${totalRowsCount}">
                                 ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
                             </td>
-                            <td class="p-2 text-center no-print bg-white" rowspan="6">
+                            <td class="p-2 text-center no-print bg-white" rowspan="${totalRowsCount}">
                                 <div class="flex flex-col items-center justify-center gap-1.5">
                                     <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
                                     <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
@@ -1267,6 +1321,62 @@
 
             if (classFilter) classFilter.innerHTML = classOptionsHTML;
             if (stdClassSelect) stdClassSelect.innerHTML = modalSelectHTML;
+        }
+
+        function openManageMainSectionsModal() {
+            renderMainSectionsList();
+            document.getElementById('manageMainSectionsModal').classList.remove('hidden');
+        }
+
+        function renderMainSectionsList() {
+            const container = document.getElementById('mainSectionsListContainer');
+            let html = '';
+
+            mainSectionsConfig.forEach((mainSec, mIdx) => {
+                html += `
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="mainSec_${mIdx}" ${mainSec.enabled !== false ? 'checked' : ''} onchange="toggleMainSection(${mIdx}, this.checked)" class="w-4 h-4 text-blue-600 rounded">
+                                <label for="mainSec_${mIdx}" class="font-black text-slate-900 text-xs">${mainSec.title} (مجموع الدرجات: ${mainSec.maxTotal})</label>
+                            </div>
+                            <span class="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 rounded-lg font-bold">قسم رئيسي</span>
+                        </div>
+                        <div class="space-y-2 pr-4">
+                `;
+
+                mainSec.subSections.forEach((sub, sIdx) => {
+                    html += `
+                        <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100 text-xs">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="subSec_${mIdx}_${sIdx}" ${sub.enabled !== false ? 'checked' : ''} onchange="toggleSubSection(${mIdx}, ${sIdx}, this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                                <span class="font-bold text-slate-800">${sub.title}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400">الدرجة العظمى: ${sub.maxTotal}</span>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function toggleMainSection(mIdx, isChecked) {
+            mainSectionsConfig[mIdx].enabled = isChecked;
+            renderMainSectionsList();
+            renderTable();
+            await saveAllToCloud();
+            showToast(`تم تحديث حالة ${mainSectionsConfig[mIdx].title}.`);
+        }
+
+        async function toggleSubSection(mIdx, sIdx, isChecked) {
+            mainSectionsConfig[mIdx].subSections[sIdx].enabled = isChecked;
+            renderMainSectionsList();
+            renderTable();
+            await saveAllToCloud();
+            showToast(`تم تحديث حالة القسم الفرعي.`);
         }
 
         async function deleteCurrentClassStudents() {
@@ -1483,16 +1593,16 @@
                     </div>
                     <div class="space-y-3">
                         <div class="bg-blue-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
-                            <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
+                            <span>القسم الشفوي (تلاوة، حفظ، تجويد)</span>
+                            <span class="font-black text-blue-900">${totals.oralTotal} درجة</span>
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم التحريري (الاختبار 1، 2، 3 - من 60)</span>
-                            <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
+                            <span>القسم التحريري (الاختبارات)</span>
+                            <span class="font-black text-purple-900">${totals.writtenTotal} درجة</span>
                         </div>
                     </div>
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-extrabold text-sm">المجموع الكلي النهائي (من 100):</span>
+                        <span class="font-extrabold text-sm">المجموع الكلي النهائي:</span>
                         <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
                 `;
@@ -1556,16 +1666,16 @@
 
                     <div class="space-y-3">
                         <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
-                            <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
+                            <span>القسم الشفوي (تلاوة، حفظ، تجويد)</span>
+                            <span class="font-black text-blue-900">${totals.oralTotal} درجة</span>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم التحريري (الاختبار 1، 2، 3 - من 60)</span>
-                            <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
+                            <span>القسم التحريري (الاختبارات)</span>
+                            <span class="font-black text-purple-900">${totals.writtenTotal} درجة</span>
                         </div>
                     </div>
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-extrabold text-sm">المجموع الكلي النهائي (من 100):</span>
+                        <span class="font-extrabold text-sm">المجموع الكلي النهائي:</span>
                         <span class="font-black text-lg">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
                 `;
@@ -1604,9 +1714,10 @@
                 await db.collection("app_data").doc("main_state").set({
                     students: students,
                     classes: customClasses,
+                    sectionsConfig: mainSectionsConfig,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ الأقسام والمحاولات بالسحابة بنجاح! 💾");
+                showToast("تم حفظ الإعدادات والدرجات بالسحابة بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
                 showToast("تعذرت المزامنة بالسحابة.", "error");
