@@ -331,7 +331,7 @@
             </div>
             <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50 font-black">
                 <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-black">
-                    💡 كل فرع يحسب أفضل محاولة، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
+                    💡 كل فرع يحسب أفضل محاولة بصيغة "الدرجة من الحد الأعلى"، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
                 </div>
                 <div id="sectionsConfigEditorContainer" class="space-y-6"></div>
             </div>
@@ -423,7 +423,6 @@
         </div>
     </div>
 
-    <!-- نافذة اختيار الفصل لنسخ روابط التقارير -->
     <div id="classLinksModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden font-black">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -812,7 +811,7 @@
                     <div class="border border-slate-300 rounded-xl overflow-hidden">
                         <div class="px-4 py-2 bg-slate-800 text-white font-black text-xs flex justify-between items-center">
                             <span><i class="fas ${mainSec.icon || 'fa-book'} ml-1.5 text-amber-300"></i> ${mainSec.title}</span>
-                            <span class="bg-slate-900 px-3 py-1 rounded-lg text-amber-300 text-xs font-black">المجموع الكلي الأفضل للقسم: ${secSum} / ${mainSec.maxTotal}</span>
+                            <span class="bg-slate-900 px-3 py-1 rounded-lg text-amber-300 text-xs font-black">المجموع الأفضل للقسم: ${secSum} من ${mainSec.maxTotal}</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-slate-50">
                 `;
@@ -820,6 +819,7 @@
                 mainSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let best = getBestSlotScore(std, col.slots);
+                    let colMax = col.slots.reduce((sum, s) => sum + s.max, 0); // مجموع الحد الأعلى للفرع إذا لزم، أو أقصى محاولة
                     reportHTML += `
                         <div class="p-3 rounded-xl border ${colColor} space-y-2">
                             <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between">
@@ -833,7 +833,7 @@
                         reportHTML += `
                             <div class="flex justify-between items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200">
                                 <span class="text-slate-600 font-black">${slot.title}</span>
-                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">/ ${slot.max}</span></span>
+                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">من ${slot.max}</span></span>
                             </div>
                         `;
                     });
@@ -892,7 +892,7 @@
                 });
 
                 html += `
-                                        <th class="p-3 bg-amber-950 text-amber-300 w-28 border-l border-slate-700">المجموع الكلي النهائي (100)</th>
+                                        <th class="p-3 bg-amber-950 text-amber-300 w-28 border-l border-slate-700">المجموع النهائي (من 100)</th>
                                         <th class="p-3 bg-slate-800 text-white w-28">إجراءات</th>
                                     </tr>
                                     <tr class="bg-slate-800 text-slate-200 text-[10px] text-center font-black">
@@ -903,7 +903,7 @@
                 twoRowsSectionsConfig.forEach(mainSec => {
                     mainSec.columns.forEach((col, cIdx) => {
                         let colColor = columnColors[cIdx % columnColors.length];
-                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle}</th>`;
+                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle} (الأفضل)</th>`;
                     });
                     html += `<th class="p-2 border-l border-slate-700 bg-emerald-900 text-emerald-300">مجموع القسم</th>`;
                 });
@@ -943,7 +943,7 @@
 
                     html += `
                             <td class="p-2 text-center border-l border-slate-300 bg-amber-50/60 font-black text-amber-900 text-sm">
-                                ${totals.grandTotal} <span class="text-[10px] text-amber-800 font-black">(${pct}%)</span>
+                                ${totals.grandTotal} من 100 <span class="text-[10px] text-amber-800 font-black">(${pct}%)</span>
                             </td>
                             <td class="p-2 text-center bg-slate-50 no-print">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -1092,7 +1092,7 @@
                             <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                         </div>
                         <div class="text-right">
-                            <span class="font-black text-slate-900">${st._score} / 100</span>
+                            <span class="font-black text-slate-900">${st._score} من 100</span>
                             <div class="text-[10px] font-black text-slate-500">(${st._pct}%)</div>
                         </div>
                     </div>
@@ -1543,7 +1543,7 @@
                 let currentSecSum = totals.sectionTotals[activeMainSectionIndex] || 0;
 
                 cardsHTML += `
-                    <div class="bg-white rounded-3xl p-6 shadow-custom border-2 border-slate-200/80 transition-all hover:border-blue-300 hover:shadow-xl space-y-5 my-6">
+                    <div class="bg-white rounded-3xl p-6 shadow-custom border-2 border-slate-200/85 transition-all hover:border-blue-300 hover:shadow-xl space-y-5 my-6">
                         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                             <div class="flex items-center gap-3.5">
                                 <div class="w-12 h-12 bg-blue-900 text-amber-300 rounded-2xl flex items-center justify-center font-black text-sm shadow-inner border border-blue-800">
@@ -1560,10 +1560,10 @@
                                     <i class="fas fa-layer-group text-blue-600 ml-1"></i> الفصل: ${st.className || '1/1'}
                                 </span>
                                 <span class="px-3.5 py-1.5 bg-indigo-50 text-indigo-900 rounded-xl border border-indigo-200 text-xs font-black shadow-2xs">
-                                    مجموع القسم الكلي الأفضل: <span class="text-indigo-700 font-black">${currentSecSum}</span>
+                                    مجموع القسم الأفضل: <span class="text-indigo-700 font-black">${currentSecSum} من ${currentSec.maxTotal}</span>
                                 </span>
                                 <span class="px-3.5 py-1.5 bg-amber-50 text-amber-900 rounded-xl border border-amber-200 text-xs font-black shadow-2xs">
-                                    المجموع النهائي الكلي: <span class="text-amber-700 font-black">${totals.grandTotal}</span> / 100 (${pct}%)
+                                    المجموع النهائي الكلي: <span class="text-amber-700 font-black">${totals.grandTotal}</span> من 100 (${pct}%)
                                 </span>
 
                                 <div class="flex items-center gap-2 mr-auto">
@@ -1584,7 +1584,7 @@
                         <div class="p-4 rounded-2xl border-2 ${colColor} space-y-3 shadow-2xs">
                             <div class="text-xs font-black border-b border-slate-200/60 pb-2 mb-2 flex justify-between items-center">
                                 <span class="text-slate-900 font-black">${col.subTitle}</span>
-                                <span class="text-[11px] bg-white px-2 py-0.5 rounded-lg border border-slate-200 text-blue-700 font-black">الأفضل: ${bestScore}</span>
+                                <span class="text-[11px] bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 text-blue-700 font-black shadow-2xs">الأفضل: ${bestScore}</span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
                     `;
@@ -1592,12 +1592,13 @@
                     col.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
                         cardsHTML += `
-                            <div class="text-center bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-400 transition">
-                                <div class="text-[10px] text-slate-500 font-black mb-1.5">${slot.title}</div>
+                            <div class="text-center bg-white p-2.5 rounded-xl border border-slate-200/85 shadow-2xs hover:border-blue-400 transition space-y-1">
+                                <div class="text-[10px] text-slate-500 font-black">${slot.title}</div>
                                 <input type="number" step="0.5" min="0" max="${slot.max}" 
                                     value="${scoreVal}" 
                                     onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
                                     class="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition" title="الحد الأقصى: ${slot.max}">
+                                <div class="text-[9px] text-slate-400 font-black tracking-tighter">من ${slot.max}</div>
                             </div>
                         `;
                     });
@@ -1908,7 +1909,7 @@
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
             const baseUrl = window.location.href.split('#')[0];
             const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي: *${totals.grandTotal}* من 100 (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
