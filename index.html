@@ -206,7 +206,7 @@
 
         <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse min-w-[1100px]" id="mainScoreTable">
+                <table class="w-full text-right border-collapse min-w-[1200px]" id="mainScoreTable">
                     <thead id="mainTableHead"></thead>
                     <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
                 </table>
@@ -483,7 +483,7 @@
 
         // الأقسام والدرجات مقسمة تماماً:
         // الشفوي (مجموعه 40): تلاوة، حفظ، تجويد
-        // التحريري (مجموعه 60): اختبار 1، اختبار 2 (تظهر مسمياتها بوضوح فوق بعضها)
+        // التحريري (مجموعه 60): اختبار 1، اختبار 2 (يظهر كل قسم بمسمه ومحاولاته في صف مستقل)
         let sections = [
             // الشفوي (40 درجة)
             {
@@ -516,7 +516,7 @@
                     { id: 'j3', title: 'المحاولة 3', max: 4 }
                 ]
             },
-            // التحريري (60 درجة) - اختبار 1 واختبار 2 بمسمياتهما الواضحة وتحت كل منهما 3 محاولات
+            // التحريري (60 درجة) - اختبار 1 واختبار 2 كأقسام مستقلة تماماً مثل الشفوي
             {
                 id: 'sec_w_test1',
                 title: 'اختبار 1',
@@ -832,19 +832,14 @@
                     let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
                     html += `
                         <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 text-center border text-slate-500 font-bold" rowspan="2">${idx + 1}</td>
+                            <td class="p-3 text-center border text-slate-500 font-bold">${idx + 1}</td>
                             <td class="p-2 border font-extrabold text-slate-900 bg-blue-50/30">
                                 <div>${st.name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                             </td>
-                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20" rowspan="2">${totals.oralTotal} / 40</td>
-                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20" rowspan="2">${totals.writtenTotal} / 60</td>
-                            <td class="p-3 text-center border font-black text-amber-900 bg-amber-50/50" rowspan="2">${totals.grandTotal} (${pct}%)</td>
-                        </tr>
-                        <tr class="student-divider bg-slate-50/60">
-                            <td class="p-2 border text-[11px] text-slate-600 font-semibold">
-                                <span class="px-2 py-0.5 bg-purple-100 text-purple-800 rounded font-bold ml-1">التحريري</span> (اختبار 1 واختبار 2)
-                            </td>
+                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20">${totals.oralTotal} / 40</td>
+                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20">${totals.writtenTotal} / 60</td>
+                            <td class="p-3 text-center border font-black text-amber-900 bg-amber-50/50">${totals.grandTotal} (${pct}%)</td>
                         </tr>
                     `;
                 });
@@ -1192,50 +1187,33 @@
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
 
-            let oralSections = sections.filter(s => s.category !== 'written');
-            let writtenSections = sections.filter(s => s.category === 'written');
+            // دمج كافة الأقسام (الشفوي والتحريري) لعرض كل قسم في صف مستقل لكل طالب بمسمياته ومحاولاته وحقول درجاته
+            let allSections = sections;
 
-            // رأس الجدول: يعرض أقسام الشفوي ثم أقسام التحريري مع ظهور مسميات الأقسام بوضوح في الأعلى لكل عمود
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
-                    <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25" rowspan="2">#</th>
-                    <th class="p-3 w-48 sticky right-12 bg-slate-900 z-25" rowspan="2">اسم الطالب</th>
-                    <th class="p-3 w-20 text-center" rowspan="2">الفصل</th>
-                    <th class="p-3 text-center bg-slate-800 w-36" rowspan="2">نوع التقييم والقسم</th>
+                    <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25">#</th>
+                    <th class="p-3 w-48 sticky right-12 bg-slate-900 z-25">اسم الطالب</th>
+                    <th class="p-3 w-20 text-center">الفصل</th>
+                    <th class="p-3 text-center bg-slate-800 w-44">اسم القسم (شفوي أو تحريري)</th>
             `;
 
-            oralSections.forEach(sec => {
-                let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
-                headerHTML += `<th class="p-2 text-center bg-blue-950 border-r border-slate-800 text-blue-200" colspan="${sec.slots.length + 1}">${sec.title} (${secMax})</th>`;
+            // نحسب أقصى عدد محاولات لأي قسم لتوحيد الأعمدة
+            let maxSlotsCount = 0;
+            allSections.forEach(sec => {
+                if (sec.slots.length > maxSlotsCount) maxSlotsCount = sec.slots.length;
             });
 
-            writtenSections.forEach(sec => {
-                let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
-                headerHTML += `<th class="p-2 text-center bg-purple-950 border-r border-slate-800 text-purple-200" colspan="${sec.slots.length + 1}">${sec.title} (${secMax})</th>`;
-            });
+            for (let i = 1; i <= maxSlotsCount; i++) {
+                headerHTML += `<th class="p-2 text-center bg-slate-800 border-r border-slate-700">المحاولة ${i}</th>`;
+            }
 
             headerHTML += `
-                    <th class="p-3 text-center bg-amber-900/60 text-amber-300 border-r border-slate-800" rowspan="2">المجموع الكلي النهائي (100)</th>
-                    <th class="p-3 text-center bg-slate-900 no-print w-28" rowspan="2">خيارات</th>
+                    <th class="p-3 text-center bg-slate-800 border-r border-slate-700">مجموع القسم</th>
+                    <th class="p-3 text-center bg-amber-900/60 text-amber-300 border-r border-slate-800">المجموع الكلي النهائي (100)</th>
+                    <th class="p-3 text-center bg-slate-900 no-print w-20">خيارات</th>
                 </tr>
-                <tr class="bg-slate-800 text-slate-300 text-[10px] font-bold">
             `;
-
-            oralSections.forEach(sec => {
-                sec.slots.forEach(slot => {
-                    headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title} (${slot.max})</th>`;
-                });
-                headerHTML += `<th class="p-1.5 text-center bg-blue-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع الشفوي (40)</th>`;
-            });
-
-            writtenSections.forEach(sec => {
-                sec.slots.forEach(slot => {
-                    headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title} (${slot.max})</th>`;
-                });
-                headerHTML += `<th class="p-1.5 text-center bg-purple-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع ${sec.title}</th>`;
-            });
-
-            headerHTML += `</tr>`;
             tableHead.innerHTML = headerHTML;
 
             const filteredStudents = students.filter(st => {
@@ -1256,92 +1234,88 @@
             filteredStudents.forEach((st, idx) => {
                 const totals = calculateCategoryTotals(st);
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
+                let rowSpanCount = allSections.length;
 
-                // 1. السطر الأول للطالب: قسم الشفوي بمسمياته (تلاوة، حفظ، تجويد) ومجموعه 40
-                rowsHTML += `
-                    <tr class="bg-white hover:bg-blue-50/10 transition text-slate-800 font-bold border-t border-slate-200">
-                        <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10" rowspan="2">${idx + 1}</td>
-                        <td class="p-3 sticky right-12 bg-white z-10 border-l border-slate-100" rowspan="2">
-                            <div class="font-bold text-slate-900 text-xs">${st.name}</div>
-                            <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
-                        </td>
-                        <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20" rowspan="2">
-                            <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200/60">${st.className || '1/1'}</span>
-                        </td>
-                        <td class="p-2.5 text-center bg-blue-50/60 text-blue-900 text-xs font-black border-l border-b">
-                            <i class="fas fa-microphone text-blue-600 ml-1"></i> الشفوي (40 درجة)
-                        </td>
-                `;
-
-                oralSections.forEach(sec => {
+                allSections.forEach((sec, secIdx) => {
+                    let isWritten = sec.category === 'written';
+                    let secSum = 0;
                     sec.slots.forEach(slot => {
-                        let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
+                        secSum += parseFloat(st.scores && st.scores[slot.id] !== undefined ? st.scores[slot.id] : 0) || 0;
+                    });
+
+                    let badgeClass = isWritten ? 'bg-purple-50/80 text-purple-900 border-purple-200' : 'bg-blue-50/80 text-blue-900 border-blue-200';
+                    let iconClass = isWritten ? 'fa-pen-nib text-purple-600' : 'fa-microphone text-blue-600';
+                    let categoryLabel = isWritten ? 'تحريري' : 'شفوي';
+
+                    rowsHTML += `
+                        <tr class="${secIdx === rowSpanCount - 1 ? 'student-divider' : 'border-b border-slate-100'} bg-white hover:bg-slate-50/50 transition text-slate-800 font-bold">
+                    `;
+
+                    if (secIdx === 0) {
                         rowsHTML += `
-                            <td class="p-1 text-center border-r border-b border-slate-100 bg-blue-50/10">
-                                <input type="number" step="0.5" min="0" max="${slot.max}" 
-                                    value="${scoreVal}" 
-                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                    class="w-12 text-center py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white transition">
+                            <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10" rowspan="${rowSpanCount}">${idx + 1}</td>
+                            <td class="p-3 sticky right-12 bg-white z-10 border-l border-slate-100" rowspan="${rowSpanCount}">
+                                <div class="font-bold text-slate-900 text-xs">${st.name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
+                            </td>
+                            <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20" rowspan="${rowSpanCount}">
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200/60">${st.className || '1/1'}</span>
                             </td>
                         `;
-                    });
-                    let secSum = totals.oralSectionTotals[sec.id] || 0;
-                    rowsHTML += `<td class="p-2 text-center bg-blue-100/60 font-extrabold text-blue-900 border-r border-b border-slate-200">${secSum}</td>`;
-                });
+                    }
 
-                writtenSections.forEach(sec => {
-                    sec.slots.forEach(() => {
-                        rowsHTML += `<td class="bg-slate-50/20 border-r border-b"></td>`;
-                    });
-                    rowsHTML += `<td class="bg-slate-50/30 border-r border-b"></td>`;
-                });
-
-                rowsHTML += `
-                        <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-b border-slate-200 text-sm" rowspan="2">
-                            ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
+                    // اسم القسم ومسمياه الواضحة (مثل تلاوة، حفظ، تجويد، اختبار 1، اختبار 2)
+                    rowsHTML += `
+                        <td class="p-2.5 text-right border-l ${badgeClass} text-xs font-black flex items-center justify-between gap-1">
+                            <span class="flex items-center gap-1.5"><i class="fas ${iconClass}"></i> ${sec.title}</span>
+                            <span class="text-[9px] px-1.5 py-0.5 bg-white/80 rounded border">${categoryLabel}</span>
                         </td>
-                        <td class="p-2 text-center no-print bg-white" rowspan="2">
-                            <div class="flex flex-col items-center justify-center gap-1">
-                                <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
-                                <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
-                                <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>
-                            </div>
+                    `;
+
+                    // خلايا محاولات الدرجات الخاصة بالقسم
+                    for (let i = 0; i < maxSlotsCount; i++) {
+                        let slot = sec.slots[i];
+                        if (slot) {
+                            let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
+                            rowsHTML += `
+                                <td class="p-1 text-center border-r border-slate-100">
+                                    <div class="text-[9px] text-slate-400 mb-0.5">${slot.title} (${slot.max})</div>
+                                    <input type="number" step="0.5" min="0" max="${slot.max}" 
+                                        value="${scoreVal}" 
+                                        onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
+                                        class="w-14 text-center py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white transition">
+                                </td>
+                            `;
+                        } else {
+                            rowsHTML += `<td class="p-1 text-center border-r border-slate-100 bg-slate-50/20"></td>`;
+                        }
+                    }
+
+                    // مجموع القسم
+                    let maxSecPossible = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
+                    rowsHTML += `
+                        <td class="p-2 text-center font-extrabold text-slate-900 bg-slate-100/60 border-r">
+                            ${secSum} <span class="text-[9px] text-slate-400 font-normal">/${maxSecPossible}</span>
                         </td>
-                    </tr>
-                `;
+                    `;
 
-                // 2. السطر الثاني للطالب (تحته مباشرة): قسم التحريري ومسمياته ("اختبار 1" و "اختبار 2" و 3 محاولات لكل منهما)
-                rowsHTML += `
-                    <tr class="student-divider bg-purple-50/20 hover:bg-purple-50/40 transition text-slate-800 font-bold">
-                        <td class="p-2.5 text-center bg-purple-50/60 text-purple-900 text-xs font-black border-l">
-                            <i class="fas fa-pen-nib text-purple-600 ml-1"></i> التحريري (اختبار 1 و 2)
-                        </td>
-                `;
-
-                oralSections.forEach(sec => {
-                    sec.slots.forEach(() => {
-                        rowsHTML += `<td class="bg-slate-50/20 border-r"></td>`;
-                    });
-                    rowsHTML += `<td class="bg-slate-50/30 border-r"></td>`;
-                });
-
-                writtenSections.forEach(sec => {
-                    sec.slots.forEach(slot => {
-                        let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
+                    if (secIdx === 0) {
                         rowsHTML += `
-                            <td class="p-1 text-center border-r border-slate-100 bg-purple-50/10">
-                                <input type="number" step="0.5" min="0" max="${slot.max}" 
-                                    value="${scoreVal}" 
-                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                    class="w-12 text-center py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-600 focus:bg-white transition">
+                            <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-slate-200 text-sm" rowspan="${rowSpanCount}">
+                                ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
+                            </td>
+                            <td class="p-2 text-center no-print bg-white" rowspan="${rowSpanCount}">
+                                <div class="flex flex-col items-center justify-center gap-1">
+                                    <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
+                                    <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
+                                    <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>
+                                </div>
                             </td>
                         `;
-                    });
-                    let secSum = totals.writtenSectionTotals[sec.id] || 0;
-                    rowsHTML += `<td class="p-2 text-center bg-purple-100/60 font-extrabold text-purple-900 border-r border-slate-200">${secSum}</td>`;
-                });
+                    }
 
-                rowsHTML += `</tr>`;
+                    rowsHTML += `</tr>`;
+                });
             });
             tableBody.innerHTML = rowsHTML;
         }
@@ -1902,7 +1876,7 @@
                     classes: customClasses,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ مسميات الأقسام الشفوي والتحريري وتحديث السحابة بنجاح! 💾");
+                showToast("تم حفظ مسميات أقسام التحريري والشفوي ومحاولاتها وتحديث السحابة بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
                 showToast("تعذرت المزامنة بالسحابة.", "error");
