@@ -389,7 +389,7 @@
     <div id="manageSectionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-sliders-h text-amber-400"></i> إدارة الأقسام والمحاولات (المطابقة)</h3>
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-sliders-h text-amber-400"></i> إدارة الأقسام والمحاولات</h3>
                 <button onclick="closeModal('manageSectionsModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-6 flex-1">
@@ -406,7 +406,7 @@
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-end gap-3">
                     <div class="flex-1 min-w-[200px]">
                         <label class="block text-xs font-bold text-slate-700 mb-1">اسم القسم الجديد</label>
-                        <input type="text" id="newSecTitleInput" placeholder="مثال: الاختبار التحريري النهائي" class="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                        <input type="text" id="newSecTitleInput" placeholder="مثال: اختبار 3" class="w-full p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
                     </div>
                     <div class="w-40">
                         <label class="block text-xs font-bold text-slate-700 mb-1">القسم المستهدف</label>
@@ -484,7 +484,9 @@
         let activeChartInstance = null;
         let activeSectionTab = 'oral';
 
-        // الأقسام والدرجات مقسمة تماماً: الشفوي (مجموعه 40) والتحريري (مجموعه 60 طبق الأصل في الأقسام)
+        // الأقسام والدرجات مقسمة تماماً:
+        // الشفوي (مجموعه 40): يحتوي على أقسام مثل تلاوة، حفظ، تجويد
+        // التحريري (مجموعه 60): يحتوي على "اختبار 1" و "اختبار 2" وتحت كل منهما 3 محاولات تماماً مثل الشفوي
         let sections = [
             // الشفوي (40 درجة)
             {
@@ -517,35 +519,25 @@
                     { id: 'j3', title: 'المحاولة 3', max: 4 }
                 ]
             },
-            // التحريري (60 درجة) - نسخة مطابقة للأقسام ولكن مجموعها 60
+            // التحريري (60 درجة) - مسميات "اختبار 1" و "اختبار 2" وتحت كل منهما 3 محاولات
             {
-                id: 'sec_w_recitation',
-                title: 'تلاوة القرآن الكريم (تحريري)',
+                id: 'sec_w_test1',
+                title: 'اختبار 1',
                 category: 'written',
                 slots: [
-                    { id: 'wt1', title: 'المحاولة 1', max: 7 },
-                    { id: 'wt2', title: 'المحاولة 2', max: 7 },
-                    { id: 'wt3', title: 'المحاولة 3', max: 6 }
+                    { id: 'wt1_1', title: 'المحاولة 1', max: 10 },
+                    { id: 'wt1_2', title: 'المحاولة 2', max: 10 },
+                    { id: 'wt1_3', title: 'المحاولة 3', max: 10 }
                 ]
             },
             {
-                id: 'sec_w_memorization',
-                title: 'حفظ القرآن الكريم (تحريري)',
+                id: 'sec_w_test2',
+                title: 'اختبار 2',
                 category: 'written',
                 slots: [
-                    { id: 'wh1', title: 'المحاولة 1', max: 7 },
-                    { id: 'wh2', title: 'المحاولة 2', max: 7 },
-                    { id: 'wh3', title: 'المحاولة 3', max: 6 }
-                ]
-            },
-            {
-                id: 'sec_w_tajweed',
-                title: 'أحكام التجويد والترتيل (تحريري)',
-                category: 'written',
-                slots: [
-                    { id: 'wj1', title: 'المحاولة 1', max: 7 },
-                    { id: 'wj2', title: 'المحاولة 2', max: 7 },
-                    { id: 'wj3', title: 'المحاولة 3', max: 6 }
+                    { id: 'wt2_1', title: 'المحاولة 1', max: 10 },
+                    { id: 'wt2_2', title: 'المحاولة 2', max: 10 },
+                    { id: 'wt2_3', title: 'المحاولة 3', max: 10 }
                 ]
             }
         ];
@@ -855,7 +847,7 @@
                         </tr>
                         <tr class="student-divider bg-slate-50/60">
                             <td class="p-2 border text-[11px] text-slate-600 font-semibold">
-                                <span class="px-2 py-0.5 bg-purple-100 text-purple-800 rounded font-bold ml-1">التحريري</span> (نسخة مطابقة للشفوي من 60)
+                                <span class="px-2 py-0.5 bg-purple-100 text-purple-800 rounded font-bold ml-1">التحريري</span> (اختبار 1 واختبار 2 من 60)
                             </td>
                         </tr>
                     `;
@@ -1207,18 +1199,24 @@
             let oralSections = sections.filter(s => s.category !== 'written');
             let writtenSections = sections.filter(s => s.category === 'written');
 
-            // رأس الجدول الموحد للقسمين المتطابقين (الشفوي والتحريري)
+            // دمج الأعمدة العلوية لكل من الشفوي والتحريري (الشفوي مجمعة ثم التحريري مجمعة بجانبها)
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-20" rowspan="2">#</th>
                     <th class="p-3 w-48 sticky right-12 bg-slate-900 z-20" rowspan="2">اسم الطالب</th>
                     <th class="p-3 w-20 text-center" rowspan="2">الفصل</th>
-                    <th class="p-3 text-center bg-slate-800 w-32" rowspan="2">نوع التقييم</th>
             `;
 
+            // رأس أقسام الشفوي
             oralSections.forEach(sec => {
                 let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
                 headerHTML += `<th class="p-2 text-center bg-blue-950 border-r border-slate-800 text-blue-200" colspan="${sec.slots.length + 1}">${sec.title} (${secMax})</th>`;
+            });
+
+            // رأس أقسام التحريري (اختبار 1 واختبار 2)
+            writtenSections.forEach(sec => {
+                let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
+                headerHTML += `<th class="p-2 text-center bg-purple-950 border-r border-slate-800 text-purple-200" colspan="${sec.slots.length + 1}">${sec.title} (${secMax})</th>`;
             });
 
             headerHTML += `
@@ -1228,11 +1226,20 @@
                 <tr class="bg-slate-800 text-slate-300 text-[10px] font-bold">
             `;
 
+            // محاولات أقسام الشفوي
             oralSections.forEach(sec => {
                 sec.slots.forEach(slot => {
                     headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title} (${slot.max})</th>`;
                 });
                 headerHTML += `<th class="p-1.5 text-center bg-blue-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع الشفوي (40)</th>`;
+            });
+
+            // محاولات أقسام التحريري (اختبار 1 واختبار 2)
+            writtenSections.forEach(sec => {
+                sec.slots.forEach(slot => {
+                    headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title} (${slot.max})</th>`;
+                });
+                headerHTML += `<th class="p-1.5 text-center bg-purple-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع ${sec.title}</th>`;
             });
 
             headerHTML += `</tr>`;
@@ -1257,27 +1264,25 @@
                 const totals = calculateCategoryTotals(st);
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
-                // الصف الأول للطالب: القسم الشفوي (من 40)
+                // صف واحد لكل طالب يجمع الشفوي والتحريري بجانب بعضهما في نفس السطر بدقة وسلاسة
                 rowsHTML += `
-                    <tr class="bg-white hover:bg-blue-50/20 transition text-slate-800 font-bold border-t border-slate-200">
-                        <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10" rowspan="2">${idx + 1}</td>
-                        <td class="p-3 sticky right-12 bg-white z-10 border-l border-slate-100" rowspan="2">
+                    <tr class="bg-white hover:bg-slate-50 transition text-slate-800 font-bold border-t border-slate-200">
+                        <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10">${idx + 1}</td>
+                        <td class="p-3 sticky right-12 bg-white z-10 border-l border-slate-100">
                             <div class="font-bold text-slate-900 text-xs">${st.name}</div>
                             <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                         </td>
-                        <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20" rowspan="2">
+                        <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20">
                             <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200/60">${st.className || '1/1'}</span>
-                        </td>
-                        <td class="p-2.5 text-center bg-blue-50/50 text-blue-900 text-xs font-black border-l border-b">
-                            <i class="fas fa-microphone text-blue-600 ml-1"></i> الشفوي (40)
                         </td>
                 `;
 
+                // إدخال درجات الشفوي
                 oralSections.forEach(sec => {
                     sec.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
                         rowsHTML += `
-                            <td class="p-1 text-center border-r border-b border-slate-100 bg-blue-50/10">
+                            <td class="p-1 text-center border-r border-slate-100 bg-blue-50/10">
                                 <input type="number" step="0.5" min="0" max="${slot.max}" 
                                     value="${scoreVal}" 
                                     onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
@@ -1286,31 +1291,10 @@
                         `;
                     });
                     let secSum = totals.oralSectionTotals[sec.id] || 0;
-                    rowsHTML += `<td class="p-2 text-center bg-blue-100/60 font-extrabold text-blue-900 border-r border-b border-slate-200">${secSum}</td>`;
+                    rowsHTML += `<td class="p-2 text-center bg-blue-100/60 font-extrabold text-blue-900 border-r border-slate-200">${secSum}</td>`;
                 });
 
-                rowsHTML += `
-                        <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-b border-slate-200 text-sm" rowspan="2">
-                            ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
-                        </td>
-                        <td class="p-2 text-center no-print bg-white" rowspan="2">
-                            <div class="flex flex-col items-center justify-center gap-1">
-                                <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
-                                <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
-                                <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-
-                // الصف الثاني للطالب: القسم التحريري (نسخة مطابقة تحت الشفوي بـ 60 درجة والمحاولات المقابلة)
-                rowsHTML += `
-                    <tr class="student-divider bg-slate-50/60 hover:bg-purple-50/20 transition text-slate-800 font-bold">
-                        <td class="p-2.5 text-center bg-purple-50/50 text-purple-900 text-xs font-black border-l">
-                            <i class="fas fa-pen-nib text-purple-600 ml-1"></i> التحريري (60)
-                        </td>
-                `;
-
+                // إدخال درجات التحريري (اختبار 1 واختبار 2)
                 writtenSections.forEach(sec => {
                     sec.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
@@ -1327,7 +1311,19 @@
                     rowsHTML += `<td class="p-2 text-center bg-purple-100/60 font-extrabold text-purple-900 border-r border-slate-200">${secSum}</td>`;
                 });
 
-                rowsHTML += `</tr>`;
+                rowsHTML += `
+                        <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-slate-200 text-sm">
+                            ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
+                        </td>
+                        <td class="p-2 text-center no-print bg-white">
+                            <div class="flex items-center justify-center gap-1">
+                                <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
+                                <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
+                                <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
             tableBody.innerHTML = rowsHTML;
         }
@@ -1640,16 +1636,16 @@
                 title: title,
                 category: category,
                 slots: [
-                    { id: secId + '_1', title: 'المحاولة 1', max: 7 },
-                    { id: secId + '_2', title: 'المحاولة 2', max: 7 },
-                    { id: secId + '_3', title: 'المحاولة 3', max: 6 }
+                    { id: secId + '_1', title: 'المحاولة 1', max: 10 },
+                    { id: secId + '_2', title: 'المحاولة 2', max: 10 },
+                    { id: secId + '_3', title: 'المحاولة 3', max: 10 }
                 ]
             });
             input.value = '';
             renderSectionsConfig();
             renderTable();
             await saveAllToCloud();
-            showToast("تمت إضافة القسم المطابق بنجاح!");
+            showToast("تمت إضافة القسم بنجاح!");
         }
 
         function openBulkImportModal() {
@@ -1846,7 +1842,7 @@
             detailsHTML += `
                     </div>
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="text-extrabold text-sm">المجموع الكلي النهائي (من 100):</span>
+                        <span class="font-extrabold text-sm">المجموع الكلي النهائي (من 100):</span>
                         <span class="font-black text-lg">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
                 `;
@@ -1888,7 +1884,7 @@
                     classes: customClasses,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ الأقسام المطابقة وتحديث السحابة بنجاح! 💾");
+                showToast("تم حفظ هيكل التحريري الجديد (اختبار 1 واختبار 2) وتحديث السحابة بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
                 showToast("تعذرت المزامنة بالسحابة.", "error");
