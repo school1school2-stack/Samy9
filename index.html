@@ -1348,6 +1348,7 @@
                 if (sec.columns.length > maxSubCols) maxSubCols = sec.columns.length;
             });
 
+            // تم إزالة تكرار عناوين الأعمدة في الشريط العلوي تماماً بناءً على طلبكم
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25 column-divider">#</th>
@@ -1356,11 +1357,9 @@
                     <th class="p-3 text-center bg-slate-800 w-36 column-divider">القسم الرئيسي</th>
             `;
 
-            let refColumns = twoRowsSectionsConfig[0] ? twoRowsSectionsConfig[0].columns : [];
             for (let i = 0; i < maxSubCols; i++) {
-                let title = refColumns[i] ? refColumns[i].subTitle : '';
                 let colorClass = columnColors[i % columnColors.length];
-                headerHTML += `<th class="p-3 text-center ${colorClass} column-divider">${title}</th>`;
+                headerHTML += `<th class="p-3 text-center ${colorClass} column-divider">#</th>`;
             }
 
             headerHTML += `
@@ -1423,7 +1422,7 @@
                         </td>
                     `;
 
-                    // تكرار الأعمدة وإعطاء لون مميز وخط فاصل متناسق لكل عمود
+                    // إظهار أسماء الأعمدة العلوية الفرعية هنا عند المحاولات فقط وعدم تكرارها في الشريط العلوي
                     for (let cIdx = 0; cIdx < maxSubCols; cIdx++) {
                         let col = mainSec.columns[cIdx];
                         let colColor = columnColors[cIdx % columnColors.length];
@@ -1448,7 +1447,7 @@
                             });
                             rowsHTML += `</div></td>`;
                         } else {
-                            // خانة فارغة متناسقة بلون مميز لتعويض عمود الاختبار القصير واختبار الفترة في القسم الثاني
+                            // خانة فارغة متناسقة لضبط توازي 4 مقابل 4 تماماً في القسم الثاني
                             rowsHTML += `
                                 <td class="p-1 text-center column-divider ${colColor} bg-opacity-40">
                                     <div class="h-10 flex items-center justify-center text-slate-300 font-bold text-xs">—</div>
