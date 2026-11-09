@@ -440,7 +440,6 @@
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
         let activeChartInstance = null;
 
-        // الألوان المخصصة لكل عمود على حدة لراحة العين
         const columnColors = [
             'bg-sky-50 text-sky-900 border-sky-200',      
             'bg-emerald-50 text-emerald-900 border-emerald-200', 
@@ -1345,7 +1344,6 @@
                 if (sec.columns.length > maxSubCols) maxSubCols = sec.columns.length;
             });
 
-            // تم استبدال الهاشتاج بعنوان تفاصيل التقييمات الشامل لكل الأعمدة الفرعية
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25 column-divider">#</th>
@@ -1437,7 +1435,7 @@
                                         <input type="number" step="0.5" min="0" max="${slot.max}" 
                                             value="${scoreVal}" 
                                             onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                            class="w-11 text-center py-1 bg-white border border-slate-300 rounded text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 transition shadow-sm" title="الدرجة العظمى: ${slot.max}">
+                                            class="w-11 text-center py-1 bg-white border border-slate-300 rounded text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 transition shadow-sm" title="الدرجة العظمى المسموحة: ${slot.max}">
                                     </div>
                                 `;
                             });
@@ -1482,7 +1480,12 @@
             let numericVal = parseFloat(val);
             if (isNaN(numericVal)) numericVal = 0;
             if (numericVal < 0) numericVal = 0;
-            if (numericVal > maxVal) numericVal = maxVal;
+            
+            // التحقق من تجاوز الدرجة العظمى المحددة في الإعدادات ومنعها
+            if (numericVal > maxVal) {
+                showToast(`عذراً، الدرجة المدخلة أكبر من المسموح (الحد الأقصى لهذه المحاولة: ${maxVal})! ⚠️`, "error");
+                numericVal = maxVal; // إعادة ضبطها للحد الأقصى أو يمكنك تركها فارغة بحسب رغبتك
+            }
 
             let std = students.find(s => s.id === stdId);
             if (std) {
