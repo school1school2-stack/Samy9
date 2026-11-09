@@ -31,7 +31,6 @@
         }
     </style>
     
-    <!-- الفحص الفوري لرابط الطالب أو تقارير الفصل المباشرة -->
     <script>
         (function() {
             const hash = window.location.hash;
@@ -59,14 +58,12 @@
 </head>
 <body class="min-h-screen pb-24" onclick="closeAllDropdowns(event)">
 
-    <!-- زر العودة الثابت للمنصة -->
     <div id="globalBackToPlatformBtn" class="fixed top-4 right-4 z-50 hidden no-print">
         <a href="./" onclick="backToPlatform(event)" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 rounded-xl text-xs font-black shadow-2xl border border-slate-700 flex items-center gap-2 transition transform hover:scale-105">
             <i class="fas fa-arrow-right"></i> العودة للمنصة الرئيسية
         </a>
     </div>
 
-    <!-- Top Navigation Tabs -->
     <div id="mainNavbar" class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
             <div class="flex items-center gap-2 font-black text-amber-400 text-sm md:text-base">
@@ -84,7 +81,6 @@
         </div>
     </div>
 
-    <!-- Header Banner -->
     <header id="mainHeaderBanner" class="bg-royal-header text-white py-8 px-4 shadow-lg no-print">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex items-center gap-4 text-center md:text-right">
@@ -102,7 +98,6 @@
         </div>
     </header>
 
-    <!-- TEACHER DASHBOARD -->
     <div id="teacherView" class="max-w-7xl mx-auto px-4 mt-6">
         <div class="bg-white rounded-2xl p-4 md:p-5 shadow-custom mb-6 border border-slate-100 no-print">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -148,7 +143,6 @@
                         </div>
                     </div>
 
-                    <!-- قائمة التقارير المنسدلة -->
                     <div class="relative inline-block text-right">
                         <button onclick="toggleDropdown('reportsDropdown', event)" class="px-3.5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-file-alt"></i> التقارير والطباعة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
@@ -218,7 +212,6 @@
         </div>
     </div>
 
-    <!-- STUDENT VIEW -->
     <div id="studentView" class="max-w-xl mx-auto px-4 mt-12 hidden">
         <div class="bg-white rounded-2xl shadow-custom p-6 md:p-8 border border-slate-100 space-y-6">
             <div class="text-center border-b pb-4">
@@ -253,7 +246,6 @@
         </div>
     </div>
 
-    <!-- DIRECT STUDENT REPORT VIEW -->
     <div id="directStudentReportView" class="max-w-lg mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -269,7 +261,6 @@
         </div>
     </div>
 
-    <!-- DIRECT CLASS REPORT VIEW -->
     <div id="directClassReportView" class="max-w-4xl mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -283,7 +274,6 @@
         </div>
     </div>
 
-    <!-- DIRECT CHART REPORT VIEW -->
     <div id="directChartReportView" class="max-w-4xl mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-purple-900 text-white px-6 py-4 flex items-center justify-between">
@@ -297,7 +287,6 @@
         </div>
     </div>
 
-    <!-- MODAL: CLASS REPORT SELECTOR -->
     <div id="classReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -317,7 +306,6 @@
         </div>
     </div>
 
-    <!-- MODAL: MANAGE SECTIONS & GRADES -->
     <div id="manageSectionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -337,7 +325,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer id="mainFooter" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-bold border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="w-full text-center">
@@ -346,7 +333,6 @@
         </div>
     </footer>
 
-    <!-- MODAL: ADD STUDENT -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -386,7 +372,6 @@
         </div>
     </div>
 
-    <!-- MODAL: MANAGE CLASSES -->
     <div id="manageClassesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -404,7 +389,6 @@
         </div>
     </div>
 
-    <!-- MODAL: BULK IMPORT -->
     <div id="bulkImportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -422,7 +406,6 @@
         </div>
     </div>
 
-    <!-- MODAL: REPORT -->
     <div id="reportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -443,13 +426,11 @@
         </div>
     </div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-12 right-5 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 text-xs font-bold border border-slate-700">
         <i id="toastIcon" class="fas fa-check-circle text-emerald-400 text-base"></i>
         <span id="toastMessage">تمت العملية بنجاح</span>
     </div>
 
-    <!-- SCRIPT LOGIC -->
     <script>
         let students = [];
         let allowedStudentsCache = [];
@@ -458,53 +439,73 @@
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
         let activeChartInstance = null;
 
-        // الهيكل الافتراضي التفصيلي القابل للتعديل بالكامل
+        // الهيكل الافتراضي بالمسميات الدقيقة تماماً كما طلبت وفي الصورة والصوت
         let twoRowsSectionsConfig = [
             {
                 id: 'oral',
-                title: 'القسم الشفوي',
+                title: 'تقويمات شفهية وتحريرية',
                 maxTotal: 40,
                 icon: 'fa-microphone',
                 badgeClass: 'bg-blue-50/80 text-blue-900 border-blue-200',
                 columns: [
-                    { subTitle: 'التلاوة', slots: [
+                    { subTitle: 'صحة القراءة', slots: [
                         { id: 'tilawah_1', title: 'محاولة 1', max: 5 },
                         { id: 'tilawah_2', title: 'محاولة 2', max: 5 },
                         { id: 'tilawah_3', title: 'محاولة 3', max: 5 }
                     ]},
-                    { subTitle: 'الحفظ', slots: [
+                    { subTitle: 'حفظ', slots: [
                         { id: 'hifz_1', title: 'محاولة 1', max: 5 },
                         { id: 'hifz_2', title: 'محاولة 2', max: 5 },
                         { id: 'hifz_3', title: 'محاولة 3', max: 5 }
                     ]},
-                    { subTitle: 'التجويد', slots: [
+                    { subTitle: 'تجويد', slots: [
                         { id: 'tajweed_1', title: 'محاولة 1', max: 3 },
                         { id: 'tajweed_2', title: 'محاولة 2', max: 3 },
                         { id: 'tajweed_3', title: 'محاولة 3', max: 4 }
+                    ]},
+                    { subTitle: 'ترتيل', slots: [
+                        { id: 'trtil_1', title: 'محاولة 1', max: 2 },
+                        { id: 'trtil_2', title: 'محاولة 2', max: 2 },
+                        { id: 'trtil_3', title: 'محاولة 3', max: 1 }
+                    ]},
+                    { subTitle: 'اختبار قصير', slots: [
+                        { id: 'test1_1', title: 'محاولة 1', max: 3 },
+                        { id: 'test1_2', title: 'محاولة 2', max: 2 },
+                        { id: 'test1_3', title: 'محاولة 3', max: 2 }
+                    ]},
+                    { subTitle: 'اختبار الفترة', slots: [
+                        { id: 'test2_1', title: 'محاولة 1', max: 3 },
+                        { id: 'test2_2', title: 'محاولة 2', max: 2 },
+                        { id: 'test2_3', title: 'محاولة 3', max: 2 }
                     ]}
                 ]
             },
             {
                 id: 'written',
-                title: 'القسم التحريري',
+                title: 'المهام الأدائية والمشاركة والتفاعل',
                 maxTotal: 60,
-                icon: 'fa-pen-nib',
+                icon: 'fa-tasks',
                 badgeClass: 'bg-purple-50/80 text-purple-900 border-purple-200',
                 columns: [
-                    { subTitle: 'الاختبار 1', slots: [
-                        { id: 'test1_1', title: 'محاولة 1', max: 7 },
-                        { id: 'test1_2', title: 'محاولة 2', max: 7 },
-                        { id: 'test1_3', title: 'محاولة 3', max: 6 }
+                    { subTitle: 'نشاط', slots: [
+                        { id: 'act_1', title: 'محاولة 1', max: 5 },
+                        { id: 'act_2', title: 'محاولة 2', max: 5 },
+                        { id: 'act_3', title: 'محاولة 3', max: 5 }
                     ]},
-                    { subTitle: 'الاختبار 2', slots: [
-                        { id: 'test2_1', title: 'محاولة 1', max: 7 },
-                        { id: 'test2_2', title: 'محاولة 2', max: 7 },
-                        { id: 'test2_3', title: 'محاولة 3', max: 6 }
+                    { subTitle: 'مشاركة', slots: [
+                        { id: 'part_1', title: 'محاولة 1', max: 5 },
+                        { id: 'part_2', title: 'محاولة 2', max: 5 },
+                        { id: 'part_3', title: 'محاولة 3', max: 5 }
                     ]},
-                    { subTitle: 'الاختبار 3', slots: [
-                        { id: 'test3_1', title: 'محاولة 1', max: 7 },
-                        { id: 'test3_2', title: 'محاولة 2', max: 7 },
-                        { id: 'test3_3', title: 'محاولة 3', max: 6 }
+                    { subTitle: 'واجبات', slots: [
+                        { id: 'hw_1', title: 'محاولة 1', max: 5 },
+                        { id: 'hw_2', title: 'محاولة 2', max: 5 },
+                        { id: 'hw_3', title: 'محاولة 3', max: 5 }
+                    ]},
+                    { subTitle: 'بحوث', slots: [
+                        { id: 'res_1', title: 'محاولة 1', max: 5 },
+                        { id: 'res_2', title: 'محاولة 2', max: 5 },
+                        { id: 'res_3', title: 'محاولة 3', max: 5 }
                     ]}
                 ]
             }
@@ -674,7 +675,7 @@
                         secSum += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
                     });
                 });
-                if (idx === 1 || mainSec.id === 'written' || mainSec.title.includes('التحريري')) {
+                if (idx === 1 || mainSec.id === 'written' || mainSec.title.includes('المهام الأدائية')) {
                     writtenTotal = secSum;
                 } else {
                     oralTotal = secSum;
@@ -1297,6 +1298,12 @@
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
 
+            // تحديد أقصى عدد للأعمدة الفرعية ديناميكياً لضمان المحاذاة المثالية
+            let maxSubCols = 0;
+            twoRowsSectionsConfig.forEach(sec => {
+                if (sec.columns.length > maxSubCols) maxSubCols = sec.columns.length;
+            });
+
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
                     <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25">#</th>
@@ -1306,9 +1313,10 @@
             `;
 
             let refColumns = twoRowsSectionsConfig[0] ? twoRowsSectionsConfig[0].columns : [];
-            refColumns.forEach(col => {
-                headerHTML += `<th class="p-3 text-center bg-slate-800 border-r border-slate-700">${col.subTitle}</th>`;
-            });
+            for (let i = 0; i < maxSubCols; i++) {
+                let title = refColumns[i] ? refColumns[i].subTitle : '';
+                headerHTML += `<th class="p-3 text-center bg-slate-800 border-r border-slate-700">${title}</th>`;
+            }
 
             headerHTML += `
                     <th class="p-3 text-center bg-slate-800 w-24 border-r border-slate-700">مجموع القسم</th>
@@ -1370,9 +1378,14 @@
                         </td>
                     `;
 
-                    mainSec.columns.forEach(col => {
+                    mainSec.columns.forEach((col, cIdx) => {
+                        let isLastCol = (cIdx === mainSec.columns.length - 1);
+                        let colspanAttr = (isLastCol && mainSec.columns.length < maxSubCols) 
+                            ? `colspan="${maxSubCols - mainSec.columns.length + 1}"` 
+                            : '';
+
                         rowsHTML += `
-                            <td class="p-1 text-center border-r border-slate-100 bg-slate-50/40">
+                            <td ${colspanAttr} class="p-1 text-center border-r border-slate-100 bg-slate-50/40">
                                 <div class="text-[9px] font-extrabold text-slate-700 mb-1 border-b pb-0.5">${col.subTitle}</div>
                                 <div class="flex items-center justify-center gap-1">
                         `;
