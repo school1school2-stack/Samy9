@@ -207,7 +207,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-right border-collapse" id="mainScoreTable">
                     <thead id="mainTableHead"></thead>
-                    <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
+                    <tbody id="mainTableBody" class="divide-y divide-slate-200 text-xs font-medium"></tbody>
                 </table>
             </div>
             <div id="table-empty-state" class="hidden p-12 text-center">
@@ -874,9 +874,9 @@
                     let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
                     html += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-2 text-center border text-slate-500 font-bold">${idx + 1}</td>
-                            <td class="p-2 border font-extrabold text-slate-900 bg-blue-50/20">
+                        <tr class="border-b border-slate-200 hover:bg-slate-50">
+                            <td class="p-2 text-center border border-slate-200 text-slate-500 font-bold">${idx + 1}</td>
+                            <td class="p-2 border border-slate-200 font-extrabold text-slate-900 bg-blue-50/20">
                                 <div>${st.name}</div>
                                 <div class="text-[9px] text-slate-400 font-mono">${st.email}</div>
                             </td>
@@ -889,15 +889,15 @@
                             col.slots.forEach(slot => {
                                 let scoreVal = st.scores && st.scores[slot.id] !== undefined ? st.scores[slot.id] : 0;
                                 secSum += parseFloat(scoreVal) || 0;
-                                subCellsHTML += `<td class="p-2 text-center border text-slate-800 font-bold">${scoreVal}</td>`;
+                                subCellsHTML += `<td class="p-2 text-center border border-slate-200 text-slate-800 font-bold">${scoreVal}</td>`;
                             });
                         });
                         html += subCellsHTML;
-                        html += `<td class="p-2 text-center border font-black text-blue-900 bg-blue-50/40">${secSum} / ${mainSec.maxTotal}</td>`;
+                        html += `<td class="p-2 text-center border border-slate-200 font-black text-blue-900 bg-blue-50/40">${secSum} / ${mainSec.maxTotal}</td>`;
                     });
 
                     html += `
-                            <td class="p-2 text-center border font-black text-amber-900 bg-amber-50/60">${totals.grandTotal} (${pct}%)</td>
+                            <td class="p-2 text-center border border-slate-200 font-black text-amber-900 bg-amber-50/60">${totals.grandTotal} (${pct}%)</td>
                         </tr>
                     `;
                 });
@@ -1473,20 +1473,20 @@
                 });
 
                 rowsHTML += `
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition text-slate-800 font-bold">
-                        <td class="p-3 text-center text-slate-400 font-bold border-l">${idx + 1}</td>
-                        <td class="p-3 border-l">
+                    <tr class="border-b border-slate-200 hover:bg-slate-50 transition text-slate-800 font-bold">
+                        <td class="p-3 text-center text-slate-400 font-bold border-l border-slate-200">${idx + 1}</td>
+                        <td class="p-3 border-l border-slate-200">
                             <div class="font-extrabold text-slate-900 text-xs">${st.name}</div>
                             <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                         </td>
-                        <td class="p-2 text-center border-l">
+                        <td class="p-2 text-center border-l border-slate-200">
                             <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-xs">${st.className || '1/1'}</span>
                         </td>
                 `;
 
                 currentSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
-                    rowsHTML += `<td class="p-2 text-center border-l ${colColor}"><div class="flex items-center justify-center gap-1.5 flex-wrap">`;
+                    rowsHTML += `<td class="p-2 text-center border-l border-slate-200 ${colColor}"><div class="flex items-center justify-center gap-1.5 flex-wrap">`;
                     
                     col.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
@@ -1505,7 +1505,7 @@
                 });
 
                 rowsHTML += `
-                        <td class="p-2 text-center border-l bg-blue-50/40 font-black text-blue-900 text-sm">
+                        <td class="p-2 text-center border-l border-slate-200 bg-blue-50/40 font-black text-blue-900 text-sm">
                             ${currentSecSum} <span class="text-[10px] text-slate-400 font-normal">/${currentSec.maxTotal}</span>
                         </td>
                         <td class="p-2 text-center bg-amber-50/60 font-black text-amber-900 text-sm">
