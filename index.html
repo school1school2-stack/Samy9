@@ -16,7 +16,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; font-weight: 700; }
+        body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; font-weight: 700; }
         .bg-royal-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%); }
         .shadow-custom { box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.08), 0 8px 10px -6px rgba(30, 58, 138, 0.03); }
         input[type=number]::-webkit-inner-spin-button, 
@@ -199,18 +199,16 @@
             <div id="sectionTabsContainer" class="flex flex-wrap items-center gap-2 mt-5 pt-4 border-t border-slate-100"></div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
-            <div id="activeSectionHeaderInfo" class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between text-xs font-black">
+        <!-- منطقة العرض الجديدة: كل طالب في بطاقة (أيقونة) مستقلة مع فراغ وفصل تام -->
+        <div class="space-y-4">
+            <div id="activeSectionHeaderInfo" class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl flex items-center justify-between text-xs font-black shadow-md">
                 <span id="activeSectionTitleText" class="flex items-center gap-2"><i class="fas fa-layer-group text-amber-400"></i> القسم النشط</span>
                 <span id="activeSectionBadgeText" class="bg-amber-400/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30">الدرجة العظمى</span>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse" id="mainScoreTable">
-                    <thead id="mainTableHead"></thead>
-                    <tbody id="mainTableBody" class="divide-y-2 divide-slate-300 text-xs font-black"></tbody>
-                </table>
-            </div>
-            <div id="table-empty-state" class="hidden p-12 text-center">
+
+            <div id="studentsCardsContainer" class="space-y-4"></div>
+
+            <div id="table-empty-state" class="hidden bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
                 <i class="fas fa-folder-open text-4xl text-slate-300 mb-3 block"></i>
                 <p class="text-slate-600 font-black">لا يوجد طلاب مضافين بحسب شروط البحث.</p>
                 <p class="text-slate-400 text-xs font-black mt-1">استخدم خيار "إضافة طالب" أو "سحب طلاب السحابة" لإضافة الطلاب.</p>
@@ -708,7 +706,7 @@
             const container = document.getElementById('sectionTabsContainer');
             if (!container) return;
 
-            let html = '<span class="text-xs font-black text-slate-500 ml-1">عرض القسم في الجدول:</span>';
+            let html = '<span class="text-xs font-black text-slate-500 ml-1">عرض القسم في البطاقات:</span>';
             twoRowsSectionsConfig.forEach((sec, idx) => {
                 let isActive = (activeMainSectionIndex === idx);
                 let btnClass = isActive 
@@ -1423,8 +1421,7 @@
         }
 
         function renderTable() {
-            const tableHead = document.getElementById('mainTableHead');
-            const tableBody = document.getElementById('mainTableBody');
+            const container = document.getElementById('studentsCardsContainer');
             const emptyState = document.getElementById('table-empty-state');
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
@@ -1438,27 +1435,6 @@
             document.getElementById('activeSectionTitleText').innerHTML = `<i class="fas ${currentSec.icon || 'fa-folder'} text-amber-300"></i> القسم النشط: ${currentSec.title}`;
             document.getElementById('activeSectionBadgeText').innerText = `الدرجة العظمى للقسم: ${currentSec.maxTotal} درجة`;
 
-            let headerHTML = `
-                <tr class="bg-slate-900 text-slate-200 text-[11px] font-black border-b-2 border-slate-700 text-center">
-                    <th class="p-3 w-12 border-l border-slate-700">#</th>
-                    <th class="p-3 text-right border-l border-slate-700 w-52">اسم الطالب والبريد</th>
-                    <th class="p-3 w-24 border-l border-slate-700">الفصل</th>
-            `;
-
-            currentSec.columns.forEach((col, cIdx) => {
-                let colorClass = columnColors[cIdx % columnColors.length];
-                // إظهار عنوان القسم الفرعي فقط (مثل: صحة القراءة، حفظ...) بدون سرد أسماء المحاولات في الهيدر
-                headerHTML += `<th class="p-3 border-l border-slate-700 ${colorClass} text-xs font-black">${col.subTitle}</th>`;
-            });
-
-            headerHTML += `
-                    <th class="p-3 bg-blue-950 text-white w-28 border-l border-slate-700">مجموع القسم</th>
-                    <th class="p-3 bg-amber-950 text-amber-300 w-28 border-l border-slate-700">المجموع الكلي (100)</th>
-                    <th class="p-3 bg-slate-800 text-white w-28">خيارات</th>
-                </tr>
-            `;
-            tableHead.innerHTML = headerHTML;
-
             const filteredStudents = students.filter(st => {
                 const matchSearch = !searchVal || st.name.toLowerCase().includes(searchVal) || st.email.toLowerCase().includes(searchVal);
                 const matchClass = (classVal === 'all') || (st.className === classVal);
@@ -1466,14 +1442,14 @@
             });
 
             if (filteredStudents.length === 0) {
-                tableBody.innerHTML = '';
+                container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             } else {
                 emptyState.classList.add('hidden');
             }
 
-            let rowsHTML = '';
+            let cardsHTML = '';
             filteredStudents.forEach((st, idx) => {
                 const totals = calculateCategoryTotals(st);
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
@@ -1485,55 +1461,71 @@
                     });
                 });
 
-                rowsHTML += `
-                    <tr class="border-b-2 border-slate-300 hover:bg-slate-50 transition text-slate-900 font-black">
-                        <td class="p-3 text-center text-slate-500 font-black border-l border-slate-300">${idx + 1}</td>
-                        <td class="p-3 border-l border-slate-300">
-                            <div class="font-black text-slate-900 text-xs">${st.name}</div>
-                            <div class="text-[10px] text-slate-500 font-mono font-black">${st.email}</div>
-                        </td>
-                        <td class="p-2 text-center border-l border-slate-300">
-                            <span class="px-2.5 py-1 bg-blue-50 text-blue-800 rounded-lg border border-blue-200 text-xs font-black">${st.className || '1/1'}</span>
-                        </td>
+                cardsHTML += `
+                    <div class="bg-white rounded-2xl p-5 shadow-custom border border-slate-200 transition hover:shadow-lg space-y-4">
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-800 rounded-xl flex items-center justify-center font-black text-xs shadow-inner">
+                                    ${idx + 1}
+                                </div>
+                                <div>
+                                    <div class="font-black text-slate-900 text-sm md:text-base">${st.name}</div>
+                                    <div class="text-[11px] text-slate-500 font-mono">${st.email}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="px-3 py-1 bg-blue-50 text-blue-800 rounded-xl border border-blue-200 text-xs font-black">
+                                    <i class="fas fa-layer-group text-blue-600 ml-1"></i> الفصل: ${st.className || '1/1'}
+                                </span>
+                                <span class="px-3.5 py-1 bg-blue-50/80 text-blue-900 rounded-xl border border-blue-200 text-xs font-black">
+                                    مجموع القسم: <span class="text-blue-700">${currentSecSum}</span> / ${currentSec.maxTotal}
+                                </span>
+                                <span class="px-3.5 py-1 bg-amber-50 text-amber-900 rounded-xl border border-amber-200 text-xs font-black">
+                                    المجموع الكلي: <span class="text-amber-700">${totals.grandTotal}</span> / 100 (${pct}%)
+                                </span>
+
+                                <div class="flex items-center gap-1.5 mr-auto">
+                                    <button onclick="openReportModal('${st.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-black transition flex items-center gap-1" title="تقرير الطالب"><i class="fas fa-file-invoice"></i> تقرير</button>
+                                    <button onclick="openEditStudentModal('${st.id}')" class="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-xl text-xs font-black transition flex items-center gap-1" title="تعديل"><i class="fas fa-edit"></i> تعديل</button>
+                                    <button onclick="deleteStudent('${st.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-black transition flex items-center gap-1" title="حذف"><i class="fas fa-trash-alt"></i> حذف</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${currentSec.columns.length} gap-3">
                 `;
 
                 currentSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
-                    rowsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor}"><div class="flex items-center justify-center gap-1.5 flex-wrap">`;
-                    
+                    cardsHTML += `
+                        <div class="p-3.5 rounded-xl border ${colColor} space-y-2">
+                            <div class="text-xs font-black border-b pb-1.5 mb-1.5 flex justify-between items-center">
+                                <span>${col.subTitle}</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                    `;
+
                     col.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
-                        rowsHTML += `
-                            <div class="text-center">
+                        cardsHTML += `
+                            <div class="text-center bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+                                <div class="text-[10px] text-slate-500 font-black mb-1">${slot.title}</div>
                                 <input type="number" step="0.5" min="0" max="${slot.max}" 
                                     value="${scoreVal}" 
                                     onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                    class="w-12 text-center py-1 bg-white border border-slate-300 rounded-lg text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition shadow-sm" title="الحد الأقصى: ${slot.max}">
+                                    class="w-full text-center py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition" title="الحد الأقصى: ${slot.max}">
                             </div>
                         `;
                     });
 
-                    rowsHTML += `</div></td>`;
+                    cardsHTML += `</div></div>`;
                 });
 
-                rowsHTML += `
-                        <td class="p-2 text-center border-l border-slate-300 bg-blue-50/40 font-black text-blue-900 text-sm">
-                            ${currentSecSum} <span class="text-[10px] text-slate-500 font-black">/${currentSec.maxTotal}</span>
-                        </td>
-                        <td class="p-2 text-center border-l border-slate-300 bg-amber-50/60 font-black text-amber-900 text-sm">
-                            ${totals.grandTotal} <span class="text-[10px] text-amber-800 font-black">(${pct}%)</span>
-                        </td>
-                        <td class="p-2 text-center bg-slate-50">
-                            <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="openReportModal('${st.id}')" class="p-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-xs" title="تقرير الطالب"><i class="fas fa-file-invoice"></i></button>
-                                <button onclick="openEditStudentModal('${st.id}')" class="p-1.5 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg text-xs" title="تعديل"><i class="fas fa-edit"></i></button>
-                                <button onclick="deleteStudent('${st.id}')" class="p-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs" title="حذف"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                cardsHTML += `</div></div>`;
             });
-            tableBody.innerHTML = rowsHTML;
+
+            container.innerHTML = cardsHTML;
         }
 
         async function updateStudentScore(stdId, slotId, val, maxVal) {
@@ -1582,7 +1574,7 @@
                 alert("يرجى اختيار فصل محدد من قائمة (كل الفصول) أولاً لحذف طلابه.");
                 return;
             }
-            if (confirm(`هل أنت متأكد من حذف جميع طلاب الفصل (${classFilterVal}) من الجدول؟`)) {
+            if (confirm(`هل أنت متأكد من حذف جميع طلاب الفصل (${classFilterVal})؟`)) {
                 students = students.filter(s => s.className !== classFilterVal);
                 renderTable();
                 await saveAllToCloud();
@@ -1591,11 +1583,11 @@
         }
 
         async function deleteAllStudentsConfirm() {
-            if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب من الجدول نهائياً؟")) {
+            if (confirm("تحذير تدميري: هل أنت متأكد من حذف جميع الطلاب نهائياً؟")) {
                 students = [];
                 renderTable();
                 await saveAllToCloud();
-                showToast("تم تصفية وحذف كافة الطلاب من الجدول.");
+                showToast("تم تصفية وحذف كافة الطلاب.");
             }
         }
 
@@ -1653,7 +1645,7 @@
             } else {
                 let exists = students.find(s => s.email.toLowerCase() === email.toLowerCase());
                 if (exists) {
-                    showToast("هذا الطالب مضاف بالفعل في الجدول.", "error");
+                    showToast("هذا الطالب مضاف بالفعل.", "error");
                     return;
                 }
                 students.push({
@@ -1673,7 +1665,7 @@
         }
 
         async function deleteStudent(stdId) {
-            if (confirm("هل أنت متأكد من حذف هذا الطالب من الكشف؟")) {
+            if (confirm("هل أنت متأكد من حذف هذا الطالب؟")) {
                 students = students.filter(s => s.id !== stdId);
                 renderTable();
                 await saveAllToCloud();
