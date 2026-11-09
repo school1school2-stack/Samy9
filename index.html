@@ -252,7 +252,7 @@
         </div>
     </div>
 
-    <div id="directStudentReportView" class="max-w-lg mx-auto px-4 mt-8 hidden">
+    <div id="directStudentReportView" class="max-w-6xl mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
                 <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-file-invoice text-amber-400"></i> تقرير متابعة درجات الطالب</h3>
@@ -280,7 +280,7 @@
         </div>
     </div>
 
-    <div id="directChartReportView" class="max-w-4xl mx-auto px-4 mt-8 hidden">
+    <div id="directChartReportView" class="max-w-6xl mx-auto px-4 mt-8 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-purple-900 text-white px-6 py-4 flex items-center justify-between">
                 <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-chart-pie text-amber-400"></i> التقرير التحليلي البياني والمستويات</h3>
@@ -741,21 +741,20 @@
             const totals = calculateCategoryTotals(std);
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
+            // توحيد نمط التقرير ليكون بنفس شكل الجدول الرئيسي المريح
             let reportHTML = `
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 text-right font-black">
-                    <div class="text-center border-b pb-4">
-                        <span class="text-xs font-black text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
-                        <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات التقييم التفصيلي الشامل</h2>
-                        <p class="text-xs font-black text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
-                    </div>
+                <div class="text-center border-b pb-4 mb-4 font-black">
+                    <span class="text-xs font-black text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
+                    <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات الطالب: ${std.name}</h2>
+                    <p class="text-xs font-black text-slate-500">البريد: ${std.email} | الفصل: ${std.className || '1/1'}</p>
+                </div>
 
-                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs font-black">
-                        <div>
-                            <div class="text-slate-900 text-sm font-black">${std.name}</div>
-                            <div class="text-slate-400 font-mono">${std.email}</div>
-                        </div>
-                        <div class="text-right"><span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span></div>
+                <div class="bg-white rounded-2xl shadow-custom border border-slate-200 overflow-hidden mb-4">
+                    <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between text-xs font-black">
+                        <span><i class="fas fa-user-graduate text-amber-400"></i> ملخص درجات الطالب التفصيلية</span>
+                        <span class="bg-amber-400/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30">المجموع الكلي: ${totals.grandTotal} / 100 (${pct}%)</span>
                     </div>
+                    <div class="overflow-x-auto p-4 space-y-4">
             `;
 
             twoRowsSectionsConfig.forEach(mainSec => {
@@ -767,26 +766,27 @@
                 });
 
                 reportHTML += `
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="px-4 py-2 bg-slate-900 text-white font-black text-xs flex justify-between items-center">
+                    <div class="border border-slate-300 rounded-xl overflow-hidden">
+                        <div class="px-4 py-2 bg-slate-800 text-white font-black text-xs flex justify-between items-center">
                             <span><i class="fas ${mainSec.icon || 'fa-book'} ml-1.5 text-amber-300"></i> ${mainSec.title}</span>
-                            <span class="bg-slate-800 px-2.5 py-0.5 rounded-lg text-amber-300 text-[11px] font-black">${secSum} / ${mainSec.maxTotal}</span>
+                            <span class="bg-slate-900 px-2.5 py-0.5 rounded-lg text-amber-300 text-[11px] font-black">${secSum} / ${mainSec.maxTotal}</span>
                         </div>
-                        <div class="p-3 bg-slate-50/50 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-slate-50">
                 `;
 
-                mainSec.columns.forEach(col => {
+                mainSec.columns.forEach((col, cIdx) => {
+                    let colColor = columnColors[cIdx % columnColors.length];
                     reportHTML += `
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-100">
-                            <div class="text-xs font-black text-blue-900 border-b border-slate-100 pb-1 mb-2">${col.subTitle}</div>
-                            <div class="grid grid-cols-3 gap-2">
+                        <div class="p-3 rounded-xl border ${colColor} space-y-2">
+                            <div class="text-xs font-black border-b pb-1 mb-1">${col.subTitle}</div>
+                            <div class="space-y-1">
                     `;
                     col.slots.forEach(slot => {
                         let scoreVal = std.scores && (std.scores[slot.id] !== undefined) ? std.scores[slot.id] : '0';
                         reportHTML += `
-                            <div class="bg-slate-50 p-1.5 rounded text-center border border-slate-100">
-                                <div class="text-[10px] text-slate-500 font-black">${slot.title}</div>
-                                <div class="text-xs font-black text-slate-800 mt-0.5">${scoreVal} <span class="text-[9px] text-slate-400 font-normal">/ ${slot.max}</span></div>
+                            <div class="flex justify-between items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                                <span class="text-slate-600 font-black">${slot.title}</span>
+                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">/ ${slot.max}</span></span>
                             </div>
                         `;
                     });
@@ -796,12 +796,7 @@
                 reportHTML += `</div></div>`;
             });
 
-            reportHTML += `
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-black text-sm">المجموع النهائي (من 100):</span>
-                        <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-black text-amber-700">(${pct}%)</span></span>
-                    </div>
-                </div>`;
+            reportHTML += `</div></div>`;
 
             document.getElementById('directReportPrintArea').innerHTML = reportHTML;
             document.getElementById('directStudentReportView').classList.remove('hidden');
@@ -847,6 +842,7 @@
 
                 html += `
                                 <th class="p-2 border bg-amber-900 w-24">المجموع الكلي (100)</th>
+                                <th class="p-2 border bg-slate-800 w-28 no-print">خيارات</th>
                             </tr>
                             <tr class="bg-slate-800 text-slate-200 text-[10px] text-center font-black">
                                 <th class="p-1.5 border"></th>
@@ -864,6 +860,7 @@
 
                 html += `
                                 <th class="p-1.5 border bg-amber-950 text-amber-300">النهائي</th>
+                                <th class="p-1.5 border bg-slate-900 text-white no-print">إجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -898,6 +895,11 @@
 
                     html += `
                             <td class="p-2 text-center border border-slate-300 font-black text-amber-900 bg-amber-50/60">${totals.grandTotal} (${pct}%)</td>
+                            <td class="p-2 text-center border border-slate-300 no-print">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="renderDirectStudentReportFromClass('${st.email}')" class="p-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-xs" title="تقرير الطالب"><i class="fas fa-file-invoice"></i></button>
+                                </div>
+                            </td>
                         </tr>
                     `;
                 });
@@ -907,6 +909,13 @@
 
             document.getElementById('directClassReportPrintArea').innerHTML = html;
             document.getElementById('directClassReportView').classList.remove('hidden');
+        }
+
+        function renderDirectStudentReportFromClass(email) {
+            let std = students.find(s => s.email.toLowerCase() === email.toLowerCase());
+            if (std) {
+                renderDirectStudentReport(std);
+            }
         }
 
         function renderDirectChartReport(className) {
@@ -1441,7 +1450,8 @@
 
             headerHTML += `
                     <th class="p-3 bg-blue-950 text-white w-28 border-l border-slate-700">مجموع القسم</th>
-                    <th class="p-3 bg-amber-950 text-amber-300 w-28">المجموع النهائي (100)</th>
+                    <th class="p-3 bg-amber-950 text-amber-300 w-28 border-l border-slate-700">المجموع الكلي (100)</th>
+                    <th class="p-3 bg-slate-800 text-white w-28">خيارات</th>
                 </tr>
             `;
             tableHead.innerHTML = headerHTML;
@@ -1508,8 +1518,15 @@
                         <td class="p-2 text-center border-l border-slate-300 bg-blue-50/40 font-black text-blue-900 text-sm">
                             ${currentSecSum} <span class="text-[10px] text-slate-500 font-black">/${currentSec.maxTotal}</span>
                         </td>
-                        <td class="p-2 text-center bg-amber-50/60 font-black text-amber-900 text-sm">
+                        <td class="p-2 text-center border-l border-slate-300 bg-amber-50/60 font-black text-amber-900 text-sm">
                             ${totals.grandTotal} <span class="text-[10px] text-amber-800 font-black">(${pct}%)</span>
+                        </td>
+                        <td class="p-2 text-center bg-slate-50">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openReportModal('${st.id}')" class="p-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-xs" title="تقرير الطالب"><i class="fas fa-file-invoice"></i></button>
+                                <button onclick="openEditStudentModal('${st.id}')" class="p-1.5 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg text-xs" title="تعديل"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteStudent('${st.id}')" class="p-1.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs" title="حذف"><i class="fas fa-trash-alt"></i></button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1752,73 +1769,8 @@
             let std = students.find(s => s.id === stdId);
             if (!std) return;
             currentReportStudent = std;
-            const printArea = document.getElementById('reportPrintArea');
-            const totals = calculateCategoryTotals(std);
-            const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-
-            let reportHTML = `
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 text-right font-black">
-                    <div class="text-center border-b pb-4">
-                        <span class="text-xs font-black text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
-                        <h2 class="text-xl font-black text-slate-900 mt-2">كشف درجات التقييم التفصيلي الشامل</h2>
-                        <p class="text-xs font-black text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
-                    </div>
-                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs font-black">
-                        <div>
-                            <div class="text-slate-900 text-sm font-black">${std.name}</div>
-                            <div class="text-slate-400 font-mono">${std.email}</div>
-                        </div>
-                        <div class="text-right"><span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">الفصل: ${std.className || '1/1'}</span></div>
-                    </div>
-            `;
-
-            twoRowsSectionsConfig.forEach(mainSec => {
-                let secSum = 0;
-                mainSec.columns.forEach(col => {
-                    col.slots.forEach(slot => {
-                        secSum += parseFloat(std.scores && std.scores[slot.id] !== undefined ? std.scores[slot.id] : 0) || 0;
-                    });
-                });
-
-                reportHTML += `
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <div class="px-4 py-2 bg-slate-900 text-white font-black text-xs flex justify-between items-center">
-                            <span><i class="fas ${mainSec.icon || 'fa-book'} ml-1.5 text-amber-300"></i> ${mainSec.title}</span>
-                            <span class="bg-slate-800 px-2.5 py-0.5 rounded-lg text-amber-300 text-[11px] font-black">${secSum} / ${mainSec.maxTotal}</span>
-                        </div>
-                        <div class="p-3 bg-slate-50/50 space-y-3">
-                `;
-
-                mainSec.columns.forEach(col => {
-                    reportHTML += `
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-100">
-                            <div class="text-xs font-black text-blue-900 border-b border-slate-100 pb-1 mb-2">${col.subTitle}</div>
-                            <div class="grid grid-cols-3 gap-2">
-                    `;
-                    col.slots.forEach(slot => {
-                        let scoreVal = std.scores && (std.scores[slot.id] !== undefined) ? std.scores[slot.id] : '0';
-                        reportHTML += `
-                            <div class="bg-slate-50 p-1.5 rounded text-center border border-slate-100">
-                                <div class="text-[10px] text-slate-500 font-black">${slot.title}</div>
-                                <div class="text-xs font-black text-slate-800 mt-0.5">${scoreVal} <span class="text-[9px] text-slate-400 font-normal">/ ${slot.max}</span></div>
-                            </div>
-                        `;
-                    });
-                    reportHTML += `</div></div>`;
-                });
-
-                reportHTML += `</div></div>`;
-            });
-
-            reportHTML += `
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between text-amber-900">
-                        <span class="font-black text-sm">المجموع الكلي النهائي:</span>
-                        <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-black text-amber-700">(${pct}%)</span></span>
-                    </div>
-                </div>`;
-
-            printArea.innerHTML = reportHTML;
-            document.getElementById('reportModal').classList.remove('hidden');
+            renderDirectStudentReport(std);
+            document.getElementById('reportModal').classList.add('hidden');
         }
 
         function copyDirectReportLink() {
@@ -1943,7 +1895,7 @@
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
             const baseUrl = window.location.href.split('#')[0];
             const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\nالقسم 1: ${totals.oralTotal} | القسم 2: ${totals.writtenTotal}\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
@@ -1951,7 +1903,7 @@
             if (!currentReportStudent) return;
             const totals = calculateCategoryTotals(currentReportStudent);
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nالقسم 1: ${totals.oralTotal} | القسم 2: ${totals.writtenTotal}\nالمجموع الكلي النهائي: ${totals.grandTotal} من 100 (${pct}%)\n`;
+            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nالمجموع الكلي النهائي: ${totals.grandTotal} من 100 (${pct}%)\n`;
             navigator.clipboard.writeText(msg).then(() => showToast("تم نسخ التقرير للحافظة! 📋"));
         }
 
