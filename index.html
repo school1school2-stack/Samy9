@@ -90,7 +90,7 @@
                     <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-black mb-1">
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (مجموع أفضل المحاولات لكل قسم)</h1>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (أفضل محاولة من 10 لكل فرع)</h1>
                     <p class="text-slate-200 text-xs md:text-sm font-black mt-1">إعداد المعلم: <span class="text-amber-300 font-black">د / سامي محمد العمر 🎓</span></p>
                 </div>
             </div>
@@ -213,7 +213,7 @@
         <div class="space-y-6">
             <div id="activeSectionHeaderInfo" class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl flex items-center justify-between text-xs font-black shadow-md">
                 <span id="activeSectionTitleText" class="flex items-center gap-2"><i class="fas fa-layer-group text-amber-400"></i> القسم النشط</span>
-                <span id="activeSectionBadgeText" class="bg-amber-400/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30">مجموع أفضل المحاولات للقسم</span>
+                <span id="activeSectionBadgeText" class="bg-amber-400/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30">أفضل محاولة (من 10) لكل فرع داخل القسم</span>
             </div>
 
             <div id="studentsCardsContainer" class="space-y-6"></div>
@@ -334,8 +334,10 @@
             </div>
             <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50 font-black">
                 <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-black">
-                    💡 كل فرع يحسب أفضل محاولة من الـ 10 درجات، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
+                    💡 كل فرع يأخذ أعلى درجة من المحاولات الثلاث (من 10)، ثم يجمع النظام الأقسام لتكوين النتيجة النهائية من 100.
                 </div>
+                <div id="sectionsConfigEditorContainer" class="space-y-6"></div>
+            </div>
             <div class="bg-white px-6 py-4 border-t flex justify-between items-center font-black">
                 <button onclick="addNewMainSection()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5"><i class="fas fa-plus"></i> إضافة قسم رئيسي جديد</button>
                 <button onclick="saveSectionsConfigFromModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm">حفظ التطبيق والتحديث</button>
@@ -516,34 +518,34 @@
                 badgeClass: 'bg-blue-100 text-blue-900 border-blue-300',
                 columns: [
                     { subTitle: 'صحة القراءة', slots: [
-                        { id: 'tilawah_1', title: 'الأولى', max: 5 },
-                        { id: 'tilawah_2', title: 'الثانية', max: 5 },
-                        { id: 'tilawah_3', title: 'الثالثة', max: 5 }
+                        { id: 'tilawah_1', title: 'الأولى', max: 10 },
+                        { id: 'tilawah_2', title: 'الثانية', max: 10 },
+                        { id: 'tilawah_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'حفظ', slots: [
-                        { id: 'hifz_1', title: 'الأولى', max: 5 },
-                        { id: 'hifz_2', title: 'الثانية', max: 5 },
-                        { id: 'hifz_3', title: 'الثالثة', max: 5 }
+                        { id: 'hifz_1', title: 'الأولى', max: 10 },
+                        { id: 'hifz_2', title: 'الثانية', max: 10 },
+                        { id: 'hifz_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'تجويد', slots: [
-                        { id: 'tajweed_1', title: 'الأولى', max: 3 },
-                        { id: 'tajweed_2', title: 'الثانية', max: 3 },
-                        { id: 'tajweed_3', title: 'الثالثة', max: 4 }
+                        { id: 'tajweed_1', title: 'الأولى', max: 10 },
+                        { id: 'tajweed_2', title: 'الثانية', max: 10 },
+                        { id: 'tajweed_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'ترتيل', slots: [
-                        { id: 'trtil_1', title: 'الأولى', max: 2 },
-                        { id: 'trtil_2', title: 'الثانية', max: 2 },
-                        { id: 'trtil_3', title: 'الثالثة', max: 1 }
+                        { id: 'trtil_1', title: 'الأولى', max: 10 },
+                        { id: 'trtil_2', title: 'الثانية', max: 10 },
+                        { id: 'trtil_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'اختبار قصير', slots: [
-                        { id: 'test1_1', title: 'الأولى', max: 3 },
-                        { id: 'test1_2', title: 'الثانية', max: 2 },
-                        { id: 'test1_3', title: 'الثالثة', max: 2 }
+                        { id: 'test1_1', title: 'الأولى', max: 10 },
+                        { id: 'test1_2', title: 'الثانية', max: 10 },
+                        { id: 'test1_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'اختبار الفترة', slots: [
-                        { id: 'test2_1', title: 'الأولى', max: 3 },
-                        { id: 'test2_2', title: 'الثانية', max: 2 },
-                        { id: 'test2_3', title: 'الثالثة', max: 2 }
+                        { id: 'test2_1', title: 'الأولى', max: 10 },
+                        { id: 'test2_2', title: 'الثانية', max: 10 },
+                        { id: 'test2_3', title: 'الثالثة', max: 10 }
                     ]}
                 ]
             },
@@ -555,24 +557,24 @@
                 badgeClass: 'bg-indigo-100 text-indigo-900 border-indigo-300',
                 columns: [
                     { subTitle: 'نشاط', slots: [
-                        { id: 'act_1', title: 'الأولى', max: 5 },
-                        { id: 'act_2', title: 'الثانية', max: 5 },
-                        { id: 'act_3', title: 'الثالثة', max: 5 }
+                        { id: 'act_1', title: 'الأولى', max: 10 },
+                        { id: 'act_2', title: 'الثانية', max: 10 },
+                        { id: 'act_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'مشاركة', slots: [
-                        { id: 'part_1', title: 'الأولى', max: 5 },
-                        { id: 'part_2', title: 'الثانية', max: 5 },
-                        { id: 'part_3', title: 'الثالثة', max: 5 }
+                        { id: 'part_1', title: 'الأولى', max: 10 },
+                        { id: 'part_2', title: 'الثانية', max: 10 },
+                        { id: 'part_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'واجبات', slots: [
-                        { id: 'hw_1', title: 'الأولى', max: 5 },
-                        { id: 'hw_2', title: 'الثانية', max: 5 },
-                        { id: 'hw_3', title: 'الثالثة', max: 5 }
+                        { id: 'hw_1', title: 'الأولى', max: 10 },
+                        { id: 'hw_2', title: 'الثانية', max: 10 },
+                        { id: 'hw_3', title: 'الثالثة', max: 10 }
                     ]},
                     { subTitle: 'بحوث', slots: [
-                        { id: 'res_1', title: 'الأولى', max: 5 },
-                        { id: 'res_2', title: 'الثانية', max: 5 },
-                        { id: 'res_3', title: 'الثالثة', max: 5 }
+                        { id: 'res_1', title: 'الأولى', max: 10 },
+                        { id: 'res_2', title: 'الثانية', max: 10 },
+                        { id: 'res_3', title: 'الثالثة', max: 10 }
                     ]}
                 ]
             }
@@ -750,11 +752,6 @@
             return maxScore;
         }
 
-        // حساب الحد الأقصى الكلي للفرعي (مجموع الدرجات القصوى لكل المحاولات داخل هذا الفرع)
-        function getColumnMaxTotal(slots) {
-            return slots.reduce((sum, slot) => sum + (parseFloat(slot.max) || 0), 0);
-        }
-
         function calculateCategoryTotals(student) {
             let oralTotal = 0;
             let writtenTotal = 0;
@@ -825,7 +822,7 @@
 
                 <div class="bg-white rounded-2xl shadow-custom border border-slate-200 overflow-hidden mb-4">
                     <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between text-xs font-black">
-                        <span><i class="fas fa-user-graduate text-amber-400"></i> ملخص درجات الطالب التفصيلية</span>
+                        <span><i class="fas fa-user-graduate text-amber-400"></i> ملخص درجات الطالب التفصيلية (أفضل محاولة لكل فرع)</span>
                         <span class="bg-amber-400/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30">المجموع الكلي النهائي: ${totals.grandTotal} / 100 (${pct}%)</span>
                     </div>
                     <div class="overflow-x-auto p-4 space-y-4">
@@ -838,7 +835,7 @@
                     <div class="border border-slate-300 rounded-xl overflow-hidden">
                         <div class="px-4 py-2 bg-slate-800 text-white font-black text-xs flex justify-between items-center">
                             <span><i class="fas ${mainSec.icon || 'fa-book'} ml-1.5 text-amber-300"></i> ${mainSec.title}</span>
-                            <span class="bg-slate-900 px-3 py-1 rounded-lg text-amber-300 text-xs font-black">المجموع الأفضل للقسم: ${secSum} من ${mainSec.maxTotal}</span>
+                            <span class="bg-slate-900 px-3 py-1 rounded-lg text-amber-300 text-xs font-black">مجموع القسم الأفضل: ${secSum}</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-slate-50">
                 `;
@@ -846,12 +843,11 @@
                 mainSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let best = getBestSlotScore(std, col.slots);
-                    let colMaxTotal = getColumnMaxTotal(col.slots);
                     reportHTML += `
                         <div class="p-3 rounded-xl border ${colColor} space-y-2">
                             <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between items-center">
                                 <span>${col.subTitle}</span>
-                                <span class="text-blue-900 bg-white px-2 py-0.5 rounded text-[11px] font-black shadow-2xs">الأفضل: ${best} / ${colMaxTotal}</span>
+                                <span class="text-blue-900 bg-white px-2 py-0.5 rounded text-[11px] font-black shadow-2xs">الأفضل: ${best} / 10</span>
                             </div>
                             <div class="space-y-1">
                     `;
@@ -860,7 +856,7 @@
                         reportHTML += `
                             <div class="flex justify-between items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200">
                                 <span class="text-slate-600 font-black">${slot.title}</span>
-                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">من ${slot.max}</span></span>
+                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">من 10</span></span>
                             </div>
                         `;
                     });
@@ -891,7 +887,7 @@
             let html = `
                 <div class="text-center border-b pb-4 mb-4 font-black">
                     <span class="text-xs font-black text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
-                    <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات التقييم الشامل (مجموع أفضل المحاولات) - الفصل (${className})</h2>
+                    <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات التقييم الشامل (أفضل محاولة من 10 لكل فرع) - الفصل (${className})</h2>
                     <p class="text-xs font-black text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
                 </div>
             `;
@@ -930,8 +926,7 @@
                 twoRowsSectionsConfig.forEach(mainSec => {
                     mainSec.columns.forEach((col, cIdx) => {
                         let colColor = columnColors[cIdx % columnColors.length];
-                        let colMaxTotal = getColumnMaxTotal(col.slots);
-                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle} (الأفضل من ${colMaxTotal})</th>`;
+                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle} (الأفضل من 10)</th>`;
                     });
                     html += `<th class="p-2 border-l border-slate-700 bg-emerald-900 text-emerald-300">مجموع القسم</th>`;
                 });
@@ -962,8 +957,7 @@
                         mainSec.columns.forEach((col, cIdx) => {
                             let colColor = columnColors[cIdx % columnColors.length];
                             let best = getBestSlotScore(st, col.slots);
-                            let colMaxTotal = getColumnMaxTotal(col.slots);
-                            subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor} font-black text-slate-900">${best} / ${colMaxTotal}</td>`;
+                            subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor} font-black text-slate-900">${best} / 10</td>`;
                         });
                         let secTotal = totals.sectionTotals[mIdx] || 0;
                         subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 bg-emerald-50 text-emerald-900 font-black">${secTotal}</td>`;
@@ -1344,7 +1338,7 @@
                 badgeClass: 'bg-emerald-50/80 text-emerald-900 border-emerald-200',
                 columns: [
                     { subTitle: 'العنصر الأول', slots: [
-                        { id: 'slot_' + Date.now() + '_1', title: 'الأولى', max: 5 }
+                        { id: 'slot_' + Date.now() + '_1', title: 'الأولى', max: 10 }
                     ]}
                 ]
             });
@@ -1366,7 +1360,7 @@
             twoRowsSectionsConfig[mIdx].columns.push({
                 subTitle: 'عنصر جديد',
                 slots: [
-                    { id: 'slot_' + Date.now() + '_1', title: 'الأولى', max: 5 }
+                    { id: 'slot_' + Date.now() + '_1', title: 'الأولى', max: 10 }
                 ]
             });
             renderSectionsEditor();
@@ -1389,7 +1383,7 @@
             twoRowsSectionsConfig[mIdx].columns[cIdx].slots.push({
                 id: 'slot_' + Date.now() + '_' + sCount,
                 title: namesMap[sCount] || `محاولة ${sCount}`,
-                max: 5
+                max: 10
             });
             renderSectionsEditor();
         }
@@ -1583,7 +1577,7 @@
             const currentSec = twoRowsSectionsConfig[activeMainSectionIndex] || twoRowsSectionsConfig[0];
 
             document.getElementById('activeSectionTitleText').innerHTML = `<i class="fas ${currentSec.icon || 'fa-folder'} text-amber-300"></i> القسم النشط: ${currentSec.title}`;
-            document.getElementById('activeSectionBadgeText').innerText = `يُحتسب المجموع الأفضل من المحاولات الثلاث لكل فرع داخل القسم`;
+            document.getElementById('activeSectionBadgeText').innerText = `أفضل محاولة (من 10) لكل فرع داخل القسم`;
 
             const filteredStudents = students.filter(st => {
                 const matchSearch = !searchVal || st.name.toLowerCase().includes(searchVal) || st.email.toLowerCase().includes(searchVal);
@@ -1623,7 +1617,7 @@
                                     <i class="fas fa-layer-group text-blue-600 ml-1"></i> الفصل: ${st.className || '1/1'}
                                 </span>
                                 <span class="px-3.5 py-1.5 bg-indigo-50 text-indigo-900 rounded-xl border border-indigo-200 text-xs font-black shadow-2xs">
-                                    مجموع القسم الأفضل: <span class="text-indigo-700 font-black">${currentSecSum} من ${currentSec.maxTotal}</span>
+                                    مجموع القسم الأفضل: <span class="text-indigo-700 font-black">${currentSecSum}</span>
                                 </span>
                                 <span class="px-3.5 py-1.5 bg-amber-50 text-amber-900 rounded-xl border border-amber-200 text-xs font-black shadow-2xs">
                                     المجموع النهائي الكلي: <span class="text-amber-700 font-black">${totals.grandTotal}</span> من 100 (${pct}%)
@@ -1643,12 +1637,11 @@
                 currentSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let bestScore = getBestSlotScore(st, col.slots);
-                    let colMaxTotal = getColumnMaxTotal(col.slots);
                     cardsHTML += `
                         <div class="p-4 rounded-2xl border-2 ${colColor} space-y-3 shadow-2xs">
                             <div class="text-xs font-black border-b border-slate-200/60 pb-2 mb-2 flex justify-between items-center">
                                 <span class="text-slate-900 font-black">${col.subTitle}</span>
-                                <span class="text-[11px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-blue-900 font-black shadow-2xs">الأفضل: ${bestScore} / ${colMaxTotal}</span>
+                                <span class="text-[11px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-blue-900 font-black shadow-2xs">الأفضل: ${bestScore} / 10</span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
                     `;
@@ -1658,11 +1651,11 @@
                         cardsHTML += `
                             <div class="text-center bg-white p-2.5 rounded-xl border border-slate-200/85 shadow-2xs hover:border-blue-400 transition space-y-1">
                                 <div class="text-[10px] text-slate-500 font-black">${slot.title}</div>
-                                <input type="number" step="0.5" min="0" max="${slot.max}" 
+                                <input type="number" step="0.5" min="0" max="10" 
                                     value="${scoreVal}" 
-                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                    class="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition" title="الحد الأقصى: ${slot.max}">
-                                <div class="text-[9px] text-slate-400 font-black tracking-tighter">من ${slot.max}</div>
+                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, 10)" 
+                                    class="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition" title="الحد الأقصى: 10">
+                                <div class="text-[9px] text-slate-400 font-black tracking-tighter">من 10</div>
                             </div>
                         `;
                     });
@@ -2005,7 +1998,7 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        function showToast(msg, type = 'success') {
+        function showToast(msg, type = 'error') {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toastIcon');
             const text = document.getElementById('toastMessage');
@@ -2013,6 +2006,77 @@
             icon.className = type === 'error' ? "fas fa-exclamation-circle text-rose-400 text-base" : "fas fa-check-circle text-emerald-400 text-base";
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        function copyClassStudentsNamesAndEmails() {
+            const select = document.getElementById('copyNamesClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classNamesModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassNamesAndEmails() {
+            const className = document.getElementById('copyNamesClassSelect').value;
+            closeModal('classNamesModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            let textOutput = "";
+            classStudents.forEach(st => {
+                textOutput += `${st.name}\n${st.email}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ أسماء وإيميلات طلاب الفصل (${className}) بنجاح جاهزة للصق في الرفع الجماعي! 📋`);
+            });
+        }
+
+        function copyClassStudentsReportsLinks() {
+            const select = document.getElementById('copyLinksClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classLinksModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassLinks() {
+            const className = document.getElementById('copyLinksClassSelect').value;
+            closeModal('classLinksModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            const baseUrl = window.location.href.split('#')[0];
+            let textOutput = `🔗 روابط تقارير طلاب الفصل (${className}) - د / سامي محمد العمر\n-----------------------------------\n`;
+            
+            classStudents.forEach((st, idx) => {
+                const reportUrl = `${baseUrl}#report=${encodeURIComponent(st.email.trim())}`;
+                textOutput += `${idx + 1}. ${st.name}: ${reportUrl}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ روابط تقارير جميع طلاب الفصل (${className}) بنجاح! 📋`);
+            });
         }
     </script>
 </body>
