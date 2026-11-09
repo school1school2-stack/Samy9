@@ -321,12 +321,12 @@
     <div id="manageSectionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-folder-tree text-amber-400"></i> إدارة الأقسام، المسميات، والمحاولات والدرجات</h3>
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-folder-tree text-amber-400"></i> إدارة الأقسام، المسميات، والدرجات العظمى</h3>
                 <button onclick="closeModal('manageSectionsModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50">
                 <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-bold">
-                    💡 يمكنك هنا تعديل أسماء الأقسام، الأقسام الفرعية، إضافة أو حذف محاولات وتقييماتها بكل مرونة.
+                    💡 يمكنك هنا تعديل أسماء الأقسام، الأقسام الفرعية، ومحاولاتها، وتعديل الدرجات العظمى لكل محاولة. الجدول سيتحدث تلقائياً.
                 </div>
                 <div id="sectionsConfigEditorContainer" class="space-y-6"></div>
             </div>
@@ -458,7 +458,7 @@
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
         let activeChartInstance = null;
 
-        // الهيكل الافتراضي التفصيلي القابل للتعديل بالكامل
+        // الهيكل الافتراضي التفصيلي للقسمين الشفوي والتحريري ومحاولاتهما
         let twoRowsSectionsConfig = [
             {
                 id: 'oral',
@@ -468,19 +468,19 @@
                 badgeClass: 'bg-blue-50/80 text-blue-900 border-blue-200',
                 columns: [
                     { subTitle: 'التلاوة', slots: [
-                        { id: 'tilawah_1', title: 'محاولة 1', max: 5 },
-                        { id: 'tilawah_2', title: 'محاولة 2', max: 5 },
-                        { id: 'tilawah_3', title: 'محاولة 3', max: 5 }
+                        { id: 'tilawah_1', title: 'محاولة 1 (5)', max: 5 },
+                        { id: 'tilawah_2', title: 'محاولة 2 (5)', max: 5 },
+                        { id: 'tilawah_3', title: 'محاولة 3 (5)', max: 5 }
                     ]},
                     { subTitle: 'الحفظ', slots: [
-                        { id: 'hifz_1', title: 'محاولة 1', max: 5 },
-                        { id: 'hifz_2', title: 'محاولة 2', max: 5 },
-                        { id: 'hifz_3', title: 'محاولة 3', max: 5 }
+                        { id: 'hifz_1', title: 'محاولة 1 (5)', max: 5 },
+                        { id: 'hifz_2', title: 'محاولة 2 (5)', max: 5 },
+                        { id: 'hifz_3', title: 'محاولة 3 (5)', max: 5 }
                     ]},
                     { subTitle: 'التجويد', slots: [
-                        { id: 'tajweed_1', title: 'محاولة 1', max: 3 },
-                        { id: 'tajweed_2', title: 'محاولة 2', max: 3 },
-                        { id: 'tajweed_3', title: 'محاولة 3', max: 4 }
+                        { id: 'tajweed_1', title: 'محاولة 1 (3)', max: 3 },
+                        { id: 'tajweed_2', title: 'محاولة 2 (3)', max: 3 },
+                        { id: 'tajweed_3', title: 'محاولة 3 (4)', max: 4 }
                     ]}
                 ]
             },
@@ -492,19 +492,19 @@
                 badgeClass: 'bg-purple-50/80 text-purple-900 border-purple-200',
                 columns: [
                     { subTitle: 'الاختبار 1', slots: [
-                        { id: 'test1_1', title: 'محاولة 1', max: 7 },
-                        { id: 'test1_2', title: 'محاولة 2', max: 7 },
-                        { id: 'test1_3', title: 'محاولة 3', max: 6 }
+                        { id: 'test1_1', title: 'محاولة 1 (7)', max: 7 },
+                        { id: 'test1_2', title: 'محاولة 2 (7)', max: 7 },
+                        { id: 'test1_3', title: 'محاولة 3 (6)', max: 6 }
                     ]},
                     { subTitle: 'الاختبار 2', slots: [
-                        { id: 'test2_1', title: 'محاولة 1', max: 7 },
-                        { id: 'test2_2', title: 'محاولة 2', max: 7 },
-                        { id: 'test2_3', title: 'محاولة 3', max: 6 }
+                        { id: 'test2_1', title: 'محاولة 1 (7)', max: 7 },
+                        { id: 'test2_2', title: 'محاولة 2 (7)', max: 7 },
+                        { id: 'test2_3', title: 'محاولة 3 (6)', max: 6 }
                     ]},
                     { subTitle: 'الاختبار 3', slots: [
-                        { id: 'test3_1', title: 'محاولة 1', max: 7 },
-                        { id: 'test3_2', title: 'محاولة 2', max: 7 },
-                        { id: 'test3_3', title: 'محاولة 3', max: 6 }
+                        { id: 'test3_1', title: 'محاولة 1 (7)', max: 7 },
+                        { id: 'test3_2', title: 'محاولة 2 (7)', max: 7 },
+                        { id: 'test3_3', title: 'محاولة 3 (6)', max: 6 }
                     ]}
                 ]
             }
@@ -667,14 +667,14 @@
             let oralTotal = 0;
             let writtenTotal = 0;
 
-            twoRowsSectionsConfig.forEach((mainSec, idx) => {
+            twoRowsSectionsConfig.forEach(mainSec => {
                 let secSum = 0;
                 mainSec.columns.forEach(col => {
                     col.slots.forEach(slot => {
                         secSum += parseFloat(student.scores ? student.scores[slot.id] : 0) || 0;
                     });
                 });
-                if (idx === 1 || mainSec.id === 'written' || mainSec.title.includes('التحريري')) {
+                if (mainSec.id === 'written' || mainSec.title.includes('التحريري')) {
                     writtenTotal = secSum;
                 } else {
                     oralTotal = secSum;
@@ -712,11 +712,11 @@
                     </div>
                     <div class="space-y-3">
                         <div class="bg-blue-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الأول (شفوي - من 40)</span>
+                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
                             <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الثاني (تحريري - من 60)</span>
+                            <span>القسم التحريري (الاختبارات - من 60)</span>
                             <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
                         </div>
                     </div>
@@ -759,8 +759,8 @@
                             <tr class="bg-slate-900 text-white">
                                 <th class="p-2.5 text-center border w-12">#</th>
                                 <th class="p-2.5 border">اسم الطالب والصف</th>
-                                <th class="p-2.5 text-center border bg-blue-950">مجموع القسم 1</th>
-                                <th class="p-2.5 text-center border bg-purple-950">مجموع القسم 2</th>
+                                <th class="p-2.5 text-center border bg-blue-950">مجموع الشفوي (40)</th>
+                                <th class="p-2.5 text-center border bg-purple-950">مجموع التحريري (60)</th>
                                 <th class="p-2.5 text-center border bg-amber-900">المجموع الكلي النهائي (100)</th>
                             </tr>
                         </thead>
@@ -777,8 +777,8 @@
                                 <div>${st.name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
                             </td>
-                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20">${totals.oralTotal}</td>
-                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20">${totals.writtenTotal}</td>
+                            <td class="p-2 text-center border font-bold text-blue-900 bg-blue-50/20">${totals.oralTotal} / 40</td>
+                            <td class="p-2 text-center border font-bold text-purple-900 bg-purple-50/20">${totals.writtenTotal} / 60</td>
                             <td class="p-3 text-center border font-black text-amber-900 bg-amber-50/50">${totals.grandTotal} (${pct}%)</td>
                         </tr>
                     `;
@@ -996,49 +996,39 @@
             let html = '';
             twoRowsSectionsConfig.forEach((mainSec, mIdx) => {
                 html += `
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3" id="mainSecCard_${mIdx}">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                         <div class="flex items-center justify-between gap-2 border-b pb-2">
                             <div class="flex items-center gap-2 flex-1">
-                                <span class="text-xs font-extrabold text-slate-500">القسم ${mIdx+1}:</span>
+                                <span class="text-xs font-extrabold text-slate-500">اسم القسم الرئيسي:</span>
                                 <input type="text" id="mainTitle_${mIdx}" value="${mainSec.title}" class="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold flex-1">
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-extrabold text-slate-500">المجموع:</span>
+                                <span class="text-xs font-extrabold text-slate-500">مجموع القسم:</span>
                                 <input type="number" id="mainMax_${mIdx}" value="${mainSec.maxTotal}" class="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-center">
-                                <button onclick="removeMainSection(${mIdx})" class="px-2.5 py-1 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold" title="حذف القسم الرئيسى"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <div class="space-y-3 pr-2" id="subSectionsContainer_${mIdx}">
+                        <div class="space-y-3 pr-2">
                 `;
 
                 mainSec.columns.forEach((col, cIdx) => {
                     html += `
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2" id="subSecCard_${mIdx}_${cIdx}">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                             <div class="flex items-center justify-between gap-2">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <span class="text-[11px] font-bold text-indigo-900">الفرعي ${cIdx+1}:</span>
+                                    <span class="text-[11px] font-bold text-indigo-900">القسم الفرعي ${cIdx+1}:</span>
                                     <input type="text" id="subTitle_${mIdx}_${cIdx}" value="${col.subTitle}" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold flex-1">
                                 </div>
-                                <div class="flex items-center gap-1">
-                                    <button onclick="addSubSectionSlot(${mIdx}, ${cIdx})" class="px-2 py-1 bg-blue-600 text-white hover:bg-blue-700 rounded text-[10px] font-bold"><i class="fas fa-plus"></i> محاولة</button>
-                                    <button onclick="removeSubSection(${mIdx}, ${cIdx})" class="px-2 py-1 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded text-[10px] font-bold"><i class="fas fa-trash"></i></button>
-                                </div>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/60" id="slotsContainer_${mIdx}_${cIdx}">
+                            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-200/60">
                     `;
 
                     col.slots.forEach((slot, sIdx) => {
-                        let uniqueSlotId = slot.id || `slot_${mIdx}_${cIdx}_${sIdx}_${Date.now()}`;
                         html += `
-                            <div class="bg-white p-2 rounded border border-slate-100 space-y-1 relative" id="slotCard_${mIdx}_${cIdx}_${sIdx}">
-                                <div class="flex justify-between items-center text-[9px] font-bold text-slate-500">
-                                    <span>المحاولة ${sIdx+1}:</span>
-                                    <button onclick="removeSlot(${mIdx}, ${cIdx}, ${sIdx})" class="text-rose-500 hover:text-rose-700"><i class="fas fa-times"></i></button>
-                                </div>
+                            <div class="bg-white p-2 rounded border border-slate-100 space-y-1">
+                                <div class="text-[9px] font-bold text-slate-500">المحاولة ${sIdx+1}:</div>
                                 <div class="flex gap-1">
                                     <input type="text" id="slotTitle_${mIdx}_${cIdx}_${sIdx}" value="${slot.title}" class="w-1/2 px-1 py-0.5 bg-slate-50 border rounded text-[10px] font-bold text-center" placeholder="المسمى">
                                     <input type="number" id="slotMax_${mIdx}_${cIdx}_${sIdx}" value="${slot.max}" class="w-1/2 px-1 py-0.5 bg-slate-50 border rounded text-[10px] font-bold text-center" placeholder="الدرجة">
-                                    <input type="hidden" id="slotId_${mIdx}_${cIdx}_${sIdx}" value="${uniqueSlotId}">
                                 </div>
                             </div>
                         `;
@@ -1047,85 +1037,12 @@
                     html += `</div></div>`;
                 });
 
-                html += `</div>
-                    <div class="pt-2">
-                        <button onclick="addSubSection(${mIdx})" class="px-3 py-1.5 bg-purple-600 text-white hover:bg-purple-700 rounded-lg text-xs font-bold"><i class="fas fa-plus"></i> إضافة قسم فرعي جديد</button>
-                    </div>
-                </div>`;
+                html += `</div></div>`;
             });
             container.innerHTML = html;
         }
 
-        function addNewMainSection() {
-            collectDataFromSectionsEditor();
-            twoRowsSectionsConfig.push({
-                id: 'sec_' + Date.now(),
-                title: 'قسم رئيسي جديد',
-                maxTotal: 20,
-                icon: 'fa-folder',
-                badgeClass: 'bg-emerald-50/80 text-emerald-900 border-emerald-200',
-                columns: [
-                    { subTitle: 'العنصر الأول', slots: [
-                        { id: 'slot_' + Date.now() + '_1', title: 'محاولة 1', max: 10 }
-                    ]}
-                ]
-            });
-            renderSectionsEditor();
-        }
-
-        function removeMainSection(mIdx) {
-            collectDataFromSectionsEditor();
-            if (twoRowsSectionsConfig.length <= 1) {
-                showToast("يجب الإبقاء على قسم رئيسي واحد على الأقل.", "error");
-                return;
-            }
-            twoRowsSectionsConfig.splice(mIdx, 1);
-            renderSectionsEditor();
-        }
-
-        function addSubSection(mIdx) {
-            collectDataFromSectionsEditor();
-            twoRowsSectionsConfig[mIdx].columns.push({
-                subTitle: 'عنصر جديد',
-                slots: [
-                    { id: 'slot_' + Date.now() + '_1', title: 'محاولة 1', max: 5 }
-                ]
-            });
-            renderSectionsEditor();
-        }
-
-        function removeSubSection(mIdx, cIdx) {
-            collectDataFromSectionsEditor();
-            if (twoRowsSectionsConfig[mIdx].columns.length <= 1) {
-                showToast("يجب الإبقاء على عنصر فرعي واحد على الأقل في القسم.", "error");
-                return;
-            }
-            twoRowsSectionsConfig[mIdx].columns.splice(cIdx, 1);
-            renderSectionsEditor();
-        }
-
-        function addSubSectionSlot(mIdx, cIdx) {
-            collectDataFromSectionsEditor();
-            let sCount = twoRowsSectionsConfig[mIdx].columns[cIdx].slots.length + 1;
-            twoRowsSectionsConfig[mIdx].columns[cIdx].slots.push({
-                id: 'slot_' + Date.now() + '_' + sCount,
-                title: `محاولة ${sCount}`,
-                max: 5
-            });
-            renderSectionsEditor();
-        }
-
-        function removeSlot(mIdx, cIdx, sIdx) {
-            collectDataFromSectionsEditor();
-            if (twoRowsSectionsConfig[mIdx].columns[cIdx].slots.length <= 1) {
-                showToast("يجب الإبقاء على محاولة واحدة على الأقل في العنصر الفرعي.", "error");
-                return;
-            }
-            twoRowsSectionsConfig[mIdx].columns[cIdx].slots.splice(sIdx, 1);
-            renderSectionsEditor();
-        }
-
-        function collectDataFromSectionsEditor() {
+        async function saveSectionsConfigFromModal() {
             twoRowsSectionsConfig.forEach((mainSec, mIdx) => {
                 let mTitleEl = document.getElementById(`mainTitle_${mIdx}`);
                 let mMaxEl = document.getElementById(`mainMax_${mIdx}`);
@@ -1139,21 +1056,16 @@
                     col.slots.forEach((slot, sIdx) => {
                         let stTitleEl = document.getElementById(`slotTitle_${mIdx}_${cIdx}_${sIdx}`);
                         let stMaxEl = document.getElementById(`slotMax_${mIdx}_${cIdx}_${sIdx}`);
-                        let stIdEl = document.getElementById(`slotId_${mIdx}_${cIdx}_${sIdx}`);
                         if (stTitleEl) slot.title = stTitleEl.value.trim();
                         if (stMaxEl) slot.max = parseFloat(stMaxEl.value) || 0;
-                        if (stIdEl && stIdEl.value) slot.id = stIdEl.value;
                     });
                 });
             });
-        }
 
-        async function saveSectionsConfigFromModal() {
-            collectDataFromSectionsEditor();
             closeModal('manageSectionsModal');
             renderTable();
             await saveAllToCloud();
-            showToast("تم تحديث وحفظ الأقسام والمحاولات بنجاح! 🚀");
+            showToast("تم تحديث وحفظ الأقسام والمسميات والدرجات بنجاح! 🚀");
         }
 
         function toggleDropdown(dropdownId, event) {
@@ -1365,7 +1277,7 @@
 
                     rowsHTML += `
                         <td class="p-2.5 text-right border-l ${mainSec.badgeClass} text-xs font-black flex items-center justify-between gap-1">
-                            <span class="flex items-center gap-1.5"><i class="fas ${mainSec.icon || 'fa-book'}"></i> ${mainSec.title}</span>
+                            <span class="flex items-center gap-1.5"><i class="fas ${mainSec.icon}"></i> ${mainSec.title}</span>
                             <span class="text-[9px] px-1.5 py-0.5 bg-white/90 rounded border">من ${mainSec.maxTotal}</span>
                         </td>
                     `;
@@ -1663,11 +1575,11 @@
                     </div>
                     <div class="space-y-3">
                         <div class="bg-blue-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الأول (شفوي - من 40)</span>
+                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
                             <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الثاني (تحريري - من 60)</span>
+                            <span>القسم التحريري (الاختبارات - من 60)</span>
                             <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
                         </div>
                     </div>
@@ -1736,11 +1648,11 @@
 
                     <div class="space-y-3">
                         <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الأول (شفوي - من 40)</span>
+                            <span>القسم الشفوي (تلاوة، حفظ، تجويد - من 40)</span>
                             <span class="font-black text-blue-900">${totals.oralTotal} / 40</span>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs font-bold">
-                            <span>القسم الثاني (تحريري - من 60)</span>
+                            <span>القسم التحريري (الاختبارات - من 60)</span>
                             <span class="font-black text-purple-900">${totals.writtenTotal} / 60</span>
                         </div>
                     </div>
@@ -1766,7 +1678,7 @@
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
             const baseUrl = window.location.href.split('#')[0];
             const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\nالقسم 1: ${totals.oralTotal} | القسم 2: ${totals.writtenTotal}\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\nالشفوي: ${totals.oralTotal} | التحريري: ${totals.writtenTotal}\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
@@ -1774,7 +1686,7 @@
             if (!currentReportStudent) return;
             const totals = calculateCategoryTotals(currentReportStudent);
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
-            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nالقسم 1: ${totals.oralTotal} | القسم 2: ${totals.writtenTotal}\nالمجموع الكلي النهائي: ${totals.grandTotal} من 100 (${pct}%)\n`;
+            let msg = `تقرير درجات الطالب: ${currentReportStudent.name}\nشفوي: ${totals.oralTotal} | تحريري: ${totals.writtenTotal}\nالمجموع الكلي النهائي: ${totals.grandTotal} من 100 (${pct}%)\n`;
             navigator.clipboard.writeText(msg).then(() => showToast("تم نسخ التقرير للحافظة! 📋"));
         }
 
