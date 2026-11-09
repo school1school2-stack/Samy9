@@ -1,4 +1,3 @@
-ata().sections;
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1188,12 +1187,20 @@ ata().sections;
             let oralSections = sections.filter(s => s.category !== 'written');
             let writtenSections = sections.filter(s => s.category === 'written');
 
+            // حساب العدد الكلي للأعمدة العلوية لكل قسم
+            let oralTotalSlots = 0;
+            oralSections.forEach(sec => { oralTotalSlots += sec.slots.length + 1; });
+
+            let writtenTotalSlots = 0;
+            writtenSections.forEach(sec => { writtenTotalSlots += sec.slots.length + 1; });
+
+            // بناء رأس الجدول بدقة (الشفوي ثم التحريري تحته في الهيكل)
             let headerHTML = `
                 <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
-                    <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-20">#</th>
-                    <th class="p-3 w-48 sticky right-12 bg-slate-900 z-20">اسم الطالب</th>
-                    <th class="p-3 w-20 text-center">الفصل</th>
-                    <th class="p-3 text-center bg-slate-800">نوع التقييم</th>
+                    <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-20" rowspan="2">#</th>
+                    <th class="p-3 w-48 sticky right-12 bg-slate-900 z-20" rowspan="2">اسم الطالب</th>
+                    <th class="p-3 w-20 text-center" rowspan="2">الفصل</th>
+                    <th class="p-3 text-center bg-slate-800 w-28" rowspan="2">نوع التقييم</th>
             `;
 
             oralSections.forEach(sec => {
@@ -1201,18 +1208,11 @@ ata().sections;
                 headerHTML += `<th class="p-2 text-center bg-blue-950 border-r border-slate-800 text-blue-200" colspan="${sec.slots.length + 1}">${sec.title} (${secMax})</th>`;
             });
 
-            writtenSections.forEach(sec => {
-                let secMax = sec.slots.reduce((a, b) => a + (parseFloat(b.max) || 0), 0);
-                headerHTML += `<th class="p-2 text-center bg-purple-950 border-r border-slate-800 text-purple-200" colspan="${sec.slots.length + 1}">${sec.title} (${secMax})</th>`;
-            });
-
             headerHTML += `
                     <th class="p-3 text-center bg-amber-900/60 text-amber-300 border-r border-slate-800" rowspan="2">المجموع الكلي النهائي (100)</th>
                     <th class="p-3 text-center bg-slate-900 no-print w-28" rowspan="2">خيارات</th>
                 </tr>
                 <tr class="bg-slate-800 text-slate-300 text-[10px] font-bold">
-                    <th></th><th></th><th></th>
-                    <th class="bg-slate-800 text-center text-amber-300">تفاصيل العناصر والمحاولات</th>
             `;
 
             oralSections.forEach(sec => {
@@ -1220,13 +1220,6 @@ ata().sections;
                     headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title} (${slot.max})</th>`;
                 });
                 headerHTML += `<th class="p-1.5 text-center bg-blue-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع الشفوي (40)</th>`;
-            });
-
-            writtenSections.forEach(sec => {
-                sec.slots.forEach(slot => {
-                    headerHTML += `<th class="p-1.5 text-center border-r border-slate-700/60 nowrap-title">${slot.title} (${slot.max})</th>`;
-                });
-                headerHTML += `<th class="p-1.5 text-center bg-purple-900/40 text-amber-300 font-extrabold border-r border-slate-700 nowrap-title">مجموع التحريري (60)</th>`;
             });
 
             headerHTML += `</tr>`;
@@ -1247,7 +1240,11 @@ ata().sections;
             }
 
             let rowsHTML = '';
-            filteredStudents.forEach((st, idx) => {
+            filteredStudents.filter(st => {
+                const matchSearch = !searchVal || st.name.toLowerCase().includes(searchVal) || st.email.toLowerCase().includes(searchVal);
+                const matchClass = (classVal === 'all') || (st.className === classVal);
+                return matchSearch && matchClass;
+            }).forEach((st, idx) => {
                 const totals = calculateCategoryTotals(st);
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
@@ -1283,13 +1280,6 @@ ata().sections;
                     rowsHTML += `<td class="p-2 text-center bg-blue-100/60 font-extrabold text-blue-900 border-r border-b border-slate-200">${secSum}</td>`;
                 });
 
-                writtenSections.forEach(sec => {
-                    sec.slots.forEach(() => {
-                        rowsHTML += `<td class="bg-slate-50/30 border-b border-r"></td>`;
-                    });
-                    rowsHTML += `<td class="bg-slate-50/30 border-b border-r"></td>`;
-                });
-
                 rowsHTML += `
                         <td class="p-2 text-center bg-amber-50 font-black text-amber-900 border-r border-b border-slate-200 text-sm" rowspan="2">
                             ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
@@ -1304,7 +1294,7 @@ ata().sections;
                     </tr>
                 `;
 
-                // الصف الثاني للطالب: القسم التحريري (من 60 مع المحاولات المستقلة والخط الغامق الفاصل)
+                // الصف الثاني للطالب: القسم التحريري (من 60 مع محاولاته المستقلة وفصل الخط الغامق الفاصل تحت كل طالب تماماً)
                 rowsHTML += `
                     <tr class="student-divider bg-slate-50/60 hover:bg-purple-50/20 transition text-slate-800 font-bold">
                         <td class="p-2.5 text-center bg-purple-50/50 text-purple-900 text-xs font-black border-l">
@@ -1312,6 +1302,7 @@ ata().sections;
                         </td>
                 `;
 
+                // تعويض خلايا الشفوي لتبدأ محاولات التحريري أسفلها بشكل صحيح
                 oralSections.forEach(sec => {
                     sec.slots.forEach(() => {
                         rowsHTML += `<td class="bg-slate-50/30 border-r"></td>`;
@@ -1319,6 +1310,7 @@ ata().sections;
                     rowsHTML += `<td class="bg-slate-50/30 border-r"></td>`;
                 });
 
+                // إدراج خانات التحريري أسفل الأعمدة المخصصة
                 writtenSections.forEach(sec => {
                     sec.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
@@ -1763,7 +1755,7 @@ ata().sections;
                         <span class="font-extrabold text-sm">المجموع الكلي النهائي (من 100):</span>
                         <span class="font-black text-xl">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
-                </div>`;
+                `;
             printArea.innerHTML = reportHTML;
             document.getElementById('reportModal').classList.remove('hidden');
         }
@@ -1857,7 +1849,7 @@ ata().sections;
                         <span class="font-extrabold text-sm">المجموع الكلي النهائي (من 100):</span>
                         <span class="font-black text-lg">${totals.grandTotal} / 100 <span class="text-xs font-bold text-amber-700">(${pct}%)</span></span>
                     </div>
-                </div>`;
+                `;
 
             resultDiv.innerHTML = detailsHTML;
         }
@@ -1896,7 +1888,7 @@ ata().sections;
                     classes: customClasses,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ الأقسام المنفصلة وتحديث السحابة بنجاح! 💾");
+                showToast("تم حفظ هيكل الأقسام المنفصلة وتحديث السحابة بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
                 showToast("تعذرت المزامنة بالسحابة.", "error");
