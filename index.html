@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة تقييم الطلاب - د / سامي محمد العمر | ثانوية الأمير عبد المجيد</title>
+    <title>منصة تقييم الطلاب - أ / خالد بن محمد الشثري | ثانوية الأمير عبد المجيد</title>
     <!-- Tailwind CSS & FontAwesome & Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -90,8 +90,8 @@
                     <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-black mb-1">
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي تحريري  + مهام أدائية  )</h1>
-                    <p class="text-slate-200 text-xs md:text-sm font-black mt-1">إعداد المعلم: <span class="text-amber-300 font-black">د / سامي محمد العمر 🎓</span></p>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي 40 + تحريري 60 = النهائي 100)</h1>
+                    <p class="text-slate-200 text-xs md:text-sm font-black mt-1">إعداد المعلم: <span class="text-amber-300 font-black">الأستاذ/ خالد بن محمد الشثري 🎓</span></p>
                 </div>
             </div>
         </div>
@@ -147,7 +147,6 @@
                             <i class="fas fa-file-alt"></i> التقارير والطباعة <i class="fas fa-chevron-down text-[10px] mr-1"></i>
                         </button>
                         <div id="reportsDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 divide-y divide-slate-100 font-black">
-                            <!-- خيار رابط بوابة الطلاب الثابت الذي تم نقله هنا -->
                             <div class="py-1 bg-teal-50/50">
                                 <button onclick="copyStudentPortalLink()" class="w-full text-right px-4 py-2 text-xs font-black text-teal-800 hover:bg-teal-100 flex items-center justify-between">
                                     <span class="flex items-center gap-2"><i class="fas fa-link text-teal-600"></i> نسخ رابط بوابة الطلاب الثابت 🔗</span>
@@ -346,7 +345,7 @@
     <footer id="mainFooter" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-slate-300 py-3 px-4 text-center text-xs font-black border-t border-slate-800 z-30 no-print shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="w-full text-center">
-                إعداد المعلم د / سامي محمد العمر | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span> | <span class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</span>
+                إعداد المعلم الأستاذ/ خالد بن محمد الشثري | <span class="text-blue-400">ثانوية الأمير عبد المجيد</span> | <span class="text-slate-400">جميع الحقوق محفوظة &copy; 2026</span>
             </div>
         </div>
     </footer>
@@ -574,7 +573,8 @@
         function initCloudSync() {
             if (!db) return;
 
-            db.collection("allowed_students").onSnapshot(snapshot => {
+            // مسار مستقل خاص بالأساتذة (allowed_students_khaled)
+            db.collection("allowed_students_khaled").onSnapshot(snapshot => {
                 allowedStudentsCache = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -587,7 +587,8 @@
                 filterAllowedStudents('');
             });
 
-            db.collection("app_data").doc("main_state").onSnapshot(doc => {
+            // مسار مستقل خاص بحالة البيانات والدرجات (main_state_khaled)
+            db.collection("app_data").doc("main_state_khaled").onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
                     if (data.students) students = data.students;
@@ -605,7 +606,7 @@
                     renderTable();
                 }
             }, err => {
-                db.collection("app_data").doc("main_state").get().then(d => {
+                db.collection("app_data").doc("main_state_khaled").get().then(d => {
                     if (d.exists) {
                         const data = d.data();
                         if (data.students) students = data.students;
@@ -632,7 +633,7 @@
                 if (std) {
                     renderDirectStudentReport(std);
                 } else if (db) {
-                    db.collection("app_data").doc("main_state").get().then(doc => {
+                    db.collection("app_data").doc("main_state_khaled").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
                             let foundStd = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
@@ -655,7 +656,7 @@
                 hasOpenedReportFromUrl = true;
 
                 if (students.length === 0 && db) {
-                    db.collection("app_data").doc("main_state").get().then(doc => {
+                    db.collection("app_data").doc("main_state_khaled").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
                             renderDirectClassReport(targetClass);
@@ -671,7 +672,7 @@
                 hasOpenedReportFromUrl = true;
 
                 if (students.length === 0 && db) {
-                    db.collection("app_data").doc("main_state").get().then(doc => {
+                    db.collection("app_data").doc("main_state_khaled").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
                             renderDirectChartReport(targetClass);
@@ -836,7 +837,7 @@
                 <div class="text-center border-b pb-4 mb-4 font-black">
                     <span class="text-xs font-black text-blue-900 bg-blue-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
                     <h2 class="text-xl font-black text-slate-900 mt-2">تقرير درجات التقييم الشامل والتفصيلي - الفصل (${className})</h2>
-                    <p class="text-xs font-black text-slate-500">المعلم: د / سامي محمد العمر 🎓</p>
+                    <p class="text-xs font-black text-slate-500">المعلم: الأستاذ/ خالد بن محمد الشثري 🎓</p>
                 </div>
             `;
 
@@ -969,7 +970,7 @@
                 <div class="text-center border-b pb-4 font-black">
                     <span class="text-xs font-black text-purple-900 bg-purple-50 px-3 py-1 rounded-full">ثانوية الأمير عبد المجيد</span>
                     <h2 class="text-xl font-black text-slate-900 mt-2">التقرير التحليلي البياني والمستويات للفصل (${className})</h2>
-                    <p class="text-xs font-black text-slate-500">إعداد وتصنيف المعلم: د / سامي محمد العمر 🎓</p>
+                    <p class="text-xs font-black text-slate-500">إعداد وتصنيف المعلم: الأستاذ/ خالد بن محمد الشثري 🎓</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm font-black">
@@ -1400,7 +1401,7 @@
             }
 
             try {
-                const snap = await db.collection("allowed_students").get();
+                const snap = await db.collection("allowed_students_khaled").get();
                 let addedCount = 0;
 
                 if (snap.empty) {
@@ -1810,7 +1811,7 @@
 
             if (db) {
                 try {
-                    const doc = await db.collection("app_data").doc("main_state").get();
+                    const doc = await db.collection("app_data").doc("main_state_khaled").get();
                     if (doc.exists && doc.data().students) {
                         students = doc.data().students;
                     }
@@ -1824,7 +1825,7 @@
                     <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-center text-xs font-black">
                         <i class="fas fa-exclamation-triangle text-amber-600 text-lg"></i>
                         <div class="font-black text-amber-900">لم يتم العثور على سجل درجات لهذا البريد حالياً.</div>
-                        <p class="text-slate-500 text-[11px] font-black">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع د / سامي محمد العمر.</p>
+                        <p class="text-slate-500 text-[11px] font-black">تأكد من كتابة البريد الإلكتروني الرسمي بدقة، أو تواصل مع الأستاذ/ خالد بن محمد الشثري.</p>
                     </div>`;
                 return;
             }
@@ -1846,7 +1847,7 @@
             const pct = Math.round((totals.grandTotal / 100) * 100) || 0;
             const baseUrl = window.location.href.split('#')[0];
             const reportUrl = `${baseUrl}#report=${currentReportStudent.email.trim()}`;
-            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: د / سامي محمد العمر\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
+            let msg = `السلام عليكم ورحمة الله وبركاته،\nتقرير درجات الطالب: *${currentReportStudent.name}*\nمادة القرآن الكريم والتربية الإسلامية - ثانوية الأمير عبد المجيد\nمعلم المادة: الأستاذ/ خالد بن محمد الشثري\n----------------------------\nالمجموع النهائي (من 100): *${totals.grandTotal}* (النسبة: ${pct}%)\n\nيمكنك الاطلاع على تقريرك التفصيلي عبر الرابط:\n${reportUrl}\n\nنتمنى لك التوفيق 🌟`;
             window.open(`https://wa.me/${currentReportStudent.phone || ''}?text=` + encodeURIComponent(msg), '_blank');
         }
 
@@ -1861,13 +1862,14 @@
         async function saveAllToCloud() {
             if (!db) return;
             try {
-                await db.collection("app_data").doc("main_state").set({
+                // حفظ البيانات في المسار المستقل الخاص بك (main_state_khaled)
+                await db.collection("app_data").doc("main_state_khaled").set({
                     students: students,
                     classes: customClasses,
                     sectionsConfig: twoRowsSectionsConfig,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ صفوف الأقسام والدرجات بالسحابة بنجاح! 💾");
+                showToast("تم حفظ صفوف الأقسام والدرجات في سحابك الخاص بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
                 showToast("تعذرت المزامنة بالسحابة.", "error");
