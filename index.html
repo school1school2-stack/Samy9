@@ -18,12 +18,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
         body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; }
         .bg-royal-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%); }
-        .shadow-custom { box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.1), 0 8px 10px -6px rgba(30, 58, 138, 0.05); }
+        .shadow-custom { box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.08), 0 8px 10px -6px rgba(30, 58, 138, 0.03); }
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-        .student-divider { border-bottom: 4px solid #0f172a !important; }
-        .column-divider { border-left: 2px solid #cbd5e1 !important; border-right: 2px solid #cbd5e1 !important; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -196,11 +194,18 @@
                     </button>
                 </div>
             </div>
+
+            <!-- أزرار اختيار القسم لعرضه بنظام مريح ومنظم -->
+            <div id="sectionTabsContainer" class="flex flex-wrap items-center gap-2 mt-5 pt-4 border-t border-slate-100"></div>
         </div>
 
         <div class="bg-white rounded-2xl shadow-custom border border-slate-100 overflow-hidden">
+            <div id="activeSectionHeaderInfo" class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between text-xs font-bold">
+                <span id="activeSectionTitleText" class="flex items-center gap-2"><i class="fas fa-layer-group text-amber-400"></i> القسم النشط</span>
+                <span id="activeSectionBadgeText" class="bg-amber-400/20 text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30">الدرجة العظمى</span>
+            </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse min-w-[1300px]" id="mainScoreTable">
+                <table class="w-full text-right border-collapse" id="mainScoreTable">
                     <thead id="mainTableHead"></thead>
                     <tbody id="mainTableBody" class="divide-y divide-slate-100 text-xs font-medium"></tbody>
                 </table>
@@ -439,14 +444,15 @@
         let db = null;
         let customClasses = ['1/1', '1/2', '2/1', '2/2', '3/1', '3/2'];
         let activeChartInstance = null;
+        let activeMainSectionIndex = 0;
 
         const columnColors = [
-            'bg-sky-50 text-sky-900 border-sky-200',      
-            'bg-emerald-50 text-emerald-900 border-emerald-200', 
-            'bg-amber-50 text-amber-900 border-amber-200',  
-            'bg-purple-50 text-purple-900 border-purple-200', 
-            'bg-rose-50 text-rose-900 border-rose-200',     
-            'bg-teal-50 text-teal-900 border-teal-200'      
+            'bg-sky-50/80 text-sky-900 border-sky-200',      
+            'bg-emerald-50/80 text-emerald-900 border-emerald-200', 
+            'bg-amber-50/80 text-amber-900 border-amber-200',  
+            'bg-purple-50/80 text-purple-900 border-purple-200', 
+            'bg-rose-50/80 text-rose-900 border-rose-200',     
+            'bg-teal-50/80 text-teal-900 border-teal-200'      
         ];
 
         let twoRowsSectionsConfig = [
@@ -570,11 +576,13 @@
                     if (data.sectionsConfig && data.sectionsConfig.length > 0) twoRowsSectionsConfig = data.sectionsConfig;
                     
                     populateClassOptions();
+                    renderSectionTabs();
                     renderTable();
                     checkUrlReportParam(); 
                 } else {
                     saveAllToCloud();
                     populateClassOptions();
+                    renderSectionTabs();
                     renderTable();
                 }
             }, err => {
@@ -586,6 +594,7 @@
                         if (data.sectionsConfig && data.sectionsConfig.length > 0) twoRowsSectionsConfig = data.sectionsConfig;
                     }
                     populateClassOptions();
+                    renderSectionTabs();
                     renderTable();
                     checkUrlReportParam();
                 });
@@ -693,6 +702,32 @@
 
             let grandTotal = oralTotal + writtenTotal;
             return { oralTotal, writtenTotal, grandTotal };
+        }
+
+        function renderSectionTabs() {
+            const container = document.getElementById('sectionTabsContainer');
+            if (!container) return;
+
+            let html = '<span class="text-xs font-extrabold text-slate-500 ml-1">عرض القسم في الجدول:</span>';
+            twoRowsSectionsConfig.forEach((sec, idx) => {
+                let isActive = (activeMainSectionIndex === idx);
+                let btnClass = isActive 
+                    ? 'px-4 py-2 bg-blue-700 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2 transition' 
+                    : 'px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 transition';
+                
+                html += `
+                    <button onclick="switchActiveSection(${idx})" class="${btnClass}">
+                        <i class="fas ${sec.icon || 'fa-folder'}"></i> ${sec.title}
+                    </button>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function switchActiveSection(idx) {
+            activeMainSectionIndex = idx;
+            renderSectionTabs();
+            renderTable();
         }
 
         function renderDirectStudentReport(std) {
@@ -1235,6 +1270,7 @@
         async function saveSectionsConfigFromModal() {
             collectDataFromSectionsEditor();
             closeModal('manageSectionsModal');
+            renderSectionTabs();
             renderTable();
             await saveAllToCloud();
             showToast("تم تحديث وحفظ الأقسام والمحاولات بنجاح! 🚀");
@@ -1381,28 +1417,31 @@
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const classVal = document.getElementById('classFilter').value;
 
-            let maxSubCols = 0;
-            twoRowsSectionsConfig.forEach(sec => {
-                if (sec.columns.length > maxSubCols) maxSubCols = sec.columns.length;
-            });
-
-            let headerHTML = `
-                <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800">
-                    <th class="p-3 w-12 text-center sticky right-0 bg-slate-900 z-25 column-divider">#</th>
-                    <th class="p-3 w-44 sticky right-12 bg-slate-900 z-25 column-divider">اسم الطالب</th>
-                    <th class="p-3 w-20 text-center column-divider">الفصل</th>
-                    <th class="p-3 text-center bg-slate-800 w-36 column-divider">القسم الرئيسي</th>
-            `;
-
-            for (let i = 0; i < maxSubCols; i++) {
-                let colorClass = columnColors[i % columnColors.length];
-                headerHTML += `<th class="p-3 text-center ${colorClass} column-divider font-black">تفاصيل التقييمات</th>`;
+            if (activeMainSectionIndex >= twoRowsSectionsConfig.length) {
+                activeMainSectionIndex = 0;
             }
 
+            const currentSec = twoRowsSectionsConfig[activeMainSectionIndex] || twoRowsSectionsConfig[0];
+
+            document.getElementById('activeSectionTitleText').innerHTML = `<i class="fas ${currentSec.icon || 'fa-folder'} text-amber-300"></i> القسم النشط: ${currentSec.title}`;
+            document.getElementById('activeSectionBadgeText').innerText = `الدرجة العظمى للقسم: ${currentSec.maxTotal} درجة`;
+
+            let headerHTML = `
+                <tr class="bg-slate-900 text-slate-200 text-[11px] font-bold border-b border-slate-800 text-center">
+                    <th class="p-3 w-12 border-l border-slate-800">#</th>
+                    <th class="p-3 text-right border-l border-slate-800 w-52">اسم الطالب والبريد</th>
+                    <th class="p-3 w-24 border-l border-slate-800">الفصل</th>
+            `;
+
+            currentSec.columns.forEach((col, cIdx) => {
+                let colorClass = columnColors[cIdx % columnColors.length];
+                let slotsNames = col.slots.map(s => s.title).join(' | ');
+                headerHTML += `<th class="p-2.5 border-l border-slate-800 ${colorClass}"><div>${col.subTitle}</div><div class="text-[9px] opacity-75 font-normal mt-0.5">${slotsNames}</div></th>`;
+            });
+
             headerHTML += `
-                    <th class="p-3 text-center bg-slate-800 w-24 column-divider">مجموع القسم</th>
-                    <th class="p-3 text-center bg-amber-900/80 text-amber-300 column-divider w-28">المجموع النهائي</th>
-                    <th class="p-3 text-center bg-slate-900 no-print w-16">خيارات</th>
+                    <th class="p-3 bg-blue-950 text-white w-28 border-l border-slate-800">مجموع القسم</th>
+                    <th class="p-3 bg-amber-950 text-amber-300 w-28">المجموع النهائي (100)</th>
                 </tr>
             `;
             tableHead.innerHTML = headerHTML;
@@ -1426,94 +1465,54 @@
                 const totals = calculateCategoryTotals(st);
                 let pct = Math.round((totals.grandTotal / 100) * 100) || 0;
 
-                twoRowsSectionsConfig.forEach((mainSec, secIdx) => {
-                    let secSum = 0;
+                let currentSecSum = 0;
+                currentSec.columns.forEach(col => {
+                    col.slots.forEach(slot => {
+                        currentSecSum += parseFloat(st.scores && st.scores[slot.id] !== undefined ? st.scores[slot.id] : 0) || 0;
+                    });
+                });
+
+                rowsHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition text-slate-800 font-bold">
+                        <td class="p-3 text-center text-slate-400 font-bold border-l">${idx + 1}</td>
+                        <td class="p-3 border-l">
+                            <div class="font-extrabold text-slate-900 text-xs">${st.name}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
+                        </td>
+                        <td class="p-2 text-center border-l">
+                            <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-xs">${st.className || '1/1'}</span>
+                        </td>
+                `;
+
+                currentSec.columns.forEach((col, cIdx) => {
+                    let colColor = columnColors[cIdx % columnColors.length];
+                    rowsHTML += `<td class="p-2 text-center border-l ${colColor}"><div class="flex items-center justify-center gap-1.5 flex-wrap">`;
                     
-                    mainSec.columns.forEach(col => {
-                        col.slots.forEach(slot => {
-                            secSum += parseFloat(st.scores && st.scores[slot.id] !== undefined ? st.scores[slot.id] : 0) || 0;
-                        });
+                    col.slots.forEach(slot => {
+                        let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
+                        rowsHTML += `
+                            <div class="text-center">
+                                <div class="text-[8px] text-slate-500 font-bold">${slot.title}</div>
+                                <input type="number" step="0.5" min="0" max="${slot.max}" 
+                                    value="${scoreVal}" 
+                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
+                                    class="w-12 text-center py-1 bg-white border border-slate-300 rounded-lg text-xs font-black text-slate-800 focus:outline-none focus:border-blue-600 transition shadow-sm" title="الحد الأقصى: ${slot.max}">
+                            </div>
+                        `;
                     });
 
-                    let rowClass = (secIdx === 1) ? 'student-divider bg-purple-50/10' : 'border-b border-slate-100 bg-white';
-
-                    rowsHTML += `<tr class="${rowClass} hover:bg-slate-50/50 transition text-slate-800 font-bold">`;
-
-                    if (secIdx === 0) {
-                        rowsHTML += `
-                            <td class="p-3 text-center text-slate-400 font-bold sticky right-0 bg-white z-10 column-divider" rowspan="2">${idx + 1}</td>
-                            <td class="p-3 sticky right-12 bg-white z-10 column-divider border-l border-slate-100" rowspan="2">
-                                <div class="font-bold text-slate-900 text-xs">${st.name}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">${st.email}</div>
-                            </td>
-                            <td class="p-2 text-center text-xs font-bold text-blue-900 bg-blue-50/20 column-divider" rowspan="2">
-                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200/60">${st.className || '1/1'}</span>
-                            </td>
-                        `;
-                    }
-
-                    rowsHTML += `
-                        <td class="p-2.5 text-right column-divider ${mainSec.badgeClass} text-xs font-black flex items-center justify-between gap-1">
-                            <span class="flex items-center gap-1.5"><i class="fas ${mainSec.icon || 'fa-book'}"></i> ${mainSec.title}</span>
-                            <span class="text-[9px] px-1.5 py-0.5 bg-white/90 rounded border">من ${mainSec.maxTotal}</span>
-                        </td>
-                    `;
-
-                    for (let cIdx = 0; cIdx < maxSubCols; cIdx++) {
-                        let col = mainSec.columns[cIdx];
-                        let colColor = columnColors[cIdx % columnColors.length];
-
-                        if (col) {
-                            rowsHTML += `
-                                <td class="p-1 text-center column-divider ${colColor}">
-                                    <div class="text-[9px] font-extrabold mb-1 border-b pb-0.5">${col.subTitle}</div>
-                                    <div class="flex items-center justify-center gap-1">
-                            `;
-                            col.slots.forEach(slot => {
-                                let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
-                                rowsHTML += `
-                                    <div class="text-center">
-                                        <div class="text-[8px] opacity-75">${slot.title}</div>
-                                        <input type="number" step="0.5" min="0" max="${slot.max}" 
-                                            value="${scoreVal}" 
-                                            onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
-                                            class="w-11 text-center py-1 bg-white border border-slate-300 rounded text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600 transition shadow-sm" title="الدرجة العظمى المسموحة: ${slot.max}">
-                                    </div>
-                                `;
-                            });
-                            rowsHTML += `</div></td>`;
-                        } else {
-                            rowsHTML += `
-                                <td class="p-1 text-center column-divider ${colColor} bg-opacity-40">
-                                    <div class="h-10 flex items-center justify-center text-slate-300 font-bold text-xs">—</div>
-                                </td>
-                            `;
-                        }
-                    }
-
-                    rowsHTML += `
-                        <td class="p-2 text-center column-divider font-extrabold text-slate-900 bg-slate-100 border-r">
-                            ${secSum} <span class="text-[9px] text-slate-400 font-normal">/${mainSec.maxTotal}</span>
-                        </td>
-                    `;
-
-                    if (secIdx === 0) {
-                        rowsHTML += `
-                            <td class="p-2 text-center column-divider bg-amber-50 font-black text-amber-900 border-r border-slate-200 text-sm" rowspan="2">
-                                ${totals.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span>
-                            </td>
-                            <td class="p-2 text-center no-print bg-white" rowspan="2">
-                                <div class="flex flex-col items-center justify-center gap-1.5">
-                                    <button onclick="openReportModal('${st.id}')" title="عرض التقرير" class="w-7 h-7 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-file-invoice"></i></button>
-                                    <button onclick="openEditStudentModal('${st.id}')" title="تعديل" class="w-7 h-7 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-pen"></i></button>
-                                    <button onclick="deleteStudent('${st.id}')" title="حذف" class="w-7 h-7 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg flex items-center justify-center text-xs transition"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        `;
-                    }
-
-                    rowsHTML += `</tr>`;
+                    rowsHTML += `</div></td>`;
                 });
+
+                rowsHTML += `
+                        <td class="p-2 text-center border-l bg-blue-50/40 font-black text-blue-900 text-sm">
+                            ${currentSecSum} <span class="text-[10px] text-slate-400 font-normal">/${currentSec.maxTotal}</span>
+                        </td>
+                        <td class="p-2 text-center bg-amber-50/60 font-black text-amber-900 text-sm">
+                            ${totals.grandTotal} <span class="text-[10px] text-amber-700 font-bold">(${pct}%)</span>
+                        </td>
+                    </tr>
+                `;
             });
             tableBody.innerHTML = rowsHTML;
         }
