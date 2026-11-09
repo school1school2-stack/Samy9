@@ -334,7 +334,7 @@
             </div>
             <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50 font-black">
                 <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-black">
-                    💡 كل فرع يحسب أفضل محاولة بصيغة "الدرجة من الحد الأعلى"، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
+                    💡 كل فرع يحسب أفضل محاولة بصيغة "الأفضل: الدرجة / الحد الأعلى"، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
                 </div>
                 <div id="sectionsConfigEditorContainer" class="space-y-6"></div>
             </div>
@@ -752,6 +752,11 @@
             return maxScore;
         }
 
+        // حساب الحد الأقصى الكلي للفرعي (مجموع الدرجات القصوى لكل المحاولات داخل هذا الفرع)
+        function getColumnMaxTotal(slots) {
+            return slots.reduce((sum, slot) => sum + (parseFloat(slot.max) || 0), 0);
+        }
+
         function calculateCategoryTotals(student) {
             let oralTotal = 0;
             let writtenTotal = 0;
@@ -843,11 +848,12 @@
                 mainSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let best = getBestSlotScore(std, col.slots);
+                    let colMaxTotal = getColumnMaxTotal(col.slots);
                     reportHTML += `
                         <div class="p-3 rounded-xl border ${colColor} space-y-2">
-                            <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between">
+                            <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between items-center">
                                 <span>${col.subTitle}</span>
-                                <span class="text-blue-700 bg-white px-1.5 py-0.5 rounded text-[10px]">الأفضل: ${best}</span>
+                                <span class="text-blue-900 bg-white px-2 py-0.5 rounded text-[11px] font-black shadow-2xs">الأفضل: ${best} / ${colMaxTotal}</span>
                             </div>
                             <div class="space-y-1">
                     `;
@@ -926,7 +932,8 @@
                 twoRowsSectionsConfig.forEach(mainSec => {
                     mainSec.columns.forEach((col, cIdx) => {
                         let colColor = columnColors[cIdx % columnColors.length];
-                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle} (الأفضل)</th>`;
+                        let colMaxTotal = getColumnMaxTotal(col.slots);
+                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle} (الأفضل من ${colMaxTotal})</th>`;
                     });
                     html += `<th class="p-2 border-l border-slate-700 bg-emerald-900 text-emerald-300">مجموع القسم</th>`;
                 });
@@ -957,7 +964,8 @@
                         mainSec.columns.forEach((col, cIdx) => {
                             let colColor = columnColors[cIdx % columnColors.length];
                             let best = getBestSlotScore(st, col.slots);
-                            subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor} font-black text-slate-900">${best}</td>`;
+                            let colMaxTotal = getColumnMaxTotal(col.slots);
+                            subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor} font-black text-slate-900">${best} / ${colMaxTotal}</td>`;
                         });
                         let secTotal = totals.sectionTotals[mIdx] || 0;
                         subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 bg-emerald-50 text-emerald-900 font-black">${secTotal}</td>`;
@@ -1637,11 +1645,12 @@
                 currentSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let bestScore = getBestSlotScore(st, col.slots);
+                    let colMaxTotal = getColumnMaxTotal(col.slots);
                     cardsHTML += `
                         <div class="p-4 rounded-2xl border-2 ${colColor} space-y-3 shadow-2xs">
                             <div class="text-xs font-black border-b border-slate-200/60 pb-2 mb-2 flex justify-between items-center">
                                 <span class="text-slate-900 font-black">${col.subTitle}</span>
-                                <span class="text-[11px] bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 text-blue-700 font-black shadow-2xs">الأفضل: ${bestScore}</span>
+                                <span class="text-[11px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-blue-900 font-black shadow-2xs">الأفضل: ${bestScore} / ${colMaxTotal}</span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
                     `;
