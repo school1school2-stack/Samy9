@@ -92,7 +92,7 @@
                     <div class="inline-flex items-center gap-2 px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-bold mb-1">
                         <span>مادة القرآن الكريم والتربية الإسلامية</span>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم ( القرآن الكريم وعلومه )</h1>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">كشف درجات التقييم (شفوي 40 + تحريري 60 = النهائي 100)</h1>
                     <p class="text-slate-200 text-xs md:text-sm font-medium mt-1">إعداد المعلم: <span class="text-amber-300 font-extrabold">د / سامي محمد العمر 🎓</span></p>
                 </div>
             </div>
@@ -1481,10 +1481,15 @@
             if (isNaN(numericVal)) numericVal = 0;
             if (numericVal < 0) numericVal = 0;
             
-            // منع تجاوز الدرجة العظمى المحددة في الإعدادات مع إظهار تنبيه بصري
+            // التحقق من تجاوز الحد الأقصى وإعطاء تنبيه مع إبقاء خانة الإدخال فارغة أو كما أدخلتها دون تعديل تلقائي للدرجة العظمى
             if (numericVal > maxVal) {
-                showToast(`عذراً، الدرجة المدخلة أكبر من المسموح (الحد الأقصى لهذه المحاولة: ${maxVal})! ⚠️`, "error");
-                numericVal = maxVal;
+                showToast(`عذراً، الدرجة (${numericVal}) أكبر من المسموح (الحد الأقصى لهذه المحاولة: ${maxVal})! ⚠️`, "error");
+                let std = students.find(s => s.id === stdId);
+                if (std && std.scores) {
+                    delete std.scores[slotId]; // إزالة القيمة المخزنة الخاطئة ليترك الحقل شاغراً لتدخل الدرجة الصحيحة
+                }
+                renderTable();
+                return;
             }
 
             let std = students.find(s => s.id === stdId);
